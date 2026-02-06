@@ -30,6 +30,47 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* Subtle mandala background pattern */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  background-image:
+    /* Center lotus/mandala circles */
+    radial-gradient(circle at 50% 50%, transparent 0%, transparent 20%, rgba(196, 167, 125, 0.08) 20%, rgba(196, 167, 125, 0.08) 21%, transparent 21%),
+    radial-gradient(circle at 50% 50%, transparent 0%, transparent 35%, rgba(196, 167, 125, 0.06) 35%, rgba(196, 167, 125, 0.06) 36%, transparent 36%),
+    radial-gradient(circle at 50% 50%, transparent 0%, transparent 50%, rgba(196, 167, 125, 0.04) 50%, rgba(196, 167, 125, 0.04) 51%, transparent 51%),
+    /* Petal shapes using overlapping circles */
+    radial-gradient(ellipse 30% 50% at 50% 30%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 50% at 50% 70%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 30% 50%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 70% 50%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
+    /* Diagonal petals */
+    radial-gradient(ellipse 35% 35% at 35% 35%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 35% at 65% 35%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 35% at 35% 65%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 35% at 65% 65%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
+    /* Outer ring dots */
+    radial-gradient(circle at 50% 10%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%),
+    radial-gradient(circle at 50% 90%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%),
+    radial-gradient(circle at 10% 50%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%),
+    radial-gradient(circle at 90% 50%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%);
+  background-size: 300px 300px;
+  background-position: center center;
+}
+
+/* Ensure content stays above the pattern */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Warm minimal scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
