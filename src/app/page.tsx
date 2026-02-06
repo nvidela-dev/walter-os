@@ -5,96 +5,85 @@ const apps = [
   {
     name: "Providers",
     href: "/providers",
-    icon: "🏪",
-    color: "bg-blue-500",
-    description: "Manage your suppliers",
-  },
-  {
-    name: "Products",
-    href: "/products",
-    icon: "📦",
-    color: "bg-green-500",
-    description: "Track inventory items",
+    icon: "🪷",
+    description: "Suppliers & products",
   },
   {
     name: "Services",
     href: "/services",
-    icon: "💡",
-    color: "bg-yellow-500",
-    description: "Utilities and bills",
+    icon: "✨",
+    description: "Utilities & bills",
   },
   {
     name: "House",
     href: "/house-expenses",
-    icon: "🏠",
-    color: "bg-orange-500",
+    icon: "🏡",
     description: "Home expenses",
   },
   {
-    name: "Employees",
+    name: "Team",
     href: "/employees",
-    icon: "👥",
-    color: "bg-purple-500",
-    description: "Staff management",
+    icon: "🙏",
+    description: "Staff & payroll",
   },
   {
     name: "Recipes",
     href: "/recipes",
-    icon: "📖",
-    color: "bg-pink-500",
+    icon: "📿",
     description: "Your recipes",
   },
   {
     name: "Menu",
     href: "/menu",
-    icon: "🍽️",
-    color: "bg-red-500",
-    description: "Menu items",
+    icon: "☕",
+    description: "Items & pricing",
   },
 ];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-blue-50 to-white">
+    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-800">Walter OS</h1>
+      <header className="flex items-center justify-between px-6 py-6">
+        <div>
+          <h1 className="text-2xl font-light tracking-wide text-[#3d3530]">
+            walter
+          </h1>
+          <p className="text-sm text-[#8b7355]">mindful management</p>
+        </div>
         <UserButton
           appearance={{
             elements: {
-              avatarBox: "w-12 h-12",
+              avatarBox: "w-12 h-12 ring-2 ring-[#e8e0d4]",
             },
           }}
         />
       </header>
 
       {/* App Grid */}
-      <main className="flex-1 px-4 py-6">
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:gap-6">
+      <main className="flex-1 px-6 py-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {apps.map((app) => (
             <Link
               key={app.name}
               href={app.href}
-              className="group flex flex-col items-center gap-2 rounded-2xl p-4 transition-all active:scale-95"
+              className="group flex flex-col items-center gap-3 rounded-3xl bg-[#f5f0e8] p-6 transition-all hover:bg-[#e8e0d4] active:scale-[0.98]"
             >
-              {/* App Icon */}
-              <div
-                className={`flex h-16 w-16 items-center justify-center rounded-2xl ${app.color} text-3xl shadow-lg transition-transform group-hover:scale-105 sm:h-20 sm:w-20 sm:text-4xl`}
-              >
-                {app.icon}
+              <span className="text-4xl">{app.icon}</span>
+              <div className="text-center">
+                <span className="block text-base font-medium text-[#3d3530]">
+                  {app.name}
+                </span>
+                <span className="text-xs text-[#8b7355]">{app.description}</span>
               </div>
-              {/* App Name */}
-              <span className="text-center text-sm font-medium text-gray-700 sm:text-base">
-                {app.name}
-              </span>
             </Link>
           ))}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-4 text-center text-sm text-gray-500">
-        Tap an app to get started
+      <footer className="px-6 py-6 text-center">
+        <p className="text-sm text-[#c4a77d]">breathe · organize · flow</p>
       </footer>
     </div>
   );

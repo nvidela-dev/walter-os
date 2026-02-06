@@ -28,37 +28,37 @@ export function MenuForm({ item, recipes }: { item?: MenuItem; recipes: { id: st
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="nombre" className="mb-2 block text-lg font-medium text-gray-700">Item Name *</label>
-        <input type="text" id="nombre" name="nombre" required defaultValue={item?.nombre}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-red-500 focus:outline-none" />
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Item Name</label>
+        <input type="text" name="nombre" required defaultValue={item?.nombre}
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <div>
-        <label htmlFor="precioVenta" className="mb-2 block text-lg font-medium text-gray-700">Sale Price ($) *</label>
-        <input type="number" id="precioVenta" name="precioVenta" step="0.01" required defaultValue={item?.precioVenta}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-red-500 focus:outline-none" />
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Sale Price ($)</label>
+        <input type="number" name="precioVenta" step="0.01" required defaultValue={item?.precioVenta}
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <div>
-        <label htmlFor="recetaId" className="mb-2 block text-lg font-medium text-gray-700">Linked Recipe (optional)</label>
-        <select id="recetaId" name="recetaId" defaultValue={item?.recetaId ?? ""}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-red-500 focus:outline-none">
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Linked Recipe</label>
+        <select name="recetaId" defaultValue={item?.recetaId ?? ""}
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none">
           <option value="">No recipe</option>
           {recipes.map((r) => <option key={r.id} value={r.id}>{r.nombre}</option>)}
         </select>
       </div>
 
       <div>
-        <label htmlFor="descripcion" className="mb-2 block text-lg font-medium text-gray-700">Description</label>
-        <textarea id="descripcion" name="descripcion" rows={3} defaultValue={item?.descripcion ?? ""}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-red-500 focus:outline-none" />
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Description</label>
+        <textarea name="descripcion" rows={3} defaultValue={item?.descripcion ?? ""} placeholder="Optional notes..."
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <button type="submit" disabled={isSubmitting}
-        className="w-full rounded-xl bg-red-500 py-4 text-xl font-semibold text-white shadow-lg active:scale-[0.98] disabled:opacity-50">
-        {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Add Item"}
+        className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">
+        {isSubmitting ? "..." : isEditing ? "Save" : "Add Item"}
       </button>
     </form>
   );

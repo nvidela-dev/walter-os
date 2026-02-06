@@ -14,35 +14,17 @@ export function RecipeForm({ recipe }: { recipe?: Receta }) {
     e.preventDefault();
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
-    const data = {
-      nombre: formData.get("nombre") as string,
-      descripcion: (formData.get("descripcion") as string) || null,
-    };
-
+    const data = { nombre: formData.get("nombre") as string, descripcion: (formData.get("descripcion") as string) || null };
     if (isEditing) await updateRecipe(recipe.id, data);
     else await createRecipe(data);
     router.push("/recipes");
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="nombre" className="mb-2 block text-lg font-medium text-gray-700">Recipe Name *</label>
-        <input type="text" id="nombre" name="nombre" required defaultValue={recipe?.nombre}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-pink-500 focus:outline-none" />
-      </div>
-
-      <div>
-        <label htmlFor="descripcion" className="mb-2 block text-lg font-medium text-gray-700">Description / Instructions</label>
-        <textarea id="descripcion" name="descripcion" rows={5} defaultValue={recipe?.descripcion ?? ""}
-          placeholder="How to prepare this recipe..."
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-pink-500 focus:outline-none" />
-      </div>
-
-      <button type="submit" disabled={isSubmitting}
-        className="w-full rounded-xl bg-pink-500 py-4 text-xl font-semibold text-white shadow-lg active:scale-[0.98] disabled:opacity-50">
-        {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Add Recipe"}
-      </button>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Recipe Name</label><input type="text" name="nombre" required defaultValue={recipe?.nombre} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Instructions</label><textarea name="descripcion" rows={5} defaultValue={recipe?.descripcion ?? ""} placeholder="How to prepare..." className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">{isSubmitting ? "..." : isEditing ? "Save" : "Add Recipe"}</button>
     </form>
   );
 }

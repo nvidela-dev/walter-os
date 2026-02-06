@@ -6,12 +6,12 @@ export default async function NewMenuItemPage() {
   const recipes = await getAllRecipes();
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      <header className="sticky top-0 z-10 flex items-center gap-3 bg-white px-4 py-4 shadow-sm">
-        <Link href="/menu" className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-xl">←</Link>
-        <h1 className="text-xl font-bold text-gray-800">Add Menu Item</h1>
+    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+      <header className="sticky top-0 z-10 flex items-center gap-4 bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
+        <Link href="/menu" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-lg text-[#8b7355]">←</Link>
+        <h1 className="text-xl font-light text-[#3d3530]">New Menu Item</h1>
       </header>
-      <main className="flex-1 p-4"><div className="rounded-2xl bg-white p-6 shadow-sm"><MenuForm recipes={recipes} /></div></main>
+      <main className="flex-1 px-6 py-4"><div className="rounded-2xl bg-[#f5f0e8] p-6"><MenuForm recipes={recipes} /></div></main>
     </div>
   );
 }

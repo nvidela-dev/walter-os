@@ -34,36 +34,32 @@ export function ServiceForm({ service }: { service?: Servicio }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="nombre" className="mb-2 block text-lg font-medium text-gray-700">Service Name *</label>
-        <input type="text" id="nombre" name="nombre" required defaultValue={service?.nombre} placeholder="e.g., Electricity, Water..."
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-yellow-500 focus:outline-none" />
+        <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-[#3d3530]">Service Name</label>
+        <input type="text" id="nombre" name="nombre" required defaultValue={service?.nombre} placeholder="e.g., Electricity..."
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
-
       <div>
-        <label htmlFor="montoFijo" className="mb-2 block text-lg font-medium text-gray-700">Fixed Amount ($) *</label>
+        <label htmlFor="montoFijo" className="mb-2 block text-sm font-medium text-[#3d3530]">Amount ($)</label>
         <input type="number" id="montoFijo" name="montoFijo" step="0.01" required defaultValue={service?.montoFijo}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-yellow-500 focus:outline-none" />
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
       </div>
-
       <div>
-        <label htmlFor="frecuencia" className="mb-2 block text-lg font-medium text-gray-700">Frequency *</label>
+        <label htmlFor="frecuencia" className="mb-2 block text-sm font-medium text-[#3d3530]">Frequency</label>
         <select id="frecuencia" name="frecuencia" required defaultValue={service?.frecuencia ?? "mensual"}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-yellow-500 focus:outline-none">
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none">
           {FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
       </div>
-
       <div>
-        <label htmlFor="descripcion" className="mb-2 block text-lg font-medium text-gray-700">Description (optional)</label>
-        <textarea id="descripcion" name="descripcion" rows={3} defaultValue={service?.descripcion ?? ""}
-          className="w-full rounded-xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-yellow-500 focus:outline-none" />
+        <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-[#3d3530]">Notes</label>
+        <textarea id="descripcion" name="descripcion" rows={2} defaultValue={service?.descripcion ?? ""} placeholder="Optional..."
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
-
       <button type="submit" disabled={isSubmitting}
-        className="w-full rounded-xl bg-yellow-500 py-4 text-xl font-semibold text-white shadow-lg active:scale-[0.98] disabled:opacity-50">
-        {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Add Service"}
+        className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">
+        {isSubmitting ? "Saving..." : isEditing ? "Save" : "Add Service"}
       </button>
     </form>
   );

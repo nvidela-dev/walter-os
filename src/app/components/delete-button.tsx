@@ -23,15 +23,17 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
 
   if (showConfirm) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-          <h2 className="mb-2 text-xl font-bold text-gray-800">Delete?</h2>
-          <p className="mb-6 text-gray-600">Are you sure you want to delete &quot;{name}&quot;? This cannot be undone.</p>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3d3530]/50 p-6">
+        <div className="w-full max-w-sm rounded-2xl bg-[#faf8f5] p-6 shadow-xl">
+          <h2 className="mb-2 text-lg font-medium text-[#3d3530]">Delete?</h2>
+          <p className="mb-6 text-sm text-[#8b7355]">
+            Are you sure you want to delete &quot;{name}&quot;?
+          </p>
           <div className="flex gap-3">
             <button onClick={() => setShowConfirm(false)} disabled={isDeleting}
-              className="flex-1 rounded-xl border-2 border-gray-200 py-3 text-lg font-medium text-gray-700 active:bg-gray-50">Cancel</button>
+              className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]">Cancel</button>
             <button onClick={handleDelete} disabled={isDeleting}
-              className="flex-1 rounded-xl bg-red-500 py-3 text-lg font-medium text-white active:bg-red-600 disabled:opacity-50">
+              className="flex-1 rounded-xl bg-[#a68b5b] py-3 text-sm font-medium text-white disabled:opacity-50">
               {isDeleting ? "..." : "Delete"}
             </button>
           </div>
@@ -40,5 +42,5 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
     );
   }
 
-  return <button onClick={() => setShowConfirm(true)} className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-xl text-red-600">🗑️</button>;
+  return <button onClick={() => setShowConfirm(true)} className="rounded-full bg-[#f5f0e8] p-2 text-[#8b7355]">🗑</button>;
 }

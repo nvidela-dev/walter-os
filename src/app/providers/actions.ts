@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { proveedores, proveedorProductos, productos, type NewProveedor } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { proveedores, proveedorProductos, productos, type NewProveedor, type NewProducto } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getProviders() {
@@ -20,10 +20,12 @@ export async function getProviderWithProducts(id: string) {
 
   const providerProducts = await db
     .select({
+      id: productos.id,
       productoId: proveedorProductos.productoId,
       precio: proveedorProductos.precio,
       nombre: productos.nombre,
       unidad: productos.unidad,
+      descripcion: productos.descripcion,
     })
     .from(proveedorProductos)
     .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
@@ -54,25 +56,27 @@ export async function deleteProvider(id: string) {
   revalidatePath("/providers");
 }
 
-export async function addProductToProvider(
+// Create a product and link it to a provider
+export async function createProductForProvider(
   proveedorId: string,
-  productoId: string,
+  productData: NewProducto,
   precio: string
 ) {
-  await db.insert(proveedorProductos).values({ proveedorId, productoId, precio });
+  // Create the product
+  const [product] = await db.insert(productos).values(productData).returning();
+
+  // Link it to the provider with price
+  await db.insert(proveedorProductos).values({
+    proveedorId,
+    productoId: product.id,
+    precio,
+  });
+
   revalidatePath(`/providers/${proveedorId}`);
+  return product;
 }
 
-export async function removeProductFromProvider(proveedorId: string, productoId: string) {
-  await db
-    .delete(proveedorProductos)
-    .where(
-      eq(proveedorProductos.proveedorId, proveedorId)
-    );
-  revalidatePath(`/providers/${proveedorId}`);
-}
-
-export async function updateProviderProductPrice(
+export async function updateProductPrice(
   proveedorId: string,
   productoId: string,
   precio: string
@@ -80,6 +84,26 @@ export async function updateProviderProductPrice(
   await db
     .update(proveedorProductos)
     .set({ precio, updatedAt: new Date() })
-    .where(eq(proveedorProductos.proveedorId, proveedorId));
+    .where(
+      and(
+        eq(proveedorProductos.proveedorId, proveedorId),
+        eq(proveedorProductos.productoId, productoId)
+      )
+    );
+  revalidatePath(`/providers/${proveedorId}`);
+}
+
+export async function removeProductFromProvider(proveedorId: string, productoId: string) {
+  // Remove the link
+  await db
+    .delete(proveedorProductos)
+    .where(
+      and(
+        eq(proveedorProductos.proveedorId, proveedorId),
+        eq(proveedorProductos.productoId, productoId)
+      )
+    );
+  // Delete the product itself since products must belong to a provider
+  await db.delete(productos).where(eq(productos.id, productoId));
   revalidatePath(`/providers/${proveedorId}`);
 }
