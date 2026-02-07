@@ -24,7 +24,7 @@ export function ProductList({ products, providerId }: { products: Product[]; pro
   if (products.length === 0) {
     return (
       <p className="py-4 text-center text-sm text-[#8b7355]">
-        No products yet. Add one below.
+        Sin productos. Agrega uno abajo.
       </p>
     );
   }

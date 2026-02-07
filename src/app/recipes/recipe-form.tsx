@@ -22,9 +22,9 @@ export function RecipeForm({ recipe }: { recipe?: Receta }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Recipe Name</label><input type="text" name="nombre" required defaultValue={recipe?.nombre} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Instructions</label><textarea name="descripcion" rows={5} defaultValue={recipe?.descripcion ?? ""} placeholder="How to prepare..." className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">{isSubmitting ? "..." : isEditing ? "Save" : "Add Recipe"}</button>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Nombre de la Receta</label><input type="text" name="nombre" required defaultValue={recipe?.nombre} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Instrucciones</label><textarea name="descripcion" rows={5} defaultValue={recipe?.descripcion ?? ""} placeholder="Cómo preparar..." className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">{isSubmitting ? "..." : isEditing ? "Guardar" : "Agregar Receta"}</button>
     </form>
   );
 }

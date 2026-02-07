@@ -21,9 +21,9 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
       <main className="flex-1 space-y-4 px-6 py-4">
         <div className="rounded-2xl bg-[#f5f0e8] p-6"><RecipeForm recipe={recipe} /></div>
         <div className="rounded-2xl bg-[#f5f0e8] p-6">
-          <h2 className="mb-4 text-lg font-medium text-[#3d3530]">Ingredients</h2>
+          <h2 className="mb-4 text-lg font-medium text-[#3d3530]">Ingredientes</h2>
           {recipe.ingredientes.length === 0 ? (
-            <p className="text-[#8b7355]">No ingredients added yet.</p>
+            <p className="text-[#8b7355]">Sin ingredientes aún.</p>
           ) : (
             <div className="space-y-2">
               {recipe.ingredientes.map((i) => (

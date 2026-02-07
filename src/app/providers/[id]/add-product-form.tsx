@@ -4,12 +4,12 @@ import { useState } from "react";
 import { createProductForProvider } from "../actions";
 
 const UNITS = [
-  { value: "unidad", label: "Unit" },
+  { value: "unidad", label: "Unidad" },
   { value: "kg", label: "Kg" },
-  { value: "g", label: "Gram" },
-  { value: "litro", label: "Liter" },
+  { value: "g", label: "Gramo" },
+  { value: "litro", label: "Litro" },
   { value: "ml", label: "ml" },
-  { value: "docena", label: "Dozen" },
+  { value: "docena", label: "Docena" },
 ];
 
 export function AddProductForm({ providerId }: { providerId: string }) {
@@ -42,7 +42,7 @@ export function AddProductForm({ providerId }: { providerId: string }) {
         onClick={() => setIsOpen(true)}
         className="w-full rounded-xl border-2 border-dashed border-[#c4a77d] py-4 text-sm font-medium text-[#c4a77d] hover:bg-white"
       >
-        + Add Product
+        + Agregar Producto
       </button>
     );
   }
@@ -55,7 +55,7 @@ export function AddProductForm({ providerId }: { providerId: string }) {
             type="text"
             name="nombre"
             required
-            placeholder="Product name"
+            placeholder="Nombre del producto"
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
@@ -65,7 +65,7 @@ export function AddProductForm({ providerId }: { providerId: string }) {
             name="precio"
             step="0.01"
             required
-            placeholder="Price"
+            placeholder="Precio"
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
@@ -90,14 +90,14 @@ export function AddProductForm({ providerId }: { providerId: string }) {
           onClick={() => setIsOpen(false)}
           className="flex-1 rounded-lg border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
         >
-          Cancel
+          Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="flex-1 rounded-lg bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
         >
-          {isSubmitting ? "Adding..." : "Add"}
+          {isSubmitting ? "Agregando..." : "Agregar"}
         </button>
       </div>
     </form>

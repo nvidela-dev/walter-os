@@ -9,18 +9,18 @@ export default async function HouseExpensesPage() {
       <header className="sticky top-0 z-10 flex items-center justify-between bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-lg text-[#8b7355]">←</Link>
-          <h1 className="text-xl font-light text-[#3d3530]">House</h1>
+          <h1 className="text-xl font-light text-[#3d3530]">Hogar</h1>
         </div>
-        <Link href="/house-expenses/new" className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]">+ Add</Link>
+        <Link href="/house-expenses/new" className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]">+ Agregar</Link>
       </header>
 
       <main className="flex-1 px-6 py-4">
         {expenses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <span className="mb-4 text-5xl">🏡</span>
-            <h2 className="mb-2 text-lg font-medium text-[#3d3530]">No expenses yet</h2>
-            <p className="mb-6 text-sm text-[#8b7355]">Track home expenses here</p>
-            <Link href="/house-expenses/new" className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm">Add Expense</Link>
+            <h2 className="mb-2 text-lg font-medium text-[#3d3530]">Sin gastos</h2>
+            <p className="mb-6 text-sm text-[#8b7355]">Registra los gastos del hogar</p>
+            <Link href="/house-expenses/new" className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm">Agregar Gasto</Link>
           </div>
         ) : (
           <div className="space-y-3">

@@ -3,40 +3,40 @@ import Link from "next/link";
 
 const apps = [
   {
-    name: "Providers",
+    name: "Proveedores",
     href: "/providers",
     icon: "🪷",
-    description: "Suppliers & products",
+    description: "Productos y precios",
   },
   {
-    name: "Services",
+    name: "Servicios",
     href: "/services",
     icon: "✨",
-    description: "Utilities & bills",
+    description: "Luz, agua, gas...",
   },
   {
-    name: "House",
+    name: "Hogar",
     href: "/house-expenses",
     icon: "🏡",
-    description: "Home expenses",
+    description: "Gastos del hogar",
   },
   {
-    name: "Team",
+    name: "Equipo",
     href: "/employees",
     icon: "🙏",
-    description: "Staff & payroll",
+    description: "Personal y sueldos",
   },
   {
-    name: "Recipes",
+    name: "Recetas",
     href: "/recipes",
     icon: "📿",
-    description: "Your recipes",
+    description: "Tus recetas",
   },
   {
-    name: "Menu",
+    name: "Menú",
     href: "/menu",
     icon: "☕",
-    description: "Items & pricing",
+    description: "Platos y precios",
   },
 ];
 
@@ -49,7 +49,7 @@ export default function Home() {
           <h1 className="text-2xl font-light tracking-wide text-[#3d3530]">
             walter
           </h1>
-          <p className="text-sm text-[#8b7355]">mindful management</p>
+          <p className="text-sm text-[#8b7355]">gestión consciente</p>
         </div>
         <UserButton
           appearance={{
@@ -83,7 +83,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="px-6 py-6 text-center">
-        <p className="text-sm text-[#c4a77d]">breathe · organize · flow</p>
+        <p className="text-sm text-[#c4a77d]">respira · organiza · fluye</p>
       </footer>
     </div>
   );

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { createHouseExpense, updateHouseExpense } from "./actions";
 import type { GastoHogar } from "@/db/schema";
 
-const FREQUENCIES = [{ value: "mensual", label: "Monthly" }, { value: "bimestral", label: "Bimonthly" }, { value: "trimestral", label: "Quarterly" }, { value: "anual", label: "Yearly" }];
+const FREQUENCIES = [{ value: "mensual", label: "Mensual" }, { value: "bimestral", label: "Bimestral" }, { value: "trimestral", label: "Trimestral" }, { value: "anual", label: "Anual" }];
 
 export function ExpenseForm({ expense }: { expense?: GastoHogar }) {
   const router = useRouter();
@@ -24,11 +24,11 @@ export function ExpenseForm({ expense }: { expense?: GastoHogar }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Name</label><input type="text" name="nombre" required defaultValue={expense?.nombre} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Amount ($)</label><input type="number" name="monto" step="0.01" required defaultValue={expense?.monto} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Frequency</label><select name="frecuencia" defaultValue={expense?.frecuencia ?? "mensual"} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none">{FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></div>
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Notes</label><textarea name="descripcion" rows={2} defaultValue={expense?.descripcion ?? ""} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">{isSubmitting ? "..." : isEditing ? "Save" : "Add"}</button>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Nombre</label><input type="text" name="nombre" required defaultValue={expense?.nombre} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Monto ($)</label><input type="number" name="monto" step="0.01" required defaultValue={expense?.monto} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Frecuencia</label><select name="frecuencia" defaultValue={expense?.frecuencia ?? "mensual"} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none">{FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></div>
+      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">Notas</label><textarea name="descripcion" rows={2} defaultValue={expense?.descripcion ?? ""} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
+      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">{isSubmitting ? "..." : isEditing ? "Guardar" : "Agregar"}</button>
     </form>
   );
 }
