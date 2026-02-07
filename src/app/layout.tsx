@@ -15,12 +15,28 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Walter OS",
-  description: "Restaurant management made simple",
+  description: "Gestión consciente para tu restaurante",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
+    title: "Walter",
+  },
+  applicationName: "Walter OS",
+  keywords: ["restaurante", "gestión", "inventario", "recetas", "menú"],
+  authors: [{ name: "Walter OS" }],
+  openGraph: {
+    type: "website",
     title: "Walter OS",
+    description: "Gestión consciente para tu restaurante",
+    siteName: "Walter OS",
   },
 };
 
@@ -29,7 +45,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#3b82f6",
+  themeColor: "#c4a77d",
 };
 
 export default function RootLayout({
@@ -39,7 +55,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="es">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
