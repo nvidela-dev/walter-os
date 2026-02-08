@@ -23,6 +23,7 @@ export async function getProviderWithProducts(id: string) {
       id: productos.id,
       productoId: proveedorProductos.productoId,
       precio: proveedorProductos.precio,
+      cantidad: proveedorProductos.cantidad,
       nombre: productos.nombre,
       unidad: productos.unidad,
       descripcion: productos.descripcion,
@@ -60,16 +61,18 @@ export async function deleteProvider(id: string) {
 export async function createProductForProvider(
   proveedorId: string,
   productData: NewProducto,
-  precio: string
+  precio: string,
+  cantidad: string
 ) {
   // Create the product
   const [product] = await db.insert(productos).values(productData).returning();
 
-  // Link it to the provider with price
+  // Link it to the provider with price and quantity
   await db.insert(proveedorProductos).values({
     proveedorId,
     productoId: product.id,
     precio,
+    cantidad,
   });
 
   revalidatePath(`/providers/${proveedorId}`);

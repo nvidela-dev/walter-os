@@ -13,6 +13,7 @@ export const proveedorProductos = pgTable(
       .notNull()
       .references(() => productos.id, { onDelete: "cascade" }),
     precio: numeric("precio", { precision: 10, scale: 2 }).notNull(),
+    cantidad: numeric("cantidad", { precision: 10, scale: 2 }).notNull().default("1"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

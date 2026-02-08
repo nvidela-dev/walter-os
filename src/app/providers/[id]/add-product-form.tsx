@@ -28,7 +28,8 @@ export function AddProductForm({ providerId }: { providerId: string }) {
         unidad: formData.get("unidad") as string,
         descripcion: (formData.get("descripcion") as string) || null,
       },
-      formData.get("precio") as string
+      formData.get("precio") as string,
+      formData.get("cantidad") as string
     );
 
     setIsSubmitting(false);
@@ -49,23 +50,24 @@ export function AddProductForm({ providerId }: { providerId: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="col-span-2">
-          <input
-            type="text"
-            name="nombre"
-            required
-            placeholder="Nombre del producto"
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
-          />
-        </div>
+      <div>
+        <input
+          type="text"
+          name="nombre"
+          required
+          placeholder="Nombre del producto"
+          className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <input
             type="number"
-            name="precio"
+            name="cantidad"
             step="0.01"
             required
-            placeholder="Precio"
+            defaultValue="1"
+            placeholder="Cant."
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
@@ -81,6 +83,16 @@ export function AddProductForm({ providerId }: { providerId: string }) {
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <input
+            type="number"
+            name="precio"
+            step="0.01"
+            required
+            placeholder="Precio"
+            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
+          />
         </div>
       </div>
 

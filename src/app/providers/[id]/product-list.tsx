@@ -9,6 +9,7 @@ interface Product {
   nombre: string;
   unidad: string;
   precio: string;
+  cantidad: string;
   descripcion: string | null;
 }
 
@@ -39,7 +40,7 @@ export function ProductList({ products, providerId }: { products: Product[]; pro
           <div className="flex-1">
             <p className="font-medium text-[#3d3530]">{product.nombre}</p>
             <p className="text-sm text-[#8b7355]">
-              ${product.precio} / {product.unidad}
+              {product.cantidad} {product.unidad} · ${product.precio}
             </p>
           </div>
           <button
