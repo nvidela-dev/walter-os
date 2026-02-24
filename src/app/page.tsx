@@ -12,7 +12,13 @@ const apps = [
     name: "Servicios",
     href: "/services",
     icon: "✨",
-    description: "Luz, agua, gas...",
+    description: "Catálogo de servicios",
+  },
+  {
+    name: "Pagos",
+    href: "/service-payments",
+    icon: "💸",
+    description: "Pagos de servicios",
   },
   {
     name: "Hogar",

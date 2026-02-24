@@ -45,9 +45,9 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
       </div>
 
       <div>
-        <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-[#3d3530]">Notas</label>
+        <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-[#3d3530]">Descripción</label>
         <textarea id="descripcion" name="descripcion" rows={3} defaultValue={provider?.descripcion ?? ""}
-          placeholder="Notas opcionales..."
+          placeholder="Descripción opcional..."
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 

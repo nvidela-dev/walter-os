@@ -32,6 +32,9 @@ export default async function ProvidersPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8e0d4] text-xl">🪷</div>
                 <div className="flex-1">
                   <h3 className="font-medium text-[#3d3530]">{provider.nombre}</h3>
+                  {provider.descripcion && (
+                    <p className="text-sm text-[#8b7355]">{provider.descripcion}</p>
+                  )}
                   {Number(provider.deuda) > 0 && (
                     <p className="text-sm text-[#a68b5b]">Deuda: ${provider.deuda}</p>
                   )}

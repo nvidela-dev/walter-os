@@ -30,7 +30,9 @@ export default async function ServicesPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8e0d4] text-xl">✨</div>
                 <div className="flex-1">
                   <h3 className="font-medium text-[#3d3530]">{service.nombre}</h3>
-                  <p className="text-sm text-[#8b7355]">${service.montoFijo} / {service.frecuencia}</p>
+                  {service.descripcion && (
+                    <p className="text-sm text-[#8b7355]">{service.descripcion}</p>
+                  )}
                 </div>
                 <span className="text-[#c4a77d]">→</span>
               </Link>
