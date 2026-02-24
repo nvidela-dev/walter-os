@@ -16,42 +16,56 @@ const apps = [
     href: "/providers",
     icon: TruckIcon,
     description: "Productos y precios",
+    color: "text-amber-700",
+    bg: "bg-amber-50",
   },
   {
     name: "Servicios",
     href: "/services",
     icon: WrenchScrewdriverIcon,
     description: "Catálogo de servicios",
+    color: "text-slate-600",
+    bg: "bg-slate-50",
   },
   {
     name: "Pagos",
     href: "/service-payments",
     icon: CreditCardIcon,
     description: "Pagos de servicios",
+    color: "text-emerald-700",
+    bg: "bg-emerald-50",
   },
   {
     name: "Hogar",
     href: "/house-expenses",
     icon: HomeIcon,
     description: "Gastos del hogar",
+    color: "text-orange-700",
+    bg: "bg-orange-50",
   },
   {
     name: "Equipo",
     href: "/employees",
     icon: UserGroupIcon,
     description: "Personal y sueldos",
+    color: "text-rose-700",
+    bg: "bg-rose-50",
   },
   {
     name: "Recetas",
     href: "/recipes",
     icon: BookOpenIcon,
     description: "Tus recetas",
+    color: "text-teal-700",
+    bg: "bg-teal-50",
   },
   {
     name: "Menú",
     href: "/menu",
     icon: ClipboardDocumentListIcon,
     description: "Platos y precios",
+    color: "text-violet-700",
+    bg: "bg-violet-50",
   },
 ];
 
@@ -76,9 +90,9 @@ export default function Home() {
             <Link
               key={app.name}
               href={app.href}
-              className="group flex flex-col items-center gap-3 rounded-3xl bg-[#f5f0e8] p-6 transition-all hover:bg-[#e8e0d4] active:scale-[0.98]"
+              className={`group flex flex-col items-center gap-3 rounded-3xl ${app.bg} p-6 transition-all hover:scale-[1.02] active:scale-[0.98]`}
             >
-              <app.icon className="h-10 w-10 text-[#8b7355]" />
+              <app.icon className={`h-10 w-10 ${app.color}`} />
               <div className="text-center">
                 <span className="block text-base font-medium text-[#3d3530]">
                   {app.name}
