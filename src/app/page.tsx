@@ -50,13 +50,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-6">
-        <div>
-          <h1 className="text-2xl font-light tracking-wide text-[#3d3530]">
-            walter
-          </h1>
-          <p className="text-sm text-[#8b7355]">gestión consciente</p>
-        </div>
+      <header className="flex items-center justify-end px-6 py-6">
         <UserButton
           appearance={{
             elements: {

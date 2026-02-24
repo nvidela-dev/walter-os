@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Walter OS",
-  description: "Gestión consciente para tu restaurante",
+  title: "Gestión",
+  description: "Gestión para tu restaurante",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -27,16 +27,15 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Walter",
+    title: "Gestión",
   },
-  applicationName: "Walter OS",
+  applicationName: "Gestión",
   keywords: ["restaurante", "gestión", "inventario", "recetas", "menú"],
-  authors: [{ name: "Walter OS" }],
   openGraph: {
     type: "website",
-    title: "Walter OS",
-    description: "Gestión consciente para tu restaurante",
-    siteName: "Walter OS",
+    title: "Gestión",
+    description: "Gestión para tu restaurante",
+    siteName: "Gestión",
   },
 };
 

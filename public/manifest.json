@@ -1,7 +1,7 @@
 {
-  "name": "Walter OS",
-  "short_name": "Walter",
-  "description": "Gestión consciente para tu restaurante",
+  "name": "Gestión",
+  "short_name": "Gestión",
+  "description": "Gestión para tu restaurante",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf8f5",
