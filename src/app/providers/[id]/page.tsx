@@ -33,26 +33,18 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
       </header>
 
       <main className="flex-1 space-y-6 px-6 py-4">
-        {/* Provider Details */}
         <section className="rounded-2xl bg-[#f5f0e8] p-6">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-[#8b7355]">Detalles</h2>
           <ProviderForm provider={provider} />
         </section>
 
-        {/* Products Section */}
         <section className="rounded-2xl bg-[#f5f0e8] p-6">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-[#8b7355]">Productos</h2>
-
           <ProductList products={provider.productos} providerId={provider.id} />
-
           <div className="mt-4 border-t border-[#e8e0d4] pt-4">
             <AddProductForm providerId={provider.id} />
           </div>
         </section>
 
-        {/* Debt Section */}
         <section className="rounded-2xl bg-[#f5f0e8] p-6">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-[#8b7355]">Deuda</h2>
           <DebtForm providerId={provider.id} currentDebt={provider.deuda} />
         </section>
       </main>
