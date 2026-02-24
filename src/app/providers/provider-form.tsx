@@ -17,7 +17,6 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
     const data = {
       nombre: formData.get("nombre") as string,
       descripcion: (formData.get("descripcion") as string) || null,
-      deuda: formData.get("deuda") as string || "0",
     };
 
     if (isEditing) {
@@ -43,12 +42,6 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
         <input type="text" id="descripcion" name="descripcion" defaultValue={provider?.descripcion ?? ""}
           placeholder="Descripción opcional..."
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
-
-      <div className="border-t border-[#e8e0d4] pt-5">
-        <label htmlFor="deuda" className="mb-2 block text-sm font-medium text-[#3d3530]">Deuda Actual ($)</label>
-        <input type="number" id="deuda" name="deuda" step="0.01" defaultValue={provider?.deuda ?? "0"}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <button type="submit" disabled={isSubmitting}
