@@ -4,6 +4,7 @@ export const proveedores = pgTable("proveedores", {
   id: uuid("id").primaryKey().defaultRandom(),
   nombre: text("nombre").notNull(),
   descripcion: text("descripcion"),
+  dias: text("dias"), // Comma-separated days: "L,M,V"
   logoUrl: text("logo_url"),
   deuda: numeric("deuda", { precision: 10, scale: 2 }).default("0").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

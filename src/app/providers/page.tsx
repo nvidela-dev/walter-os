@@ -44,6 +44,15 @@ export default async function ProvidersPage() {
                     <p className="text-sm text-[#a68b5b]">Deuda: ${provider.deuda}</p>
                   )}
                 </div>
+                {provider.dias && (
+                  <div className="flex gap-1">
+                    {provider.dias.split(",").map((day) => (
+                      <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-medium text-amber-700">
+                        {day}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <ChevronRightIcon className="h-5 w-5 text-[#c4a77d]" />
               </Link>
             ))}

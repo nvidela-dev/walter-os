@@ -11,6 +11,7 @@ export async function getProviders() {
       id: proveedores.id,
       nombre: proveedores.nombre,
       descripcion: proveedores.descripcion,
+      dias: proveedores.dias,
       deuda: proveedores.deuda,
       productCount: count(proveedorProductos.productoId),
     })

@@ -15,6 +15,13 @@
       "when": 1770763079676,
       "tag": "0001_overrated_luminals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771949611316,
+      "tag": "0002_low_blazing_skull",
+      "breakpoints": true
     }
   ]
 }
