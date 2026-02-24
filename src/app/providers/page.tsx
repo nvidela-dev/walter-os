@@ -32,8 +32,8 @@ export default async function ProvidersPage() {
             {providers.map((provider) => (
               <Link key={provider.id} href={`/providers/${provider.id}`}
                 className="flex items-center gap-4 rounded-2xl bg-[#f5f0e8] p-5 transition-colors hover:bg-[#e8e0d4] active:scale-[0.99]">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8e0d4]">
-                  <TruckIcon className="h-6 w-6 text-[#8b7355]" />
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${provider.productCount > 0 ? 'bg-amber-100' : 'bg-[#e8e0d4]'}`}>
+                  <TruckIcon className={`h-6 w-6 ${provider.productCount > 0 ? 'text-amber-600' : 'text-[#8b7355]'}`} />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-[#3d3530]">{provider.nombre}</h3>

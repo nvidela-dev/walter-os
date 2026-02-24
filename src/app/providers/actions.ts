@@ -2,11 +2,24 @@
 
 import { db } from "@/db";
 import { proveedores, proveedorProductos, productos, type NewProveedor, type NewProducto } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getProviders() {
-  return db.select().from(proveedores).orderBy(proveedores.nombre);
+  const result = await db
+    .select({
+      id: proveedores.id,
+      nombre: proveedores.nombre,
+      descripcion: proveedores.descripcion,
+      deuda: proveedores.deuda,
+      productCount: count(proveedorProductos.productoId),
+    })
+    .from(proveedores)
+    .leftJoin(proveedorProductos, eq(proveedores.id, proveedorProductos.proveedorId))
+    .groupBy(proveedores.id)
+    .orderBy(proveedores.nombre);
+
+  return result;
 }
 
 export async function getProvider(id: string) {
