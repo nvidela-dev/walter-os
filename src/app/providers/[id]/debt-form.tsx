@@ -25,14 +25,14 @@ export function DebtForm({ providerId, currentDebt }: { providerId: string; curr
   return (
     <form onSubmit={handleSubmit} className="flex items-end gap-3">
       <div className="flex-1">
-        <label htmlFor="deuda" className="mb-2 block text-sm font-medium text-[#3d3530]">Deuda Actual ($)</label>
+        <label htmlFor="deuda" className="mb-2 block text-xs font-medium text-[#8b7355]">Deuda Actual ($)</label>
         <input
           type="number"
           id="deuda"
           name="deuda"
           step="0.01"
           defaultValue={currentDebt}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         />
       </div>
       <button

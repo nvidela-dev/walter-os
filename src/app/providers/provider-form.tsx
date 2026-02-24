@@ -31,10 +31,10 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-[#3d3530]">Nombre del Proveedor</label>
+        <label htmlFor="nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">Nombre del Proveedor</label>
         <input type="text" id="nombre" name="nombre" required defaultValue={provider?.nombre}
           placeholder="Ingresa el nombre..."
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <div>
