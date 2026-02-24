@@ -96,6 +96,50 @@ export async function updateProductPrice(
   revalidatePath(`/providers/${proveedorId}`);
 }
 
+export async function getProductForProvider(proveedorId: string, productoId: string) {
+  const result = await db
+    .select({
+      id: productos.id,
+      nombre: productos.nombre,
+      unidad: productos.unidad,
+      descripcion: productos.descripcion,
+      precio: proveedorProductos.precio,
+    })
+    .from(proveedorProductos)
+    .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
+    .where(
+      and(
+        eq(proveedorProductos.proveedorId, proveedorId),
+        eq(proveedorProductos.productoId, productoId)
+      )
+    );
+  return result[0] ?? null;
+}
+
+export async function updateProduct(
+  proveedorId: string,
+  productoId: string,
+  data: { nombre: string; unidad: string; precio: string }
+) {
+  await db
+    .update(productos)
+    .set({ nombre: data.nombre, unidad: data.unidad, updatedAt: new Date() })
+    .where(eq(productos.id, productoId));
+
+  await db
+    .update(proveedorProductos)
+    .set({ precio: data.precio, updatedAt: new Date() })
+    .where(
+      and(
+        eq(proveedorProductos.proveedorId, proveedorId),
+        eq(proveedorProductos.productoId, productoId)
+      )
+    );
+
+  revalidatePath(`/providers/${proveedorId}`);
+  revalidatePath(`/providers/${proveedorId}/products/${productoId}`);
+}
+
 export async function removeProductFromProvider(proveedorId: string, productoId: string) {
   // Remove the link
   await db
