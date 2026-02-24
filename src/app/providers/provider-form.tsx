@@ -39,16 +39,16 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
       </div>
 
       <div>
+        <label htmlFor="descripcion" className="mb-2 block text-xs font-medium text-[#8b7355]">Descripción</label>
+        <input type="text" id="descripcion" name="descripcion" defaultValue={provider?.descripcion ?? ""}
+          placeholder="Descripción opcional..."
+          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
+      </div>
+
+      <div className="border-t border-[#e8e0d4] pt-5">
         <label htmlFor="deuda" className="mb-2 block text-sm font-medium text-[#3d3530]">Deuda Actual ($)</label>
         <input type="number" id="deuda" name="deuda" step="0.01" defaultValue={provider?.deuda ?? "0"}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
-
-      <div>
-        <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-[#3d3530]">Descripción</label>
-        <textarea id="descripcion" name="descripcion" rows={3} defaultValue={provider?.descripcion ?? ""}
-          placeholder="Descripción opcional..."
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <button type="submit" disabled={isSubmitting}
