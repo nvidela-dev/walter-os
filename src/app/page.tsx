@@ -1,47 +1,56 @@
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import {
+  TruckIcon,
+  WrenchScrewdriverIcon,
+  CreditCardIcon,
+  HomeIcon,
+  UserGroupIcon,
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 
 const apps = [
   {
     name: "Proveedores",
     href: "/providers",
-    icon: "🪷",
+    icon: TruckIcon,
     description: "Productos y precios",
   },
   {
     name: "Servicios",
     href: "/services",
-    icon: "✨",
+    icon: WrenchScrewdriverIcon,
     description: "Catálogo de servicios",
   },
   {
     name: "Pagos",
     href: "/service-payments",
-    icon: "💸",
+    icon: CreditCardIcon,
     description: "Pagos de servicios",
   },
   {
     name: "Hogar",
     href: "/house-expenses",
-    icon: "🏡",
+    icon: HomeIcon,
     description: "Gastos del hogar",
   },
   {
     name: "Equipo",
     href: "/employees",
-    icon: "🙏",
+    icon: UserGroupIcon,
     description: "Personal y sueldos",
   },
   {
     name: "Recetas",
     href: "/recipes",
-    icon: "📿",
+    icon: BookOpenIcon,
     description: "Tus recetas",
   },
   {
     name: "Menú",
     href: "/menu",
-    icon: "☕",
+    icon: ClipboardDocumentListIcon,
     description: "Platos y precios",
   },
 ];
@@ -69,7 +78,7 @@ export default function Home() {
               href={app.href}
               className="group flex flex-col items-center gap-3 rounded-3xl bg-[#f5f0e8] p-6 transition-all hover:bg-[#e8e0d4] active:scale-[0.98]"
             >
-              <span className="text-4xl">{app.icon}</span>
+              <app.icon className="h-10 w-10 text-[#8b7355]" />
               <div className="text-center">
                 <span className="block text-base font-medium text-[#3d3530]">
                   {app.name}
@@ -80,11 +89,6 @@ export default function Home() {
           ))}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="px-6 py-6 text-center">
-        <p className="text-sm text-[#c4a77d]">respira · organiza · fluye</p>
-      </footer>
     </div>
   );
 }
