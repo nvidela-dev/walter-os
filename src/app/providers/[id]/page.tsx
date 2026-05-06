@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProviderWithProducts } from "../actions";
+import { getProviderWithProducts, getUnidades } from "../actions";
 import { ProviderForm } from "../provider-form";
 import { DeleteProviderButton } from "./delete-button";
 import { ProductList } from "./product-list";
@@ -14,7 +14,10 @@ interface ProviderPageProps {
 
 export default async function ProviderPage({ params }: ProviderPageProps) {
   const { id } = await params;
-  const provider = await getProviderWithProducts(id);
+  const [provider, unidades] = await Promise.all([
+    getProviderWithProducts(id),
+    getUnidades(),
+  ]);
 
   if (!provider) {
     notFound();
@@ -40,7 +43,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
         <section className="rounded-2xl bg-[#f5f0e8] p-6">
           <ProductList products={provider.productos} providerId={provider.id} />
           <div className="mt-4 border-t border-[#e8e0d4] pt-4">
-            <AddProductForm providerId={provider.id} />
+            <AddProductForm providerId={provider.id} unidades={unidades} />
           </div>
         </section>
 

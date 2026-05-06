@@ -12,7 +12,7 @@ export const recetaProductos = pgTable(
     productoId: uuid("producto_id")
       .notNull()
       .references(() => productos.id, { onDelete: "cascade" }),
-    cantidad: numeric("cantidad", { precision: 10, scale: 3 }).notNull(), // Amount needed (in producto.unidad)
+    cantidad: numeric("cantidad", { precision: 10, scale: 3 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [primaryKey({ columns: [table.recetaId, table.productoId] })]

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProvider, getProductForProvider } from "../../../actions";
+import { getProvider, getProductForProvider, getUnidades } from "../../../actions";
 import { ProductEditForm } from "./product-edit-form";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
@@ -11,9 +11,10 @@ interface ProductEditPageProps {
 export default async function ProductEditPage({ params }: ProductEditPageProps) {
   const { id, productId } = await params;
 
-  const [provider, product] = await Promise.all([
+  const [provider, product, unidades] = await Promise.all([
     getProvider(id),
     getProductForProvider(id, productId),
+    getUnidades(),
   ]);
 
   if (!provider || !product) {
@@ -35,6 +36,7 @@ export default async function ProductEditPage({ params }: ProductEditPageProps) 
             providerId={id}
             productId={productId}
             product={product}
+            unidades={unidades}
           />
         </section>
       </main>

@@ -1,5 +1,8 @@
 // Core entities - Spanish table names as per project requirements
 
+// Units of measure
+export * from "./unidades";
+
 // Products
 export * from "./productos";
 

@@ -7,22 +7,36 @@ import { updateProduct } from "../../../actions";
 interface Product {
   id: string;
   nombre: string;
-  unidad: string;
+  unidadId: string | null;
   precio: string;
   descripcion: string | null;
+}
+
+interface UnidadOption {
+  id: string;
+  codigo: string;
+  nombre: string;
 }
 
 export function ProductEditForm({
   providerId,
   productId,
   product,
+  unidades,
 }: {
   providerId: string;
   productId: string;
   product: Product;
+  unidades: UnidadOption[];
 }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const defaultUnidadId =
+    product.unidadId ??
+    unidades.find((u) => u.codigo === "unidad")?.id ??
+    unidades[0]?.id ??
+    "";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,7 +45,7 @@ export function ProductEditForm({
     const formData = new FormData(e.currentTarget);
     const data = {
       nombre: formData.get("nombre") as string,
-      unidad: formData.get("unidad") as string,
+      unidadId: formData.get("unidadId") as string,
       precio: formData.get("precio") as string,
     };
 
@@ -54,17 +68,18 @@ export function ProductEditForm({
       </div>
 
       <div>
-        <label htmlFor="unidad" className="mb-2 block text-xs font-medium text-[#8b7355]">Unidad</label>
+        <label htmlFor="unidadId" className="mb-2 block text-xs font-medium text-[#8b7355]">Unidad</label>
         <select
-          id="unidad"
-          name="unidad"
-          defaultValue={product.unidad}
+          id="unidadId"
+          name="unidadId"
+          defaultValue={defaultUnidadId}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         >
-          <option value="kg">kg</option>
-          <option value="unidad">unidad</option>
-          <option value="pack">pack</option>
-          <option value="litro">litro</option>
+          {unidades.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.nombre}
+            </option>
+          ))}
         </select>
       </div>
 
