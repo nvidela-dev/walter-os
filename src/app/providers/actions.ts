@@ -1,9 +1,22 @@
 "use server";
 
 import { db } from "@/db";
-import { proveedores, proveedorProductos, productos, type NewProveedor, type NewProducto } from "@/db/schema";
-import { eq, and, sql, count } from "drizzle-orm";
+import {
+  proveedores,
+  proveedorProductos,
+  productos,
+  unidades,
+  type NewProveedor,
+} from "@/db/schema";
+import { eq, and, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+
+export async function getUnidades() {
+  return db
+    .select({ id: unidades.id, codigo: unidades.codigo, nombre: unidades.nombre })
+    .from(unidades)
+    .orderBy(unidades.nombre);
+}
 
 export async function getProviders() {
   const result = await db
@@ -39,11 +52,14 @@ export async function getProviderWithProducts(id: string) {
       precio: proveedorProductos.precio,
       cantidad: proveedorProductos.cantidad,
       nombre: productos.nombre,
-      unidad: productos.unidad,
+      unidadId: productos.unidadId,
+      unidad: unidades.codigo,
+      unidadNombre: unidades.nombre,
       descripcion: productos.descripcion,
     })
     .from(proveedorProductos)
     .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
+    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
     .where(eq(proveedorProductos.proveedorId, id));
 
   return { ...provider, productos: providerProducts };
@@ -74,14 +90,24 @@ export async function deleteProvider(id: string) {
 // Create a product and link it to a provider
 export async function createProductForProvider(
   proveedorId: string,
-  productData: NewProducto,
+  productData: { nombre: string; descripcion: string | null; unidadId: string },
   precio: string,
   cantidad: string
 ) {
-  // Create the product
-  const [product] = await db.insert(productos).values(productData).returning();
+  const unidad = await getUnidadOrThrow(productData.unidadId);
 
-  // Link it to the provider with price and quantity
+  // Dual-write: populate the legacy `unidad` text column alongside `unidad_id`
+  // so a rollback to the previous deploy still has the old field available.
+  const [product] = await db
+    .insert(productos)
+    .values({
+      nombre: productData.nombre,
+      descripcion: productData.descripcion,
+      unidadId: unidad.id,
+      unidad: unidad.codigo,
+    })
+    .returning();
+
   await db.insert(proveedorProductos).values({
     proveedorId,
     productoId: product.id,
@@ -115,12 +141,15 @@ export async function getProductForProvider(proveedorId: string, productoId: str
     .select({
       id: productos.id,
       nombre: productos.nombre,
-      unidad: productos.unidad,
+      unidadId: productos.unidadId,
+      unidad: unidades.codigo,
+      unidadNombre: unidades.nombre,
       descripcion: productos.descripcion,
       precio: proveedorProductos.precio,
     })
     .from(proveedorProductos)
     .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
+    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
     .where(
       and(
         eq(proveedorProductos.proveedorId, proveedorId),
@@ -133,11 +162,18 @@ export async function getProductForProvider(proveedorId: string, productoId: str
 export async function updateProduct(
   proveedorId: string,
   productoId: string,
-  data: { nombre: string; unidad: string; precio: string }
+  data: { nombre: string; unidadId: string; precio: string }
 ) {
+  const unidad = await getUnidadOrThrow(data.unidadId);
+
   await db
     .update(productos)
-    .set({ nombre: data.nombre, unidad: data.unidad, updatedAt: new Date() })
+    .set({
+      nombre: data.nombre,
+      unidadId: unidad.id,
+      unidad: unidad.codigo,
+      updatedAt: new Date(),
+    })
     .where(eq(productos.id, productoId));
 
   await db
@@ -167,4 +203,13 @@ export async function removeProductFromProvider(proveedorId: string, productoId:
   // Delete the product itself since products must belong to a provider
   await db.delete(productos).where(eq(productos.id, productoId));
   revalidatePath(`/providers/${proveedorId}`);
+}
+
+async function getUnidadOrThrow(unidadId: string) {
+  const [unidad] = await db
+    .select({ id: unidades.id, codigo: unidades.codigo })
+    .from(unidades)
+    .where(eq(unidades.id, unidadId));
+  if (!unidad) throw new Error(`Unknown unidadId: ${unidadId}`);
+  return unidad;
 }

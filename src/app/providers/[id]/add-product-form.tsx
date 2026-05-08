@@ -3,18 +3,24 @@
 import { useState } from "react";
 import { createProductForProvider } from "../actions";
 
-const UNITS = [
-  { value: "unidad", label: "Unidad" },
-  { value: "kg", label: "Kg" },
-  { value: "g", label: "Gramo" },
-  { value: "litro", label: "Litro" },
-  { value: "ml", label: "ml" },
-  { value: "docena", label: "Docena" },
-];
+interface UnidadOption {
+  id: string;
+  codigo: string;
+  nombre: string;
+}
 
-export function AddProductForm({ providerId }: { providerId: string }) {
+export function AddProductForm({
+  providerId,
+  unidades,
+}: {
+  providerId: string;
+  unidades: UnidadOption[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const defaultUnidadId =
+    unidades.find((u) => u.codigo === "unidad")?.id ?? unidades[0]?.id ?? "";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -25,7 +31,7 @@ export function AddProductForm({ providerId }: { providerId: string }) {
       providerId,
       {
         nombre: formData.get("nombre") as string,
-        unidad: formData.get("unidad") as string,
+        unidadId: formData.get("unidadId") as string,
         descripcion: (formData.get("descripcion") as string) || null,
       },
       formData.get("precio") as string,
@@ -73,13 +79,13 @@ export function AddProductForm({ providerId }: { providerId: string }) {
         </div>
         <div>
           <select
-            name="unidad"
-            defaultValue="unidad"
+            name="unidadId"
+            defaultValue={defaultUnidadId}
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
-            {UNITS.map((u) => (
-              <option key={u.value} value={u.value}>
-                {u.label}
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre}
               </option>
             ))}
           </select>

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { recetas, recetaProductos, productos, type NewReceta } from "@/db/schema";
+import { recetas, recetaProductos, productos, unidades, type NewReceta } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -18,9 +18,10 @@ export async function getRecipeWithIngredients(id: string) {
   const recipe = await getRecipe(id);
   if (!recipe) return null;
   const ingredients = await db
-    .select({ productoId: recetaProductos.productoId, cantidad: recetaProductos.cantidad, nombre: productos.nombre, unidad: productos.unidad })
+    .select({ productoId: recetaProductos.productoId, cantidad: recetaProductos.cantidad, nombre: productos.nombre, unidad: unidades.codigo })
     .from(recetaProductos)
     .innerJoin(productos, eq(recetaProductos.productoId, productos.id))
+    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
     .where(eq(recetaProductos.recetaId, id));
   return { ...recipe, ingredientes: ingredients };
 }
