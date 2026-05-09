@@ -8,6 +8,7 @@ import {
   UserGroupIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
 const apps = [
@@ -18,6 +19,14 @@ const apps = [
     description: "Productos y precios",
     color: "text-amber-700",
     bg: "bg-amber-50",
+  },
+  {
+    name: "Nueva Factura",
+    href: "/facturas/new",
+    icon: DocumentTextIcon,
+    description: "Cargar factura",
+    color: "text-stone-700",
+    bg: "bg-stone-50",
   },
   {
     name: "Servicios",
