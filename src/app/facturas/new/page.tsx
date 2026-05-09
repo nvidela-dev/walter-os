@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { getFacturaFormData } from "../actions";
+import { getUnidades } from "@/app/providers/actions";
 import { FacturaForm } from "./factura-form";
 
 export default async function NuevaFacturaPage() {
-  const proveedores = await getFacturaFormData();
+  const [proveedores, unidades] = await Promise.all([
+    getFacturaFormData(),
+    getUnidades(),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
@@ -33,7 +37,7 @@ export default async function NuevaFacturaPage() {
             </Link>
           </div>
         ) : (
-          <FacturaForm proveedores={proveedores} />
+          <FacturaForm proveedores={proveedores} unidades={unidades} />
         )}
       </main>
     </div>
