@@ -11,7 +11,7 @@ import {
   productos,
   unidades,
 } from "@/db/schema";
-import { and, desc, eq, gt, ne, notExists, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, ne, notExists, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export interface CreateFacturaInput {
@@ -25,6 +25,57 @@ export interface CreateFacturaInput {
     precioUnit: string;
     cantidad: string;
   }>;
+}
+
+export async function getFacturaFormData() {
+  const rows = await db
+    .select({
+      proveedorId: proveedores.id,
+      proveedorNombre: proveedores.nombre,
+      productoId: productos.id,
+      productoNombre: productos.nombre,
+      unidadId: productos.unidadId,
+      unidadCodigo: unidades.codigo,
+      precioActual: proveedorProductos.precio,
+    })
+    .from(proveedorProductos)
+    .innerJoin(proveedores, eq(proveedorProductos.proveedorId, proveedores.id))
+    .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
+    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
+    .orderBy(asc(proveedores.nombre), asc(productos.nombre));
+
+  const grouped = new Map<
+    string,
+    {
+      id: string;
+      nombre: string;
+      productos: Array<{
+        id: string;
+        nombre: string;
+        unidadId: string;
+        unidadCodigo: string;
+        precioActual: string;
+      }>;
+    }
+  >();
+
+  for (const r of rows) {
+    if (!r.unidadId) continue; // skip products with no unidadId (defensive; shouldn't happen post-PR7)
+    let entry = grouped.get(r.proveedorId);
+    if (!entry) {
+      entry = { id: r.proveedorId, nombre: r.proveedorNombre, productos: [] };
+      grouped.set(r.proveedorId, entry);
+    }
+    entry.productos.push({
+      id: r.productoId,
+      nombre: r.productoNombre,
+      unidadId: r.unidadId,
+      unidadCodigo: r.unidadCodigo,
+      precioActual: r.precioActual,
+    });
+  }
+
+  return [...grouped.values()];
 }
 
 export async function getFacturas() {
