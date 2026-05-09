@@ -6,6 +6,7 @@ import {
   proveedorProductos,
   productos,
   unidades,
+  historialPrecios,
   type NewProveedor,
 } from "@/db/schema";
 import { eq, and, count } from "drizzle-orm";
@@ -115,6 +116,13 @@ export async function createProductForProvider(
     cantidad,
   });
 
+  await recordPriceChange({
+    productoId: product.id,
+    proveedorId,
+    precio,
+    unidadId: unidad.id,
+  });
+
   revalidatePath(`/providers/${proveedorId}`);
   return product;
 }
@@ -133,6 +141,20 @@ export async function updateProductPrice(
         eq(proveedorProductos.productoId, productoId)
       )
     );
+
+  const [producto] = await db
+    .select({ unidadId: productos.unidadId })
+    .from(productos)
+    .where(eq(productos.id, productoId));
+  if (producto?.unidadId) {
+    await recordPriceChange({
+      productoId,
+      proveedorId,
+      precio,
+      unidadId: producto.unidadId,
+    });
+  }
+
   revalidatePath(`/providers/${proveedorId}`);
 }
 
@@ -186,6 +208,13 @@ export async function updateProduct(
       )
     );
 
+  await recordPriceChange({
+    productoId,
+    proveedorId,
+    precio: data.precio,
+    unidadId: unidad.id,
+  });
+
   revalidatePath(`/providers/${proveedorId}`);
   revalidatePath(`/providers/${proveedorId}/products/${productoId}`);
 }
@@ -212,4 +241,14 @@ async function getUnidadOrThrow(unidadId: string) {
     .where(eq(unidades.id, unidadId));
   if (!unidad) throw new Error(`Unknown unidadId: ${unidadId}`);
   return unidad;
+}
+
+export async function recordPriceChange(args: {
+  productoId: string;
+  proveedorId: string;
+  precio: string;
+  unidadId: string;
+  facturaId?: string;
+}) {
+  await db.insert(historialPrecios).values(args);
 }
