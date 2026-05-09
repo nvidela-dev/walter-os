@@ -2,8 +2,15 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, PlusIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { createFactura } from "../actions";
+import { updateProduct } from "@/app/providers/actions";
+
+interface UnidadOption {
+  id: string;
+  codigo: string;
+  nombre: string;
+}
 
 interface FormProducto {
   id: string;
@@ -36,7 +43,13 @@ const todayLocal = () => {
 const numericInputClass =
   "w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none";
 
-export function FacturaForm({ proveedores }: { proveedores: FormProveedor[] }) {
+export function FacturaForm({
+  proveedores,
+  unidades,
+}: {
+  proveedores: FormProveedor[];
+  unidades: UnidadOption[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +59,7 @@ export function FacturaForm({ proveedores }: { proveedores: FormProveedor[] }) {
   const [numero, setNumero] = useState("");
   const [notas, setNotas] = useState("");
   const [lineas, setLineas] = useState<LineaState[]>([emptyLinea()]);
+  const [editingLineIdx, setEditingLineIdx] = useState<number | null>(null);
 
   const proveedor = proveedores.find((p) => p.id === proveedorId);
   const productos = useMemo(() => proveedor?.productos ?? [], [proveedor]);
@@ -247,16 +261,29 @@ export function FacturaForm({ proveedores }: { proveedores: FormProveedor[] }) {
                     ))}
                   </select>
                 </div>
-                {lineas.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeLinea(idx)}
-                    aria-label="Quitar línea"
-                    className="mt-7 flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                )}
+                <div className="mt-7 flex gap-2">
+                  {producto && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingLineIdx(idx)}
+                      aria-label="Editar producto"
+                      title="Editar producto"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </button>
+                  )}
+                  {lineas.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLinea(idx)}
+                      aria-label="Quitar línea"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
@@ -351,6 +378,164 @@ export function FacturaForm({ proveedores }: { proveedores: FormProveedor[] }) {
           {isPending ? "Guardando..." : "Crear Factura"}
         </button>
       </section>
+
+      {editingLineIdx !== null && proveedor && (() => {
+        const linea = lineas[editingLineIdx];
+        const producto = productoById.get(linea.productoId);
+        if (!producto) return null;
+        return (
+          <EditProductModal
+            proveedorId={proveedor.id}
+            producto={producto}
+            unidades={unidades}
+            initialPrecio={linea.precioUnit || producto.precioActual}
+            onClose={() => setEditingLineIdx(null)}
+            onSaved={(newPrecio) => {
+              updateLinea(editingLineIdx, { precioUnit: newPrecio });
+              setEditingLineIdx(null);
+              router.refresh();
+            }}
+          />
+        );
+      })()}
     </form>
+  );
+}
+
+function EditProductModal({
+  proveedorId,
+  producto,
+  unidades,
+  initialPrecio,
+  onClose,
+  onSaved,
+}: {
+  proveedorId: string;
+  producto: FormProducto;
+  unidades: UnidadOption[];
+  initialPrecio: string;
+  onClose: () => void;
+  onSaved: (newPrecio: string) => void;
+}) {
+  const [unidadId, setUnidadId] = useState(producto.unidadId);
+  const [precio, setPrecio] = useState(initialPrecio);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSave() {
+    setError(null);
+    const precioNum = Number(precio);
+    if (!isFinite(precioNum) || precioNum <= 0) {
+      setError("Precio inválido.");
+      return;
+    }
+    if (!unidadId) {
+      setError("Selecciona una unidad.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateProduct(proveedorId, producto.id, {
+        nombre: producto.nombre,
+        unidadId,
+        precio,
+      });
+      onSaved(precio);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al guardar.");
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-medium text-[#3d3530]">Editar producto</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSaving}
+            aria-label="Cerrar"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        <p className="mb-4 text-sm text-[#8b7355]">
+          Los cambios se guardan inmediatamente y afectan esta factura y los valores por defecto del producto.
+        </p>
+
+        <div className="mb-4">
+          <p className="mb-2 text-xs font-medium text-[#8b7355]">Producto</p>
+          <p className="rounded-xl bg-[#faf8f5] px-4 py-3 text-sm text-[#3d3530]">
+            {producto.nombre}
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="modal-unidad" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            Unidad
+          </label>
+          <select
+            id="modal-unidad"
+            value={unidadId}
+            onChange={(e) => setUnidadId(e.target.value)}
+            disabled={isSaving}
+            className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+          >
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="modal-precio" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            Precio unitario
+          </label>
+          <input
+            id="modal-precio"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0"
+            value={precio}
+            onChange={(e) => setPrecio(e.target.value)}
+            disabled={isSaving}
+            className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+          />
+        </div>
+
+        {error && (
+          <p className="mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {error}
+          </p>
+        )}
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSaving}
+            className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {isSaving ? "Guardando..." : "Guardar"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
