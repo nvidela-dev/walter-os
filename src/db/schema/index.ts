@@ -35,3 +35,12 @@ export * from "./receta-productos";
 
 // Menu items
 export * from "./menu";
+
+// Invoices (header)
+export * from "./facturas";
+
+// Invoice line items (snapshot of price/unit at time of invoice)
+export * from "./factura-lineas";
+
+// Append-only price change log (single source of truth for price evolution)
+export * from "./historial-precios";

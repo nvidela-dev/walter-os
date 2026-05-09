@@ -29,6 +29,13 @@
       "when": 1778090636445,
       "tag": "0003_friendly_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778295006907,
+      "tag": "0004_thin_boomer",
+      "breakpoints": true
     }
   ]
 }
