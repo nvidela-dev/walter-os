@@ -12,12 +12,6 @@ export * from "./proveedores";
 // Provider-Product relationship (N:N with prices)
 export * from "./proveedor-productos";
 
-// Services (utilities, bills)
-export * from "./servicios";
-
-// Service payments
-export * from "./pagos-servicios";
-
 // House expenses
 export * from "./gastos-hogar";
 
