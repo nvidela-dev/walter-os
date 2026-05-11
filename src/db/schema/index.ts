@@ -12,9 +12,6 @@ export * from "./proveedores";
 // Provider-Product relationship (N:N with prices)
 export * from "./proveedor-productos";
 
-// House expenses
-export * from "./gastos-hogar";
-
 // Employees
 export * from "./empleados";
 
