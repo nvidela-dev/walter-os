@@ -2,8 +2,6 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import {
   TruckIcon,
-  WrenchScrewdriverIcon,
-  CreditCardIcon,
   HomeIcon,
   UserGroupIcon,
   BookOpenIcon,
@@ -27,22 +25,6 @@ const apps = [
     description: "Cargar factura",
     color: "text-stone-700",
     bg: "bg-stone-50",
-  },
-  {
-    name: "Servicios",
-    href: "/services",
-    icon: WrenchScrewdriverIcon,
-    description: "Catálogo de servicios",
-    color: "text-slate-600",
-    bg: "bg-slate-50",
-  },
-  {
-    name: "Pagos",
-    href: "/service-payments",
-    icon: CreditCardIcon,
-    description: "Pagos de servicios",
-    color: "text-emerald-700",
-    bg: "bg-emerald-50",
   },
   {
     name: "Hogar",
