@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProviderWithProducts, getUnidades } from "../actions";
+import { getProviderWithProducts, getUnidades, deleteProvider } from "../actions";
 import { ProviderForm } from "../provider-form";
-import { DeleteProviderButton } from "./delete-button";
+import { DeleteButton } from "@/components/delete-button";
 import { ProductList } from "./product-list";
 import { AddProductForm } from "./add-product-form";
 import { DebtForm } from "./debt-form";
@@ -32,7 +32,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
           </Link>
           <h1 className="text-xl font-light text-[#3d3530]">{provider.nombre}</h1>
         </div>
-        <DeleteProviderButton id={provider.id} name={provider.nombre} />
+        <DeleteButton id={provider.id} name={provider.nombre} deleteAction={deleteProvider} redirectTo="/providers" />
       </header>
 
       <main className="flex-1 space-y-6 px-6 py-4">

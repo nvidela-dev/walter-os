@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRecipeWithIngredients, deleteRecipe } from "../actions";
 import { RecipeForm } from "../recipe-form";
-import { DeleteButton } from "@/app/components/delete-button";
+import { DeleteButton } from "@/components/delete-button";
 
 export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

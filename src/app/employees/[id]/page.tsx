@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEmployee, deleteEmployee } from "../actions";
 import { EmployeeForm } from "../employee-form";
-import { DeleteButton } from "@/app/components/delete-button";
+import { DeleteButton } from "@/components/delete-button";
 
 export default async function EmployeePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
