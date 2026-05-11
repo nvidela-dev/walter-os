@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMenuItem, deleteMenuItem, getAllRecipes } from "../actions";
 import { MenuForm } from "../menu-form";
-import { DeleteButton } from "@/app/components/delete-button";
+import { DeleteButton } from "@/components/delete-button";
 
 export default async function MenuItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
