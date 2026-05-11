@@ -43,6 +43,13 @@
       "when": 1778516682471,
       "tag": "0005_opposite_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778517135611,
+      "tag": "0006_flowery_maximus",
+      "breakpoints": true
     }
   ]
 }

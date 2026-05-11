@@ -1,0 +1,1 @@
+DROP TABLE "gastos_hogar" CASCADE;
