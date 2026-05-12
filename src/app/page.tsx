@@ -18,10 +18,10 @@ const apps = [
     bg: "bg-amber-50",
   },
   {
-    name: "Nueva Factura",
-    href: "/facturas/new",
+    name: "Facturas",
+    href: "/facturas",
     icon: DocumentTextIcon,
-    description: "Cargar factura",
+    description: "Cargar y pagar",
     color: "text-stone-700",
     bg: "bg-stone-50",
   },
