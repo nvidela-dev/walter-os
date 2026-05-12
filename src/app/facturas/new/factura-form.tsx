@@ -173,8 +173,6 @@ export function FacturaForm({
         setError("Monto inválido.");
         return;
       }
-      // Backend support for service invoices is pending — createFactura still
-      // requires line items, so this will surface a server error for now.
       startTransition(async () => {
         try {
           await createFactura({
@@ -182,7 +180,7 @@ export function FacturaForm({
             fecha,
             numero: numero.trim() || null,
             notas: notas.trim() || null,
-            lineas: [],
+            monto,
           });
           router.push("/");
         } catch (err) {

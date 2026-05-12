@@ -1,0 +1,1 @@
+ALTER TABLE "facturas" ADD COLUMN "monto" numeric(12, 2);
