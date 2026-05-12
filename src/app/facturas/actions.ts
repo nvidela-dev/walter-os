@@ -15,18 +15,31 @@ import {
 import { and, asc, desc, eq, gt, ne, notExists, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-export interface CreateFacturaInput {
+interface CreateFacturaBase {
   proveedorId: string;
   fecha: string; // YYYY-MM-DD
   numero?: string | null;
   notas?: string | null;
+}
+
+interface CreateFacturaProductoInput extends CreateFacturaBase {
   lineas: Array<{
     productoId: string;
     unidadId: string;
     precioUnit: string;
     cantidad: string;
   }>;
+  monto?: never;
 }
+
+interface CreateFacturaServicioInput extends CreateFacturaBase {
+  monto: string;
+  lineas?: never;
+}
+
+export type CreateFacturaInput =
+  | CreateFacturaProductoInput
+  | CreateFacturaServicioInput;
 
 export async function getFacturaFormData() {
   const rows = await db
@@ -113,6 +126,7 @@ export async function getFactura(id: string) {
       proveedorNombre: proveedores.nombre,
       fecha: facturas.fecha,
       numero: facturas.numero,
+      monto: facturas.monto,
       total: facturas.total,
       paid: facturas.paid,
       notas: facturas.notas,
@@ -175,11 +189,34 @@ export async function getProductPriceHistory(
 }
 
 export async function createFactura(input: CreateFacturaInput) {
-  if (input.lineas.length === 0) {
-    throw new Error("Factura must have at least one line");
+  const facturaId = randomUUID();
+
+  if ("monto" in input && input.monto !== undefined) {
+    const montoNum = Number(input.monto);
+    if (!isFinite(montoNum) || montoNum <= 0) {
+      throw new Error("Monto inválido");
+    }
+    const monto = montoNum.toFixed(2);
+
+    await db.insert(facturas).values({
+      id: facturaId,
+      proveedorId: input.proveedorId,
+      fecha: input.fecha,
+      numero: input.numero ?? null,
+      notas: input.notas ?? null,
+      monto,
+      total: monto,
+    });
+
+    revalidatePath("/facturas");
+    revalidatePath(`/providers/${input.proveedorId}`);
+
+    return { id: facturaId };
   }
 
-  const facturaId = randomUUID();
+  if (!input.lineas || input.lineas.length === 0) {
+    throw new Error("Factura must have at least one line");
+  }
 
   // Server-side total computation. Never trust client.
   const lineasWithTotals = input.lineas.map((l) => ({
