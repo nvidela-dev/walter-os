@@ -38,10 +38,11 @@ export async function getFacturaFormData() {
       unidadCodigo: unidades.codigo,
       precioActual: proveedorProductos.precio,
     })
-    .from(proveedorProductos)
-    .innerJoin(proveedores, eq(proveedorProductos.proveedorId, proveedores.id))
-    .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
-    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
+    .from(proveedores)
+    .leftJoin(proveedorProductos, eq(proveedorProductos.proveedorId, proveedores.id))
+    .leftJoin(productos, eq(proveedorProductos.productoId, productos.id))
+    .leftJoin(unidades, eq(productos.unidadId, unidades.id))
+    .where(eq(proveedores.tipo, "producto"))
     .orderBy(asc(proveedores.nombre), asc(productos.nombre));
 
   const grouped = new Map<
@@ -60,11 +61,14 @@ export async function getFacturaFormData() {
   >();
 
   for (const r of rows) {
-    if (!r.unidadId) continue; // skip products with no unidadId (defensive; shouldn't happen post-PR7)
     let entry = grouped.get(r.proveedorId);
     if (!entry) {
       entry = { id: r.proveedorId, nombre: r.proveedorNombre, productos: [] };
       grouped.set(r.proveedorId, entry);
+    }
+    // A left-joined row with no product row means the provider has no catalog yet.
+    if (!r.productoId || !r.unidadId || !r.productoNombre || !r.unidadCodigo || r.precioActual === null) {
+      continue;
     }
     entry.productos.push({
       id: r.productoId,

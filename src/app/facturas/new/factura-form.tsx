@@ -4,7 +4,9 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { TrashIcon, PlusIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { createFactura } from "../actions";
-import { updateProduct } from "@/app/providers/actions";
+import { createProductForProvider, updateProduct } from "@/app/providers/actions";
+
+const NEW_PRODUCT_VALUE = "__new__";
 
 interface UnidadOption {
   id: string;
@@ -60,9 +62,23 @@ export function FacturaForm({
   const [notas, setNotas] = useState("");
   const [lineas, setLineas] = useState<LineaState[]>([emptyLinea()]);
   const [editingLineIdx, setEditingLineIdx] = useState<number | null>(null);
+  const [creatingLineIdx, setCreatingLineIdx] = useState<number | null>(null);
+  // Holds products created during this session, keyed by provider, so they
+  // appear in dropdowns immediately without waiting for router.refresh().
+  const [newProductsByProveedor, setNewProductsByProveedor] = useState<
+    Record<string, FormProducto[]>
+  >({});
 
   const proveedor = proveedores.find((p) => p.id === proveedorId);
-  const productos = useMemo(() => proveedor?.productos ?? [], [proveedor]);
+  const productos = useMemo(() => {
+    const base = proveedor?.productos ?? [];
+    const extras = proveedor ? newProductsByProveedor[proveedor.id] ?? [] : [];
+    if (extras.length === 0) return base;
+    const seen = new Set(base.map((p) => p.id));
+    return [...base, ...extras.filter((p) => !seen.has(p.id))].sort((a, b) =>
+      a.nombre.localeCompare(b.nombre)
+    );
+  }, [proveedor, newProductsByProveedor]);
   const productoById = useMemo(() => {
     const map = new Map<string, FormProducto>();
     for (const p of productos) map.set(p.id, p);
@@ -84,11 +100,31 @@ export function FacturaForm({
   }
 
   function selectProducto(idx: number, productoId: string) {
+    if (productoId === NEW_PRODUCT_VALUE) {
+      setCreatingLineIdx(idx);
+      return;
+    }
     const producto = productoById.get(productoId);
     updateLinea(idx, {
       productoId,
       precioUnit: producto?.precioActual ?? "",
     });
+  }
+
+  function handleProductCreated(idx: number, producto: FormProducto) {
+    if (!proveedor) return;
+    setNewProductsByProveedor((prev) => {
+      const existing = prev[proveedor.id] ?? [];
+      if (existing.some((p) => p.id === producto.id)) return prev;
+      return { ...prev, [proveedor.id]: [...existing, producto] };
+    });
+    setLineas((prev) =>
+      prev.map((l, i) =>
+        i === idx ? { ...l, productoId: producto.id, precioUnit: producto.precioActual } : l
+      )
+    );
+    setCreatingLineIdx(null);
+    router.refresh();
   }
 
   function addLinea() {
@@ -259,6 +295,9 @@ export function FacturaForm({
                         {p.nombre}
                       </option>
                     ))}
+                    {proveedor && (
+                      <option value={NEW_PRODUCT_VALUE}>+ Agregar producto nuevo…</option>
+                    )}
                   </select>
                 </div>
                 <div className="mt-7 flex gap-2">
@@ -398,6 +437,16 @@ export function FacturaForm({
           />
         );
       })()}
+
+      {creatingLineIdx !== null && proveedor && (
+        <AddProductModal
+          proveedorId={proveedor.id}
+          proveedorNombre={proveedor.nombre}
+          unidades={unidades}
+          onClose={() => setCreatingLineIdx(null)}
+          onCreated={(producto) => handleProductCreated(creatingLineIdx, producto)}
+        />
+      )}
     </form>
   );
 }
@@ -533,6 +582,188 @@ function EditProductModal({
             className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
           >
             {isSaving ? "Guardando..." : "Guardar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddProductModal({
+  proveedorId,
+  proveedorNombre,
+  unidades,
+  onClose,
+  onCreated,
+}: {
+  proveedorId: string;
+  proveedorNombre: string;
+  unidades: UnidadOption[];
+  onClose: () => void;
+  onCreated: (producto: FormProducto) => void;
+}) {
+  const [nombre, setNombre] = useState("");
+  const [unidadId, setUnidadId] = useState(unidades[0]?.id ?? "");
+  const [precio, setPrecio] = useState("");
+  const [cantidad, setCantidad] = useState("1");
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSave() {
+    setError(null);
+    const trimmed = nombre.trim();
+    if (!trimmed) {
+      setError("El nombre es obligatorio.");
+      return;
+    }
+    if (!unidadId) {
+      setError("Selecciona una unidad.");
+      return;
+    }
+    const precioNum = Number(precio);
+    if (!isFinite(precioNum) || precioNum <= 0) {
+      setError("Precio inválido.");
+      return;
+    }
+    const cantidadNum = Number(cantidad);
+    if (!isFinite(cantidadNum) || cantidadNum <= 0) {
+      setError("Cantidad inválida.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const created = await createProductForProvider(
+        proveedorId,
+        { nombre: trimmed, descripcion: null, unidadId },
+        precio,
+        cantidad
+      );
+      const unidad = unidades.find((u) => u.id === unidadId);
+      onCreated({
+        id: created.id,
+        nombre: created.nombre,
+        unidadId,
+        unidadCodigo: unidad?.codigo ?? "",
+        precioActual: precio,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al crear el producto.");
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-medium text-[#3d3530]">Nuevo producto</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSaving}
+            aria-label="Cerrar"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        <p className="mb-4 text-sm text-[#8b7355]">
+          Se agregará al catálogo de <span className="font-medium text-[#3d3530]">{proveedorNombre}</span> y quedará disponible para futuras facturas.
+        </p>
+
+        <div className="mb-4">
+          <label htmlFor="new-prod-nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            Nombre
+          </label>
+          <input
+            id="new-prod-nombre"
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            disabled={isSaving}
+            autoFocus
+            className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="new-prod-unidad" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            Unidad
+          </label>
+          <select
+            id="new-prod-unidad"
+            value={unidadId}
+            onChange={(e) => setUnidadId(e.target.value)}
+            disabled={isSaving}
+            className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+          >
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="new-prod-precio" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              Precio unit.
+            </label>
+            <input
+              id="new-prod-precio"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={precio}
+              onChange={(e) => setPrecio(e.target.value)}
+              disabled={isSaving}
+              className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="new-prod-cantidad" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              Cantidad por pack
+            </label>
+            <input
+              id="new-prod-cantidad"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={cantidad}
+              onChange={(e) => setCantidad(e.target.value)}
+              disabled={isSaving}
+              className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p className="mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {error}
+          </p>
+        )}
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSaving}
+            className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {isSaving ? "Guardando..." : "Crear y usar"}
           </button>
         </div>
       </div>
