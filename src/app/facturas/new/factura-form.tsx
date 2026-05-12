@@ -5,8 +5,14 @@ import { useRouter } from "next/navigation";
 import { TrashIcon, PlusIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { createFactura } from "../actions";
 import { createProductForProvider, updateProduct } from "@/app/providers/actions";
+import type { ProveedorTipo } from "@/db/schema";
 
 const NEW_PRODUCT_VALUE = "__new__";
+
+const TIPO_TABS: { value: ProveedorTipo; label: string }[] = [
+  { value: "producto", label: "Productos" },
+  { value: "servicio", label: "Servicios" },
+];
 
 interface UnidadOption {
   id: string;
@@ -25,6 +31,7 @@ interface FormProducto {
 interface FormProveedor {
   id: string;
   nombre: string;
+  tipo: ProveedorTipo;
   productos: FormProducto[];
 }
 
@@ -56,11 +63,13 @@ export function FacturaForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const [tipo, setTipo] = useState<ProveedorTipo>("producto");
   const [proveedorId, setProveedorId] = useState("");
   const [fecha, setFecha] = useState(todayLocal);
   const [numero, setNumero] = useState("");
   const [notas, setNotas] = useState("");
   const [lineas, setLineas] = useState<LineaState[]>([emptyLinea()]);
+  const [monto, setMonto] = useState("");
   const [editingLineIdx, setEditingLineIdx] = useState<number | null>(null);
   const [creatingLineIdx, setCreatingLineIdx] = useState<number | null>(null);
   // Holds products created during this session, keyed by provider, so they
@@ -69,7 +78,11 @@ export function FacturaForm({
     Record<string, FormProducto[]>
   >({});
 
-  const proveedor = proveedores.find((p) => p.id === proveedorId);
+  const visibleProveedores = useMemo(
+    () => proveedores.filter((p) => p.tipo === tipo),
+    [proveedores, tipo]
+  );
+  const proveedor = visibleProveedores.find((p) => p.id === proveedorId);
   const productos = useMemo(() => {
     const base = proveedor?.productos ?? [];
     const extras = proveedor ? newProductsByProveedor[proveedor.id] ?? [] : [];
@@ -85,10 +98,20 @@ export function FacturaForm({
     return map;
   }, [productos]);
 
-  const total = lineas.reduce(
+  const lineasTotal = lineas.reduce(
     (sum, l) => sum + Number(l.precioUnit || 0) * Number(l.cantidad || 0),
     0
   );
+  const total = tipo === "servicio" ? Number(monto || 0) : lineasTotal;
+
+  function changeTipo(next: ProveedorTipo) {
+    if (next === tipo) return;
+    setTipo(next);
+    setProveedorId("");
+    setLineas([emptyLinea()]);
+    setMonto("");
+    setError(null);
+  }
 
   function changeProveedor(id: string) {
     setProveedorId(id);
@@ -144,6 +167,31 @@ export function FacturaForm({
       return;
     }
 
+    if (tipo === "servicio") {
+      const montoNum = Number(monto);
+      if (!isFinite(montoNum) || montoNum <= 0) {
+        setError("Monto inválido.");
+        return;
+      }
+      // Backend support for service invoices is pending — createFactura still
+      // requires line items, so this will surface a server error for now.
+      startTransition(async () => {
+        try {
+          await createFactura({
+            proveedorId,
+            fecha,
+            numero: numero.trim() || null,
+            notas: notas.trim() || null,
+            lineas: [],
+          });
+          router.push("/");
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Error al crear la factura.");
+        }
+      });
+      return;
+    }
+
     const payloadLineas: Array<{
       productoId: string;
       unidadId: string;
@@ -194,6 +242,29 @@ export function FacturaForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <section className="space-y-4 rounded-2xl bg-[#f5f0e8] p-6">
         <div>
+          <label className="mb-2 block text-xs font-medium text-[#8b7355]">Tipo</label>
+          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-1">
+            {TIPO_TABS.map((tab) => {
+              const isActive = tab.value === tipo;
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => changeTipo(tab.value)}
+                  className={`rounded-xl py-2.5 text-center text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-[#c4a77d] text-white shadow-sm"
+                      : "text-[#8b7355] hover:bg-[#f5f0e8]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
           <label htmlFor="proveedor" className="mb-2 block text-xs font-medium text-[#8b7355]">
             Proveedor
           </label>
@@ -204,8 +275,14 @@ export function FacturaForm({
             onChange={(e) => changeProveedor(e.target.value)}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
-            <option value="">Selecciona un proveedor</option>
-            {proveedores.map((p) => (
+            <option value="">
+              {visibleProveedores.length === 0
+                ? tipo === "servicio"
+                  ? "No hay proveedores de servicios"
+                  : "No hay proveedores de productos"
+                : "Selecciona un proveedor"}
+            </option>
+            {visibleProveedores.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.nombre}
               </option>
@@ -256,6 +333,32 @@ export function FacturaForm({
         </div>
       </section>
 
+      {tipo === "servicio" && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-medium text-[#8b7355]">Monto</h2>
+          </div>
+          <div className="rounded-xl bg-white p-4">
+            <label htmlFor="monto" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              Cuánto salió
+            </label>
+            <input
+              id="monto"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              required
+              disabled={!proveedor}
+              value={monto}
+              onChange={(e) => setMonto(e.target.value)}
+              className={numericInputClass}
+            />
+          </div>
+        </section>
+      )}
+
+      {tipo === "producto" && (
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-sm font-medium text-[#8b7355]">Líneas</h2>
@@ -396,6 +499,7 @@ export function FacturaForm({
           Agregar línea
         </button>
       </section>
+      )}
 
       <section className="rounded-2xl bg-[#f5f0e8] p-6">
         <div className="mb-4 flex items-center justify-between">

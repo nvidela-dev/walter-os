@@ -25,7 +25,7 @@ export default async function NuevaFacturaPage() {
       <main className="flex-1 px-6 py-4 pb-24">
         {proveedores.length === 0 ? (
           <div className="rounded-2xl bg-[#f5f0e8] p-6 text-center">
-            <p className="mb-2 text-[#3d3530]">No hay proveedores de productos.</p>
+            <p className="mb-2 text-[#3d3530]">No hay proveedores.</p>
             <p className="text-sm text-[#8b7355]">
               Agrega un proveedor para empezar a registrar facturas.
             </p>

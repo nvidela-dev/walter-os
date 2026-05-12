@@ -10,6 +10,7 @@ import {
   proveedores,
   productos,
   unidades,
+  type ProveedorTipo,
 } from "@/db/schema";
 import { and, asc, desc, eq, gt, ne, notExists, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -32,6 +33,7 @@ export async function getFacturaFormData() {
     .select({
       proveedorId: proveedores.id,
       proveedorNombre: proveedores.nombre,
+      proveedorTipo: proveedores.tipo,
       productoId: productos.id,
       productoNombre: productos.nombre,
       unidadId: productos.unidadId,
@@ -42,7 +44,6 @@ export async function getFacturaFormData() {
     .leftJoin(proveedorProductos, eq(proveedorProductos.proveedorId, proveedores.id))
     .leftJoin(productos, eq(proveedorProductos.productoId, productos.id))
     .leftJoin(unidades, eq(productos.unidadId, unidades.id))
-    .where(eq(proveedores.tipo, "producto"))
     .orderBy(asc(proveedores.nombre), asc(productos.nombre));
 
   const grouped = new Map<
@@ -50,6 +51,7 @@ export async function getFacturaFormData() {
     {
       id: string;
       nombre: string;
+      tipo: ProveedorTipo;
       productos: Array<{
         id: string;
         nombre: string;
@@ -63,7 +65,12 @@ export async function getFacturaFormData() {
   for (const r of rows) {
     let entry = grouped.get(r.proveedorId);
     if (!entry) {
-      entry = { id: r.proveedorId, nombre: r.proveedorNombre, productos: [] };
+      entry = {
+        id: r.proveedorId,
+        nombre: r.proveedorNombre,
+        tipo: r.proveedorTipo,
+        productos: [],
+      };
       grouped.set(r.proveedorId, entry);
     }
     // A left-joined row with no product row means the provider has no catalog yet.
