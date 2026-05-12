@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createProvider, updateProvider } from "./actions";
-import type { Proveedor } from "@/db/schema";
+import type { Proveedor, ProveedorTipo } from "@/db/schema";
 
 const DAYS = [
   { key: "L", label: "Lunes" },
@@ -18,6 +18,7 @@ const DAYS = [
 export function ProviderForm({ provider }: { provider?: Proveedor }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tipo, setTipo] = useState<ProveedorTipo>(provider?.tipo ?? "producto");
   const [selectedDays, setSelectedDays] = useState<string[]>(
     provider?.dias ? provider.dias.split(",") : []
   );
@@ -36,6 +37,7 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
     const data = {
       nombre: formData.get("nombre") as string,
       descripcion: (formData.get("descripcion") as string) || null,
+      tipo,
       dias: selectedDays.length > 0 ? selectedDays.join(",") : null,
     };
 
@@ -50,6 +52,30 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <label className="mb-2 block text-xs font-medium text-[#8b7355]">Tipo</label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setTipo("producto")}
+            className={`rounded-xl py-3 text-sm font-medium transition-colors ${
+              tipo === "producto" ? "bg-[#c4a77d] text-white" : "bg-[#e8e0d4] text-[#8b7355]"
+            }`}
+          >
+            Productos
+          </button>
+          <button
+            type="button"
+            onClick={() => setTipo("servicio")}
+            className={`rounded-xl py-3 text-sm font-medium transition-colors ${
+              tipo === "servicio" ? "bg-[#c4a77d] text-white" : "bg-[#e8e0d4] text-[#8b7355]"
+            }`}
+          >
+            Servicios
+          </button>
+        </div>
+      </div>
+
       <div>
         <label htmlFor="nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">Nombre del Proveedor</label>
         <input type="text" id="nombre" name="nombre" required defaultValue={provider?.nombre}

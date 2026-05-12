@@ -1,9 +1,12 @@
-import { pgTable, text, timestamp, uuid, numeric } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp, uuid, numeric } from "drizzle-orm/pg-core";
+
+export const proveedorTipo = pgEnum("proveedor_tipo", ["producto", "servicio"]);
 
 export const proveedores = pgTable("proveedores", {
   id: uuid("id").primaryKey().defaultRandom(),
   nombre: text("nombre").notNull(),
   descripcion: text("descripcion"),
+  tipo: proveedorTipo("tipo").notNull().default("producto"),
   dias: text("dias"), // Comma-separated days: "L,M,V"
   logoUrl: text("logo_url"),
   deuda: numeric("deuda", { precision: 10, scale: 2 }).default("0").notNull(),
@@ -13,3 +16,4 @@ export const proveedores = pgTable("proveedores", {
 
 export type Proveedor = typeof proveedores.$inferSelect;
 export type NewProveedor = typeof proveedores.$inferInsert;
+export type ProveedorTipo = (typeof proveedorTipo.enumValues)[number];

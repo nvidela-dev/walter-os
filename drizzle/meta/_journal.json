@@ -50,6 +50,13 @@
       "when": 1778517135611,
       "tag": "0006_flowery_maximus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778523641128,
+      "tag": "0007_lazy_maelstrom",
+      "breakpoints": true
     }
   ]
 }

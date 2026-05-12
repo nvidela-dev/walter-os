@@ -40,12 +40,14 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
           <ProviderForm provider={provider} />
         </section>
 
-        <section className="rounded-2xl bg-[#f5f0e8] p-6">
-          <ProductList products={provider.productos} providerId={provider.id} />
-          <div className="mt-4 border-t border-[#e8e0d4] pt-4">
-            <AddProductForm providerId={provider.id} unidades={unidades} />
-          </div>
-        </section>
+        {provider.tipo === "producto" && (
+          <section className="rounded-2xl bg-[#f5f0e8] p-6">
+            <ProductList products={provider.productos} providerId={provider.id} />
+            <div className="mt-4 border-t border-[#e8e0d4] pt-4">
+              <AddProductForm providerId={provider.id} unidades={unidades} />
+            </div>
+          </section>
+        )}
 
         <section className="rounded-2xl bg-[#f5f0e8] p-6">
           <DebtForm providerId={provider.id} currentDebt={provider.deuda} />
