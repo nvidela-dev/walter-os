@@ -6,45 +6,46 @@ import { type ReactElement, useMemo, useState, useTransition } from "react";
 
 import { createProductForProvider, updateProduct } from "@/app/providers/actions";
 import { FormMessage } from "@/components/form-feedback";
-import type { ProveedorTipo } from "@/db/schema";
+import type { ProviderType } from "@/db/schema";
+import { t } from "@/i18n";
 
-import { createFactura } from "../actions";
+import { createInvoice } from "../actions";
 
 const NEW_PRODUCT_VALUE = "__new__";
 
-const TIPO_TABS: { value: ProveedorTipo; label: string }[] = [
-  { value: "producto", label: "Productos" },
-  { value: "servicio", label: "Servicios" },
+const TYPE_TABS: { value: ProviderType; label: string }[] = [
+  { value: "producto", label: t.providers.types.producto },
+  { value: "servicio", label: t.providers.types.servicio },
 ];
 
-interface UnidadOption {
+interface UnitOption {
   id: string;
-  codigo: string;
-  nombre: string;
+  code: string;
+  name: string;
 }
 
-interface FormProducto {
+interface FormProduct {
   id: string;
-  nombre: string;
-  unidadId: string;
-  unidadCodigo: string;
-  precioActual: string;
+  name: string;
+  unitId: string;
+  unitCode: string;
+  currentPrice: string;
 }
 
-interface FormProveedor {
+interface FormProvider {
   id: string;
-  nombre: string;
-  tipo: ProveedorTipo;
-  productos: FormProducto[];
+  name: string;
+  type: ProviderType;
+  products: FormProduct[];
 }
 
-interface LineaState {
-  productoId: string;
-  cantidad: string;
-  precioUnit: string;
+interface LineState {
+  productId: string;
+  quantity: string;
+  unitPrice: string;
 }
 
-const emptyLinea = (): LineaState => ({ productoId: "", cantidad: "1", precioUnit: "" });
+const emptyLine = (): LineState => ({ productId: "", quantity: "1", unitPrice: "" });
 
 const todayLocal = (): string => {
   const now = new Date();
@@ -55,135 +56,135 @@ const todayLocal = (): string => {
 const numericInputClass =
   "w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none";
 
-export function FacturaForm({
-  proveedores,
-  unidades,
+export function InvoiceForm({
+  providers,
+  units,
 }: {
-  proveedores: FormProveedor[];
-  unidades: UnidadOption[];
+  providers: FormProvider[];
+  units: UnitOption[];
 }): ReactElement {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [tipo, setTipo] = useState<ProveedorTipo>("producto");
-  const [proveedorId, setProveedorId] = useState("");
-  const [fecha, setFecha] = useState(todayLocal);
-  const [numero, setNumero] = useState("");
-  const [notas, setNotas] = useState("");
-  const [lineas, setLineas] = useState<LineaState[]>([emptyLinea()]);
-  const [monto, setMonto] = useState("");
+  const [type, setType] = useState<ProviderType>("producto");
+  const [providerId, setProviderId] = useState("");
+  const [date, setDate] = useState(todayLocal);
+  const [number, setNumber] = useState("");
+  const [notes, setNotes] = useState("");
+  const [lines, setLines] = useState<LineState[]>([emptyLine()]);
+  const [amount, setAmount] = useState("");
   const [editingLineIdx, setEditingLineIdx] = useState<number | null>(null);
   const [creatingLineIdx, setCreatingLineIdx] = useState<number | null>(null);
   // Holds products created during this session, keyed by provider, so they
   // appear in dropdowns immediately without waiting for router.refresh().
-  const [newProductsByProveedor, setNewProductsByProveedor] = useState<
-    Record<string, FormProducto[]>
+  const [newProductsByProvider, setNewProductsByProvider] = useState<
+    Record<string, FormProduct[]>
   >({});
 
-  const visibleProveedores = useMemo(
-    () => proveedores.filter((p) => p.tipo === tipo),
-    [proveedores, tipo]
+  const visibleProviders = useMemo(
+    () => providers.filter((p) => p.type === type),
+    [providers, type]
   );
-  const proveedor = visibleProveedores.find((p) => p.id === proveedorId);
-  const productos = useMemo(() => {
-    const base = proveedor?.productos ?? [];
-    const extras = proveedor ? newProductsByProveedor[proveedor.id] ?? [] : [];
+  const provider = visibleProviders.find((p) => p.id === providerId);
+  const products = useMemo(() => {
+    const base = provider?.products ?? [];
+    const extras = provider ? newProductsByProvider[provider.id] ?? [] : [];
     if (extras.length === 0) return base;
     const seen = new Set(base.map((p) => p.id));
     return [...base, ...extras.filter((p) => !seen.has(p.id))].sort((a, b) =>
-      a.nombre.localeCompare(b.nombre)
+      a.name.localeCompare(b.name)
     );
-  }, [proveedor, newProductsByProveedor]);
-  const productoById = useMemo(() => {
-    const map = new Map<string, FormProducto>();
-    for (const p of productos) map.set(p.id, p);
+  }, [provider, newProductsByProvider]);
+  const productById = useMemo(() => {
+    const map = new Map<string, FormProduct>();
+    for (const p of products) map.set(p.id, p);
     return map;
-  }, [productos]);
+  }, [products]);
 
-  const lineasTotal = lineas.reduce(
-    (sum, l) => sum + Number(l.precioUnit || 0) * Number(l.cantidad || 0),
+  const linesTotal = lines.reduce(
+    (sum, l) => sum + Number(l.unitPrice || 0) * Number(l.quantity || 0),
     0
   );
-  const total = tipo === "servicio" ? Number(monto || 0) : lineasTotal;
+  const total = type === "servicio" ? Number(amount || 0) : linesTotal;
 
-  function changeTipo(next: ProveedorTipo): void {
-    if (next === tipo) return;
-    setTipo(next);
-    setProveedorId("");
-    setLineas([emptyLinea()]);
-    setMonto("");
+  function changeType(next: ProviderType): void {
+    if (next === type) return;
+    setType(next);
+    setProviderId("");
+    setLines([emptyLine()]);
+    setAmount("");
     setError(null);
   }
 
-  function changeProveedor(id: string): void {
-    setProveedorId(id);
-    setLineas([emptyLinea()]);
+  function changeProvider(id: string): void {
+    setProviderId(id);
+    setLines([emptyLine()]);
   }
 
-  function updateLinea(idx: number, patch: Partial<LineaState>): void {
-    setLineas((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
+  function updateLine(idx: number, patch: Partial<LineState>): void {
+    setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
   }
 
-  function selectProducto(idx: number, productoId: string): void {
-    if (productoId === NEW_PRODUCT_VALUE) {
+  function selectProduct(idx: number, selectedProductId: string): void {
+    if (selectedProductId === NEW_PRODUCT_VALUE) {
       setCreatingLineIdx(idx);
       return;
     }
-    const producto = productoById.get(productoId);
-    updateLinea(idx, {
-      productoId,
-      precioUnit: producto?.precioActual ?? "",
+    const product = productById.get(selectedProductId);
+    updateLine(idx, {
+      productId: selectedProductId,
+      unitPrice: product?.currentPrice ?? "",
     });
   }
 
-  function handleProductCreated(idx: number, producto: FormProducto): void {
-    if (!proveedor) return;
-    setNewProductsByProveedor((prev) => {
-      const existing = prev[proveedor.id] ?? [];
-      if (existing.some((p) => p.id === producto.id)) return prev;
-      return { ...prev, [proveedor.id]: [...existing, producto] };
+  function handleProductCreated(idx: number, product: FormProduct): void {
+    if (!provider) return;
+    setNewProductsByProvider((prev) => {
+      const existing = prev[provider.id] ?? [];
+      if (existing.some((p) => p.id === product.id)) return prev;
+      return { ...prev, [provider.id]: [...existing, product] };
     });
-    setLineas((prev) =>
+    setLines((prev) =>
       prev.map((l, i) =>
-        i === idx ? { ...l, productoId: producto.id, precioUnit: producto.precioActual } : l
+        i === idx ? { ...l, productId: product.id, unitPrice: product.currentPrice } : l
       )
     );
     setCreatingLineIdx(null);
     router.refresh();
   }
 
-  function addLinea(): void {
-    setLineas((prev) => [...prev, emptyLinea()]);
+  function addLine(): void {
+    setLines((prev) => [...prev, emptyLine()]);
   }
 
-  function removeLinea(idx: number): void {
-    setLineas((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
+  function removeLine(idx: number): void {
+    setLines((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
   }
 
   function handleSubmit(e: React.SyntheticEvent): void {
     e.preventDefault();
     setError(null);
 
-    if (!proveedorId) {
-      setError("Selecciona un proveedor.");
+    if (!providerId) {
+      setError(t.invoices.errors.selectProvider);
       return;
     }
 
-    if (tipo === "servicio") {
-      const montoNum = Number(monto);
-      if (!isFinite(montoNum) || montoNum <= 0) {
-        setError("Monto inválido.");
+    if (type === "servicio") {
+      const amountNum = Number(amount);
+      if (!isFinite(amountNum) || amountNum <= 0) {
+        setError(t.invoices.errors.invalidAmount);
         return;
       }
       startTransition(async () => {
         try {
-          const result = await createFactura({
-            proveedorId,
-            fecha,
-            numero: numero.trim() || null,
-            notas: notas.trim() || null,
-            monto,
+          const result = await createInvoice({
+            providerId,
+            date,
+            number: number.trim() || null,
+            notes: notes.trim() || null,
+            amount,
           });
           if (!result.ok) {
             setError(result.error);
@@ -191,50 +192,50 @@ export function FacturaForm({
           }
           router.push("/");
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Error al crear la factura.");
+          setError(err instanceof Error ? err.message : t.invoices.errors.createFailed);
         }
       });
       return;
     }
 
-    const payloadLineas: {
-      productoId: string;
-      unidadId: string;
-      precioUnit: string;
-      cantidad: string;
+    const payloadLines: {
+      productId: string;
+      unitId: string;
+      unitPrice: string;
+      quantity: string;
     }[] = [];
-    for (const l of lineas) {
-      const producto = productoById.get(l.productoId);
-      if (!producto) {
-        setError("Cada línea debe tener un producto.");
+    for (const l of lines) {
+      const product = productById.get(l.productId);
+      if (!product) {
+        setError(t.invoices.errors.lineNeedsProduct);
         return;
       }
-      const precio = Number(l.precioUnit);
-      const cant = Number(l.cantidad);
-      if (!isFinite(precio) || precio <= 0) {
-        setError(`Precio inválido en "${producto.nombre}".`);
+      const price = Number(l.unitPrice);
+      const qty = Number(l.quantity);
+      if (!isFinite(price) || price <= 0) {
+        setError(t.invoices.errors.invalidPriceFor(product.name));
         return;
       }
-      if (!isFinite(cant) || cant <= 0) {
-        setError(`Cantidad inválida en "${producto.nombre}".`);
+      if (!isFinite(qty) || qty <= 0) {
+        setError(t.invoices.errors.invalidQuantityFor(product.name));
         return;
       }
-      payloadLineas.push({
-        productoId: producto.id,
-        unidadId: producto.unidadId,
-        precioUnit: l.precioUnit,
-        cantidad: l.cantidad,
+      payloadLines.push({
+        productId: product.id,
+        unitId: product.unitId,
+        unitPrice: l.unitPrice,
+        quantity: l.quantity,
       });
     }
 
     startTransition(async () => {
       try {
-        const result = await createFactura({
-          proveedorId,
-          fecha,
-          numero: numero.trim() || null,
-          notas: notas.trim() || null,
-          lineas: payloadLineas,
+        const result = await createInvoice({
+          providerId,
+          date,
+          number: number.trim() || null,
+          notes: notes.trim() || null,
+          lines: payloadLines,
         });
         if (!result.ok) {
           setError(result.error);
@@ -242,7 +243,7 @@ export function FacturaForm({
         }
         router.push("/");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al crear la factura.");
+        setError(err instanceof Error ? err.message : t.invoices.errors.createFailed);
       }
     });
   }
@@ -251,15 +252,15 @@ export function FacturaForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <section className="space-y-4 rounded-2xl bg-[#f5f0e8] p-6">
         <div>
-          <label className="mb-2 block text-xs font-medium text-[#8b7355]">Tipo</label>
+          <label className="mb-2 block text-xs font-medium text-[#8b7355]">{t.invoices.fields.type}</label>
           <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-1">
-            {TIPO_TABS.map((tab) => {
-              const isActive = tab.value === tipo;
+            {TYPE_TABS.map((tab) => {
+              const isActive = tab.value === type;
               return (
                 <button
                   key={tab.value}
                   type="button"
-                  onClick={() => { changeTipo(tab.value); }}
+                  onClick={() => { changeType(tab.value); }}
                   className={`rounded-xl py-2.5 text-center text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-[#c4a77d] text-white shadow-sm"
@@ -274,26 +275,26 @@ export function FacturaForm({
         </div>
 
         <div>
-          <label htmlFor="proveedor" className="mb-2 block text-xs font-medium text-[#8b7355]">
-            Proveedor
+          <label htmlFor="provider" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            {t.invoices.fields.provider}
           </label>
           <select
-            id="proveedor"
+            id="provider"
             required
-            value={proveedorId}
-            onChange={(e) => { changeProveedor(e.target.value); }}
+            value={providerId}
+            onChange={(e) => { changeProvider(e.target.value); }}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
             <option value="">
-              {visibleProveedores.length === 0
-                ? tipo === "servicio"
-                  ? "No hay proveedores de servicios"
-                  : "No hay proveedores de productos"
-                : "Selecciona un proveedor"}
+              {visibleProviders.length === 0
+                ? type === "servicio"
+                  ? t.invoices.fields.noProvidersOfService
+                  : t.invoices.fields.noProvidersOfProduct
+                : t.invoices.fields.providerPlaceholder}
             </option>
-            {visibleProveedores.map((p) => (
+            {visibleProviders.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.nombre}
+                {p.name}
               </option>
             ))}
           </select>
@@ -301,134 +302,132 @@ export function FacturaForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="fecha" className="mb-2 block text-xs font-medium text-[#8b7355]">
-              Fecha
+            <label htmlFor="date" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              {t.invoices.fields.date}
             </label>
             <input
               type="date"
-              id="fecha"
+              id="date"
               required
-              value={fecha}
-              onChange={(e) => { setFecha(e.target.value); }}
+              value={date}
+              onChange={(e) => { setDate(e.target.value); }}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
             />
           </div>
           <div>
-            <label htmlFor="numero" className="mb-2 block text-xs font-medium text-[#8b7355]">
-              Nº de factura (opcional)
+            <label htmlFor="number" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              {t.invoices.fields.number}
             </label>
             <input
               type="text"
-              id="numero"
-              value={numero}
-              onChange={(e) => { setNumero(e.target.value); }}
-              placeholder="0001-00012345"
+              id="number"
+              value={number}
+              onChange={(e) => { setNumber(e.target.value); }}
+              placeholder={t.invoices.fields.numberPlaceholder}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="notas" className="mb-2 block text-xs font-medium text-[#8b7355]">
-            Notas (opcional)
+          <label htmlFor="notes" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            {t.invoices.fields.notes}
           </label>
           <textarea
-            id="notas"
+            id="notes"
             rows={2}
-            value={notas}
-            onChange={(e) => { setNotas(e.target.value); }}
+            value={notes}
+            onChange={(e) => { setNotes(e.target.value); }}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
       </section>
 
-      {tipo === "servicio" && (
+      {type === "servicio" && (
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm font-medium text-[#8b7355]">Monto</h2>
+            <h2 className="text-sm font-medium text-[#8b7355]">{t.invoices.fields.amount}</h2>
           </div>
           <div className="rounded-xl bg-white p-4">
-            <label htmlFor="monto" className="mb-2 block text-xs font-medium text-[#8b7355]">
-              Cuánto salió
+            <label htmlFor="amount" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              {t.invoices.fields.amountPrompt}
             </label>
             <input
-              id="monto"
+              id="amount"
               type="number"
               inputMode="decimal"
               step="0.01"
               min="0"
               required
-              disabled={!proveedor}
-              value={monto}
-              onChange={(e) => { setMonto(e.target.value); }}
+              disabled={!provider}
+              value={amount}
+              onChange={(e) => { setAmount(e.target.value); }}
               className={numericInputClass}
             />
           </div>
         </section>
       )}
 
-      {tipo === "producto" && (
+      {type === "producto" && (
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-sm font-medium text-[#8b7355]">Líneas</h2>
-          <span className="text-xs text-[#c4a77d]">
-            {lineas.length} {lineas.length === 1 ? "línea" : "líneas"}
-          </span>
+          <h2 className="text-sm font-medium text-[#8b7355]">{t.invoices.lines.heading}</h2>
+          <span className="text-xs text-[#c4a77d]">{t.invoices.lines.count(lines.length)}</span>
         </div>
 
-        {lineas.map((linea, idx) => {
-          const producto = productoById.get(linea.productoId);
+        {lines.map((line, idx) => {
+          const product = productById.get(line.productId);
           const isNewPrice =
-            !!producto &&
-            !!linea.precioUnit &&
-            Number(linea.precioUnit) !== Number(producto.precioActual);
+            !!product &&
+            !!line.unitPrice &&
+            Number(line.unitPrice) !== Number(product.currentPrice);
           const lineTotal =
-            Number(linea.precioUnit || 0) * Number(linea.cantidad || 0);
+            Number(line.unitPrice || 0) * Number(line.quantity || 0);
 
           return (
             <div key={idx} className="space-y-3 rounded-xl bg-white p-4">
               <div className="flex items-start gap-2">
                 <div className="flex-1">
                   <label className="mb-2 block text-xs font-medium text-[#8b7355]">
-                    Producto
+                    {t.invoices.fields.product}
                   </label>
                   <select
                     required
-                    disabled={!proveedor}
-                    value={linea.productoId}
-                    onChange={(e) => { selectProducto(idx, e.target.value); }}
+                    disabled={!provider}
+                    value={line.productId}
+                    onChange={(e) => { selectProduct(idx, e.target.value); }}
                     className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none disabled:bg-[#faf8f5] disabled:text-[#c4a77d]"
                   >
                     <option value="">
-                      {proveedor ? "Selecciona un producto" : "Elige un proveedor primero"}
+                      {provider ? t.invoices.fields.productPlaceholder : t.invoices.fields.pickProviderFirst}
                     </option>
-                    {productos.map((p) => (
+                    {products.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.nombre}
+                        {p.name}
                       </option>
                     ))}
-                    {proveedor && (
-                      <option value={NEW_PRODUCT_VALUE}>+ Agregar producto nuevo…</option>
+                    {provider && (
+                      <option value={NEW_PRODUCT_VALUE}>{t.invoices.addProductOption}</option>
                     )}
                   </select>
                 </div>
                 <div className="mt-7 flex gap-2">
-                  {producto && (
+                  {product && (
                     <button
                       type="button"
                       onClick={() => { setEditingLineIdx(idx); }}
-                      aria-label="Editar producto"
-                      title="Editar producto"
+                      aria-label={t.invoices.editProduct.title}
+                      title={t.invoices.editProduct.title}
                       className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
                     >
                       <PencilSquareIcon className="h-5 w-5" />
                     </button>
                   )}
-                  {lineas.length > 1 && (
+                  {lines.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => { removeLinea(idx); }}
-                      aria-label="Quitar línea"
+                      onClick={() => { removeLine(idx); }}
+                      aria-label={t.invoices.lines.remove}
                       className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
                     >
                       <TrashIcon className="h-5 w-5" />
@@ -440,7 +439,7 @@ export function FacturaForm({
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="mb-2 block text-xs font-medium text-[#8b7355]">
-                    Cantidad
+                    {t.invoices.fields.quantity}
                   </label>
                   <input
                     type="number"
@@ -448,25 +447,25 @@ export function FacturaForm({
                     step="0.01"
                     min="0"
                     required
-                    value={linea.cantidad}
-                    onChange={(e) => { updateLinea(idx, { cantidad: e.target.value }); }}
+                    value={line.quantity}
+                    onChange={(e) => { updateLine(idx, { quantity: e.target.value }); }}
                     className={numericInputClass}
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-xs font-medium text-[#8b7355]">
-                    Unidad
+                    {t.invoices.fields.unit}
                   </label>
                   <input
                     type="text"
                     readOnly
-                    value={producto?.unidadCodigo ?? "—"}
+                    value={product?.unitCode ?? "—"}
                     className="w-full rounded-xl border-2 border-[#e8e0d4] bg-[#faf8f5] px-3 py-3 text-sm text-[#8b7355]"
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-xs font-medium text-[#8b7355]">
-                    Precio unit.
+                    {t.invoices.fields.unitPrice}
                   </label>
                   <input
                     type="number"
@@ -474,9 +473,9 @@ export function FacturaForm({
                     step="0.01"
                     min="0"
                     required
-                    disabled={!producto}
-                    value={linea.precioUnit}
-                    onChange={(e) => { updateLinea(idx, { precioUnit: e.target.value }); }}
+                    disabled={!product}
+                    value={line.unitPrice}
+                    onChange={(e) => { updateLine(idx, { unitPrice: e.target.value }); }}
                     className={numericInputClass}
                   />
                 </div>
@@ -486,12 +485,12 @@ export function FacturaForm({
                 <div className="text-[#8b7355]">
                   {isNewPrice && (
                     <span className="text-amber-700">
-                      Nuevo precio (antes ${producto.precioActual})
+                      {t.invoices.lines.newPrice(product.currentPrice)}
                     </span>
                   )}
                 </div>
                 <div className="font-medium text-[#3d3530]">
-                  Subtotal: ${lineTotal.toFixed(2)}
+                  {t.invoices.lines.subtotal(lineTotal.toFixed(2))}
                 </div>
               </div>
             </div>
@@ -500,19 +499,19 @@ export function FacturaForm({
 
         <button
           type="button"
-          onClick={addLinea}
-          disabled={!proveedor}
+          onClick={addLine}
+          disabled={!provider}
           className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#c4a77d] py-3 text-sm font-medium text-[#c4a77d] hover:bg-white disabled:opacity-40"
         >
           <PlusIcon className="h-4 w-4" />
-          Agregar línea
+          {t.invoices.lines.add}
         </button>
       </section>
       )}
 
       <section className="rounded-2xl bg-[#f5f0e8] p-6">
         <div className="mb-4 flex items-center justify-between">
-          <span className="text-sm text-[#8b7355]">Total</span>
+          <span className="text-sm text-[#8b7355]">{t.invoices.fields.total}</span>
           <span className="text-2xl font-light text-[#3d3530]">${total.toFixed(2)}</span>
         </div>
 
@@ -523,24 +522,24 @@ export function FacturaForm({
           disabled={isPending}
           className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50"
         >
-          {isPending ? "Guardando..." : "Crear Factura"}
+          {isPending ? t.common.saving : t.invoices.create}
         </button>
       </section>
 
-      {editingLineIdx !== null && proveedor && ((): ReactElement | null => {
-        const linea = lineas[editingLineIdx];
-        if (!linea) return null;
-        const producto = productoById.get(linea.productoId);
-        if (!producto) return null;
+      {editingLineIdx !== null && provider && ((): ReactElement | null => {
+        const line = lines[editingLineIdx];
+        if (!line) return null;
+        const product = productById.get(line.productId);
+        if (!product) return null;
         return (
           <EditProductModal
-            proveedorId={proveedor.id}
-            producto={producto}
-            unidades={unidades}
-            initialPrecio={linea.precioUnit || producto.precioActual}
+            providerId={provider.id}
+            product={product}
+            units={units}
+            initialPrice={line.unitPrice || product.currentPrice}
             onClose={() => { setEditingLineIdx(null); }}
-            onSaved={(newPrecio) => {
-              updateLinea(editingLineIdx, { precioUnit: newPrecio });
+            onSaved={(newPrice) => {
+              updateLine(editingLineIdx, { unitPrice: newPrice });
               setEditingLineIdx(null);
               router.refresh();
             }}
@@ -548,13 +547,13 @@ export function FacturaForm({
         );
       })()}
 
-      {creatingLineIdx !== null && proveedor && (
+      {creatingLineIdx !== null && provider && (
         <AddProductModal
-          proveedorId={proveedor.id}
-          proveedorNombre={proveedor.nombre}
-          unidades={unidades}
+          providerId={provider.id}
+          providerName={provider.name}
+          units={units}
           onClose={() => { setCreatingLineIdx(null); }}
-          onCreated={(producto) => { handleProductCreated(creatingLineIdx, producto); }}
+          onCreated={(product) => { handleProductCreated(creatingLineIdx, product); }}
         />
       )}
     </form>
@@ -562,52 +561,52 @@ export function FacturaForm({
 }
 
 function EditProductModal({
-  proveedorId,
-  producto,
-  unidades,
-  initialPrecio,
+  providerId,
+  product,
+  units,
+  initialPrice,
   onClose,
   onSaved,
 }: {
-  proveedorId: string;
-  producto: FormProducto;
-  unidades: UnidadOption[];
-  initialPrecio: string;
+  providerId: string;
+  product: FormProduct;
+  units: UnitOption[];
+  initialPrice: string;
   onClose: () => void;
-  onSaved: (newPrecio: string) => void;
+  onSaved: (newPrice: string) => void;
 }): ReactElement {
-  const [unidadId, setUnidadId] = useState(producto.unidadId);
-  const [precio, setPrecio] = useState(initialPrecio);
+  const [unitId, setUnitId] = useState(product.unitId);
+  const [price, setPrice] = useState(initialPrice);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave(): Promise<void> {
     setError(null);
-    const precioNum = Number(precio);
-    if (!isFinite(precioNum) || precioNum <= 0) {
-      setError("Precio inválido.");
+    const priceNum = Number(price);
+    if (!isFinite(priceNum) || priceNum <= 0) {
+      setError(t.invoices.errors.invalidPrice);
       return;
     }
-    if (!unidadId) {
-      setError("Selecciona una unidad.");
+    if (!unitId) {
+      setError(t.invoices.errors.selectUnit);
       return;
     }
 
     setIsSaving(true);
     try {
-      const result = await updateProduct(proveedorId, producto.id, {
-        nombre: producto.nombre,
-        unidadId,
-        precio,
+      const result = await updateProduct(providerId, product.id, {
+        name: product.name,
+        unitId,
+        price,
       });
       if (!result.ok) {
         setError(result.error);
         setIsSaving(false);
         return;
       }
-      onSaved(precio);
+      onSaved(price);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al guardar.");
+      setError(err instanceof Error ? err.message : t.invoices.errors.saveFailed);
       setIsSaving(false);
     }
   }
@@ -616,60 +615,58 @@ function EditProductModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[#3d3530]">Editar producto</h3>
+          <h3 className="text-lg font-medium text-[#3d3530]">{t.invoices.editProduct.title}</h3>
           <button
             type="button"
             onClick={onClose}
             disabled={isSaving}
-            aria-label="Cerrar"
+            aria-label={t.common.close}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="mb-4 text-sm text-[#8b7355]">
-          Los cambios se guardan inmediatamente y afectan esta factura y los valores por defecto del producto.
-        </p>
+        <p className="mb-4 text-sm text-[#8b7355]">{t.invoices.editProduct.hint}</p>
 
         <div className="mb-4">
-          <p className="mb-2 text-xs font-medium text-[#8b7355]">Producto</p>
+          <p className="mb-2 text-xs font-medium text-[#8b7355]">{t.invoices.fields.product}</p>
           <p className="rounded-xl bg-[#faf8f5] px-4 py-3 text-sm text-[#3d3530]">
-            {producto.nombre}
+            {product.name}
           </p>
         </div>
 
         <div className="mb-4">
-          <label htmlFor="modal-unidad" className="mb-2 block text-xs font-medium text-[#8b7355]">
-            Unidad
+          <label htmlFor="modal-unit" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            {t.invoices.fields.unit}
           </label>
           <select
-            id="modal-unidad"
-            value={unidadId}
-            onChange={(e) => { setUnidadId(e.target.value); }}
+            id="modal-unit"
+            value={unitId}
+            onChange={(e) => { setUnitId(e.target.value); }}
             disabled={isSaving}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
-            {unidades.map((u) => (
+            {units.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.nombre}
+                {u.name}
               </option>
             ))}
           </select>
         </div>
 
         <div className="mb-6">
-          <label htmlFor="modal-precio" className="mb-2 block text-xs font-medium text-[#8b7355]">
-            Precio unitario
+          <label htmlFor="modal-price" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            {t.invoices.fields.unitPriceFull}
           </label>
           <input
-            id="modal-precio"
+            id="modal-price"
             type="number"
             inputMode="decimal"
             step="0.01"
             min="0"
-            value={precio}
-            onChange={(e) => { setPrecio(e.target.value); }}
+            value={price}
+            onChange={(e) => { setPrice(e.target.value); }}
             disabled={isSaving}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           />
@@ -684,7 +681,7 @@ function EditProductModal({
             disabled={isSaving}
             className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
           >
-            Cancelar
+            {t.common.cancel}
           </button>
           <button
             type="button"
@@ -692,7 +689,7 @@ function EditProductModal({
             disabled={isSaving}
             className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
           >
-            {isSaving ? "Guardando..." : "Guardar"}
+            {isSaving ? t.common.saving : t.common.save}
           </button>
         </div>
       </div>
@@ -701,70 +698,71 @@ function EditProductModal({
 }
 
 function AddProductModal({
-  proveedorId,
-  proveedorNombre,
-  unidades,
+  providerId,
+  providerName,
+  units,
   onClose,
   onCreated,
 }: {
-  proveedorId: string;
-  proveedorNombre: string;
-  unidades: UnidadOption[];
+  providerId: string;
+  providerName: string;
+  units: UnitOption[];
   onClose: () => void;
-  onCreated: (producto: FormProducto) => void;
+  onCreated: (product: FormProduct) => void;
 }): ReactElement {
-  const [nombre, setNombre] = useState("");
-  const [unidadId, setUnidadId] = useState(unidades[0]?.id ?? "");
-  const [precio, setPrecio] = useState("");
-  const [cantidad, setCantidad] = useState("1");
+  const [name, setName] = useState("");
+  const [unitId, setUnitId] = useState(units[0]?.id ?? "");
+  const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("1");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hint = t.products.addHint(providerName);
 
   async function handleSave(): Promise<void> {
     setError(null);
-    const trimmed = nombre.trim();
+    const trimmed = name.trim();
     if (!trimmed) {
-      setError("El nombre es obligatorio.");
+      setError(t.invoices.errors.nameRequired);
       return;
     }
-    if (!unidadId) {
-      setError("Selecciona una unidad.");
+    if (!unitId) {
+      setError(t.invoices.errors.selectUnit);
       return;
     }
-    const precioNum = Number(precio);
-    if (!isFinite(precioNum) || precioNum <= 0) {
-      setError("Precio inválido.");
+    const priceNum = Number(price);
+    if (!isFinite(priceNum) || priceNum <= 0) {
+      setError(t.invoices.errors.invalidPrice);
       return;
     }
-    const cantidadNum = Number(cantidad);
-    if (!isFinite(cantidadNum) || cantidadNum <= 0) {
-      setError("Cantidad inválida.");
+    const quantityNum = Number(quantity);
+    if (!isFinite(quantityNum) || quantityNum <= 0) {
+      setError(t.invoices.errors.invalidQuantity);
       return;
     }
 
     setIsSaving(true);
     try {
       const result = await createProductForProvider(
-        proveedorId,
-        { nombre: trimmed, descripcion: null, unidadId },
-        precio,
-        cantidad
+        providerId,
+        { name: trimmed, description: null, unitId },
+        price,
+        quantity
       );
       if (!result.ok) {
         setError(result.error);
         setIsSaving(false);
         return;
       }
-      const unidad = unidades.find((u) => u.id === unidadId);
+      const unit = units.find((u) => u.id === unitId);
       onCreated({
         id: result.data.id,
-        nombre: result.data.nombre,
-        unidadId,
-        unidadCodigo: unidad?.codigo ?? "",
-        precioActual: precio,
+        name: result.data.name,
+        unitId,
+        unitCode: unit?.code ?? "",
+        currentPrice: price,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear el producto.");
+      setError(err instanceof Error ? err.message : t.invoices.errors.productCreateFailed);
       setIsSaving(false);
     }
   }
@@ -773,12 +771,12 @@ function AddProductModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[#3d3530]">Nuevo producto</h3>
+          <h3 className="text-lg font-medium text-[#3d3530]">{t.products.newTitle}</h3>
           <button
             type="button"
             onClick={onClose}
             disabled={isSaving}
-            aria-label="Cerrar"
+            aria-label={t.common.close}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
           >
             <XMarkIcon className="h-5 w-5" />
@@ -786,18 +784,20 @@ function AddProductModal({
         </div>
 
         <p className="mb-4 text-sm text-[#8b7355]">
-          Se agregará al catálogo de <span className="font-medium text-[#3d3530]">{proveedorNombre}</span> y quedará disponible para futuras facturas.
+          {hint.before}
+          <span className="font-medium text-[#3d3530]">{hint.name}</span>
+          {hint.after}
         </p>
 
         <div className="mb-4">
-          <label htmlFor="new-prod-nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">
-            Nombre
+          <label htmlFor="new-prod-name" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            {t.products.fields.name}
           </label>
           <input
-            id="new-prod-nombre"
+            id="new-prod-name"
             type="text"
-            value={nombre}
-            onChange={(e) => { setNombre(e.target.value); }}
+            value={name}
+            onChange={(e) => { setName(e.target.value); }}
             disabled={isSaving}
             autoFocus
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
@@ -805,19 +805,19 @@ function AddProductModal({
         </div>
 
         <div className="mb-4">
-          <label htmlFor="new-prod-unidad" className="mb-2 block text-xs font-medium text-[#8b7355]">
-            Unidad
+          <label htmlFor="new-prod-unit" className="mb-2 block text-xs font-medium text-[#8b7355]">
+            {t.invoices.fields.unit}
           </label>
           <select
-            id="new-prod-unidad"
-            value={unidadId}
-            onChange={(e) => { setUnidadId(e.target.value); }}
+            id="new-prod-unit"
+            value={unitId}
+            onChange={(e) => { setUnitId(e.target.value); }}
             disabled={isSaving}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
-            {unidades.map((u) => (
+            {units.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.nombre}
+                {u.name}
               </option>
             ))}
           </select>
@@ -825,33 +825,33 @@ function AddProductModal({
 
         <div className="mb-6 grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="new-prod-precio" className="mb-2 block text-xs font-medium text-[#8b7355]">
-              Precio unit.
+            <label htmlFor="new-prod-price" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              {t.invoices.fields.unitPrice}
             </label>
             <input
-              id="new-prod-precio"
+              id="new-prod-price"
               type="number"
               inputMode="decimal"
               step="0.01"
               min="0"
-              value={precio}
-              onChange={(e) => { setPrecio(e.target.value); }}
+              value={price}
+              onChange={(e) => { setPrice(e.target.value); }}
               disabled={isSaving}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
             />
           </div>
           <div>
-            <label htmlFor="new-prod-cantidad" className="mb-2 block text-xs font-medium text-[#8b7355]">
-              Cantidad por pack
+            <label htmlFor="new-prod-quantity" className="mb-2 block text-xs font-medium text-[#8b7355]">
+              {t.products.fields.packQuantity}
             </label>
             <input
-              id="new-prod-cantidad"
+              id="new-prod-quantity"
               type="number"
               inputMode="decimal"
               step="0.01"
               min="0"
-              value={cantidad}
-              onChange={(e) => { setCantidad(e.target.value); }}
+              value={quantity}
+              onChange={(e) => { setQuantity(e.target.value); }}
               disabled={isSaving}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
             />
@@ -867,7 +867,7 @@ function AddProductModal({
             disabled={isSaving}
             className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
           >
-            Cancelar
+            {t.common.cancel}
           </button>
           <button
             type="button"
@@ -875,7 +875,7 @@ function AddProductModal({
             disabled={isSaving}
             className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
           >
-            {isSaving ? "Guardando..." : "Crear y usar"}
+            {isSaving ? t.common.saving : t.products.createAndUse}
           </button>
         </div>
       </div>

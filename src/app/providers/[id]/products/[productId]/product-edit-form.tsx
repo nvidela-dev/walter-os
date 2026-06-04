@@ -4,43 +4,44 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
+import { t } from "@/i18n";
 import { getFormString } from "@/lib/form";
 
 import { updateProduct } from "../../../actions";
 
 interface Product {
   id: string;
-  nombre: string;
-  unidadId: string | null;
-  precio: string;
-  descripcion: string | null;
+  name: string;
+  unitId: string | null;
+  price: string;
+  description: string | null;
 }
 
-interface UnidadOption {
+interface UnitOption {
   id: string;
-  codigo: string;
-  nombre: string;
+  code: string;
+  name: string;
 }
 
 export function ProductEditForm({
   providerId,
   productId,
   product,
-  unidades,
+  units,
 }: {
   providerId: string;
   productId: string;
   product: Product;
-  unidades: UnidadOption[];
+  units: UnitOption[];
 }): ReactElement {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const defaultUnidadId =
-    product.unidadId ??
-    unidades.find((u) => u.codigo === "unidad")?.id ??
-    unidades[0]?.id ??
+  const defaultUnitId =
+    product.unitId ??
+    units.find((u) => u.code === "unidad")?.id ??
+    units[0]?.id ??
     "";
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
@@ -50,9 +51,9 @@ export function ProductEditForm({
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      nombre: getFormString(formData, "nombre"),
-      unidadId: getFormString(formData, "unidadId"),
-      precio: getFormString(formData, "precio"),
+      name: getFormString(formData, "name"),
+      unitId: getFormString(formData, "unitId"),
+      price: getFormString(formData, "price"),
     };
 
     const result = await updateProduct(providerId, productId, data);
@@ -68,42 +69,42 @@ export function ProductEditForm({
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
       <div>
-        <label htmlFor="nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">Nombre</label>
+        <label htmlFor="name" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.products.fields.name}</label>
         <input
           type="text"
-          id="nombre"
-          name="nombre"
+          id="name"
+          name="name"
           required
-          defaultValue={product.nombre}
+          defaultValue={product.name}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         />
       </div>
 
       <div>
-        <label htmlFor="unidadId" className="mb-2 block text-xs font-medium text-[#8b7355]">Unidad</label>
+        <label htmlFor="unitId" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.products.fields.unit}</label>
         <select
-          id="unidadId"
-          name="unidadId"
-          defaultValue={defaultUnidadId}
+          id="unitId"
+          name="unitId"
+          defaultValue={defaultUnitId}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         >
-          {unidades.map((u) => (
+          {units.map((u) => (
             <option key={u.id} value={u.id}>
-              {u.nombre}
+              {u.name}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label htmlFor="precio" className="mb-2 block text-xs font-medium text-[#8b7355]">Precio ($)</label>
+        <label htmlFor="price" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.products.fields.price}</label>
         <input
           type="number"
-          id="precio"
-          name="precio"
+          id="price"
+          name="price"
           step="0.01"
           required
-          defaultValue={product.precio}
+          defaultValue={product.price}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         />
       </div>
@@ -113,7 +114,7 @@ export function ProductEditForm({
         disabled={isSubmitting}
         className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50"
       >
-        {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+        {isSubmitting ? t.common.saving : t.common.saveChanges}
       </button>
     </form>
   );

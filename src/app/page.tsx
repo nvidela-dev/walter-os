@@ -9,44 +9,41 @@ import {
 import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { t } from "@/i18n";
+
 const apps = [
   {
-    name: "Proveedores",
+    ...t.home.tiles.providers,
     href: "/providers",
     icon: TruckIcon,
-    description: "Productos y precios",
     color: "text-amber-700",
     bg: "bg-amber-50",
   },
   {
-    name: "Facturas",
-    href: "/facturas",
+    ...t.home.tiles.invoices,
+    href: "/invoices",
     icon: DocumentTextIcon,
-    description: "Cargar y pagar",
     color: "text-stone-700",
     bg: "bg-stone-50",
   },
   {
-    name: "Equipo",
+    ...t.home.tiles.employees,
     href: "/employees",
     icon: UserGroupIcon,
-    description: "Personal y sueldos",
     color: "text-rose-700",
     bg: "bg-rose-50",
   },
   {
-    name: "Recetas",
+    ...t.home.tiles.recipes,
     href: "/recipes",
     icon: BookOpenIcon,
-    description: "Tus recetas",
     color: "text-teal-700",
     bg: "bg-teal-50",
   },
   {
-    name: "Menú",
+    ...t.home.tiles.menu,
     href: "/menu",
     icon: ClipboardDocumentListIcon,
-    description: "Platos y precios",
     color: "text-violet-700",
     bg: "bg-violet-50",
   },
@@ -71,7 +68,7 @@ export default function Home(): ReactElement {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {apps.map((app) => (
             <Link
-              key={app.name}
+              key={app.href}
               href={app.href}
               className={`group flex flex-col items-center gap-3 rounded-3xl ${app.bg} p-6 transition-all hover:scale-[1.02] active:scale-[0.98]`}
             >

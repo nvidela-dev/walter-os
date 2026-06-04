@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { type Empleado, empleados, type HoraExtra,horasExtra } from "@/db/schema";
+import { type Employee, employees, type ExtraHour, extraHours } from "@/db/schema";
+import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { getEmployeeDeleteBlock } from "@/lib/delete-guards";
 import {
@@ -17,43 +18,43 @@ import {
 } from "@/lib/validation";
 
 const employeeInputSchema = z.object({
-  nombre: requiredTextSchema,
-  salarioMensual: moneySchema,
-  horasFijasSemanales: z.coerce
+  name: requiredTextSchema,
+  monthlySalary: moneySchema,
+  fixedWeeklyHours: z.coerce
     .number()
-    .int("Las horas semanales deben ser un número entero.")
-    .positive("Las horas semanales deben ser mayores que cero."),
+    .int(t.validation.weeklyHoursInteger)
+    .positive(t.validation.weeklyHoursPositive),
 });
 
 const extraHoursInputSchema = z.object({
-  empleadoId: uuidSchema,
-  fecha: isoDateSchema,
-  horas: z.coerce
+  employeeId: uuidSchema,
+  date: isoDateSchema,
+  hours: z.coerce
     .number()
-    .int("Las horas extra deben ser un número entero.")
-    .positive("Las horas extra deben ser mayores que cero."),
-  montoPagado: moneySchema,
+    .int(t.validation.extraHoursInteger)
+    .positive(t.validation.extraHoursPositive),
+  amountPaid: moneySchema,
 });
 
 export type EmployeeInput = z.infer<typeof employeeInputSchema>;
 export type ExtraHoursInput = z.infer<typeof extraHoursInputSchema>;
 
-export async function getEmployees(): Promise<Empleado[]> {
-  return db.select().from(empleados).orderBy(empleados.nombre);
+export async function getEmployees(): Promise<Employee[]> {
+  return db.select().from(employees).orderBy(employees.name);
 }
 
-export async function getEmployee(id: string): Promise<Empleado | null> {
-  const result = await db.select().from(empleados).where(eq(empleados.id, id));
+export async function getEmployee(id: string): Promise<Employee | null> {
+  const result = await db.select().from(employees).where(eq(employees.id, id));
   return result[0] ?? null;
 }
 
 export async function getEmployeeWithHours(
   id: string
-): Promise<(Empleado & { horasExtra: HoraExtra[] }) | null> {
+): Promise<(Employee & { extraHours: ExtraHour[] }) | null> {
   const employee = await getEmployee(id);
   if (!employee) return null;
-  const hours = await db.select().from(horasExtra).where(eq(horasExtra.empleadoId, id));
-  return { ...employee, horasExtra: hours };
+  const hours = await db.select().from(extraHours).where(eq(extraHours.employeeId, id));
+  return { ...employee, extraHours: hours };
 }
 
 export async function createEmployee(input: unknown): Promise<ActionResult<{ id: string }>> {
@@ -62,10 +63,10 @@ export async function createEmployee(input: unknown): Promise<ActionResult<{ id:
 
   try {
     const [created] = await db
-      .insert(empleados)
+      .insert(employees)
       .values(parsed.data)
-      .returning({ id: empleados.id });
-    if (!created) return actionError("No se pudo registrar al empleado.");
+      .returning({ id: employees.id });
+    if (!created) return actionError(t.errors.employee.createFailed);
     revalidatePath("/employees");
     return actionOk(created);
   } catch (error) {
@@ -85,12 +86,12 @@ export async function updateEmployee(
 
   try {
     const [updated] = await db
-      .update(empleados)
+      .update(employees)
       .set({ ...parsed.data, updatedAt: new Date() })
-      .where(eq(empleados.id, parsedId.data))
-      .returning({ id: empleados.id });
+      .where(eq(employees.id, parsedId.data))
+      .returning({ id: employees.id });
 
-    if (!updated) return actionError("Empleado no encontrado.");
+    if (!updated) return actionError(t.errors.employee.notFound);
 
     revalidatePath("/employees");
     revalidatePath(`/employees/${parsedId.data}`);
@@ -105,16 +106,16 @@ export async function deleteEmployee(id: string): Promise<ActionResult> {
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
   try {
-    const extraHours = await countRows(horasExtra, eq(horasExtra.empleadoId, parsedId.data));
-    const blockMessage = getEmployeeDeleteBlock({ extraHours });
+    const extraHoursCount = await countRows(extraHours, eq(extraHours.employeeId, parsedId.data));
+    const blockMessage = getEmployeeDeleteBlock({ extraHours: extraHoursCount });
     if (blockMessage != null) return actionError(blockMessage);
 
     const [deleted] = await db
-      .delete(empleados)
-      .where(eq(empleados.id, parsedId.data))
-      .returning({ id: empleados.id });
+      .delete(employees)
+      .where(eq(employees.id, parsedId.data))
+      .returning({ id: employees.id });
 
-    if (!deleted) return actionError("Empleado no encontrado.");
+    if (!deleted) return actionError(t.errors.employee.notFound);
 
     revalidatePath("/employees");
     return actionOk(undefined);
@@ -128,8 +129,8 @@ export async function addExtraHours(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    await db.insert(horasExtra).values(parsed.data);
-    revalidatePath(`/employees/${parsed.data.empleadoId}`);
+    await db.insert(extraHours).values(parsed.data);
+    revalidatePath(`/employees/${parsed.data.employeeId}`);
     return actionOk(undefined);
   } catch (error) {
     return unknownActionError(error);

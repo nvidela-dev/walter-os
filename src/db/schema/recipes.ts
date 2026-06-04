@@ -1,12 +1,12 @@
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const recetas = pgTable("recetas", {
+export const recipes = pgTable("recetas", {
   id: uuid("id").primaryKey().defaultRandom(),
-  nombre: text("nombre").notNull(),
-  descripcion: text("descripcion"),
+  name: text("nombre").notNull(),
+  description: text("descripcion"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export type Receta = typeof recetas.$inferSelect;
-export type NewReceta = typeof recetas.$inferInsert;
+export type Recipe = typeof recipes.$inferSelect;
+export type NewRecipe = typeof recipes.$inferInsert;

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getEmployeeDeleteBlock,
-  getFacturaDeleteBlock,
+  getInvoiceDeleteBlock,
   getProductDeleteBlock,
   getProviderDeleteBlock,
 } from "@/lib/delete-guards";
@@ -11,7 +11,7 @@ describe("delete guard rules", () => {
   it("allows unused records", () => {
     expect(getProviderDeleteBlock({ products: 0, invoices: 0, priceHistory: 0 })).toBeNull();
     expect(getProductDeleteBlock({ invoiceLines: 0, recipes: 0, priceHistory: 0 })).toBeNull();
-    expect(getFacturaDeleteBlock({ lines: 0, priceHistory: 0 })).toBeNull();
+    expect(getInvoiceDeleteBlock({ lines: 0, priceHistory: 0 })).toBeNull();
     expect(getEmployeeDeleteBlock({ extraHours: 0 })).toBeNull();
   });
 
@@ -28,7 +28,7 @@ describe("delete guard rules", () => {
   });
 
   it("blocks invoices and employees with historical records", () => {
-    expect(getFacturaDeleteBlock({ lines: 1, priceHistory: 0 })).toBe(
+    expect(getInvoiceDeleteBlock({ lines: 1, priceHistory: 0 })).toBe(
       "No se puede eliminar esta factura porque tiene líneas o historial asociado."
     );
     expect(getEmployeeDeleteBlock({ extraHours: 2 })).toBe(

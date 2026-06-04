@@ -5,50 +5,51 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { productos, type Receta, recetaProductos, recetas, unidades } from "@/db/schema";
+import { products, type Recipe, recipeProducts, recipes, units } from "@/db/schema";
+import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
 
 const recipeInputSchema = z.object({
-  nombre: requiredTextSchema,
-  descripcion: optionalTextSchema,
+  name: requiredTextSchema,
+  description: optionalTextSchema,
 });
 
 export type RecipeInput = z.infer<typeof recipeInputSchema>;
 
 export interface RecipeIngredient {
-  productoId: string;
-  cantidad: string;
-  nombre: string;
-  unidad: string;
+  productId: string;
+  quantity: string;
+  name: string;
+  unit: string;
 }
 
-export async function getRecipes(): Promise<Receta[]> {
-  return db.select().from(recetas).orderBy(recetas.nombre);
+export async function getRecipes(): Promise<Recipe[]> {
+  return db.select().from(recipes).orderBy(recipes.name);
 }
 
-export async function getRecipe(id: string): Promise<Receta | null> {
-  const result = await db.select().from(recetas).where(eq(recetas.id, id));
+export async function getRecipe(id: string): Promise<Recipe | null> {
+  const result = await db.select().from(recipes).where(eq(recipes.id, id));
   return result[0] ?? null;
 }
 
 export async function getRecipeWithIngredients(
   id: string
-): Promise<(Receta & { ingredientes: RecipeIngredient[] }) | null> {
+): Promise<(Recipe & { ingredients: RecipeIngredient[] }) | null> {
   const recipe = await getRecipe(id);
   if (!recipe) return null;
   const ingredients = await db
     .select({
-      productoId: recetaProductos.productoId,
-      cantidad: recetaProductos.cantidad,
-      nombre: productos.nombre,
-      unidad: unidades.codigo,
+      productId: recipeProducts.productId,
+      quantity: recipeProducts.quantity,
+      name: products.name,
+      unit: units.code,
     })
-    .from(recetaProductos)
-    .innerJoin(productos, eq(recetaProductos.productoId, productos.id))
-    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
-    .where(eq(recetaProductos.recetaId, id));
-  return { ...recipe, ingredientes: ingredients };
+    .from(recipeProducts)
+    .innerJoin(products, eq(recipeProducts.productId, products.id))
+    .innerJoin(units, eq(products.unitId, units.id))
+    .where(eq(recipeProducts.recipeId, id));
+  return { ...recipe, ingredients };
 }
 
 export async function createRecipe(input: unknown): Promise<ActionResult<{ id: string }>> {
@@ -56,8 +57,8 @@ export async function createRecipe(input: unknown): Promise<ActionResult<{ id: s
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    const [created] = await db.insert(recetas).values(parsed.data).returning({ id: recetas.id });
-    if (!created) return actionError("No se pudo crear la receta.");
+    const [created] = await db.insert(recipes).values(parsed.data).returning({ id: recipes.id });
+    if (!created) return actionError(t.errors.recipe.createFailed);
     revalidatePath("/recipes");
     return actionOk(created);
   } catch (error) {
@@ -77,12 +78,12 @@ export async function updateRecipe(
 
   try {
     const [updated] = await db
-      .update(recetas)
+      .update(recipes)
       .set({ ...parsed.data, updatedAt: new Date() })
-      .where(eq(recetas.id, parsedId.data))
-      .returning({ id: recetas.id });
+      .where(eq(recipes.id, parsedId.data))
+      .returning({ id: recipes.id });
 
-    if (!updated) return actionError("Receta no encontrada.");
+    if (!updated) return actionError(t.errors.recipe.notFound);
 
     revalidatePath("/recipes");
     revalidatePath(`/recipes/${parsedId.data}`);
@@ -98,11 +99,11 @@ export async function deleteRecipe(id: string): Promise<ActionResult> {
 
   try {
     const [deleted] = await db
-      .delete(recetas)
-      .where(eq(recetas.id, parsedId.data))
-      .returning({ id: recetas.id });
+      .delete(recipes)
+      .where(eq(recipes.id, parsedId.data))
+      .returning({ id: recipes.id });
 
-    if (!deleted) return actionError("Receta no encontrada.");
+    if (!deleted) return actionError(t.errors.recipe.notFound);
 
     revalidatePath("/recipes");
     return actionOk(undefined);

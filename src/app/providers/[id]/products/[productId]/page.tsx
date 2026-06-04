@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 
-import { getProductForProvider, getProvider, getUnidades } from "../../../actions";
+import { t } from "@/i18n";
+
+import { getProductForProvider, getProvider, getUnits } from "../../../actions";
 import { ProductEditForm } from "./product-edit-form";
 
 export const dynamic = "force-dynamic";
@@ -17,10 +19,10 @@ export default async function ProductEditPage({
 }: ProductEditPageProps): Promise<ReactElement> {
   const { id, productId } = await params;
 
-  const [provider, product, unidades] = await Promise.all([
+  const [provider, product, units] = await Promise.all([
     getProvider(id),
     getProductForProvider(id, productId),
-    getUnidades(),
+    getUnits(),
   ]);
 
   if (!provider || !product) {
@@ -33,7 +35,7 @@ export default async function ProductEditPage({
         <Link href={`/providers/${id}`} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]">
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
-        <h1 className="text-xl font-light text-[#3d3530]">Editar Producto</h1>
+        <h1 className="text-xl font-light text-[#3d3530]">{t.products.editTitle}</h1>
       </header>
 
       <main className="flex-1 px-6 py-4">
@@ -42,7 +44,7 @@ export default async function ProductEditPage({
             providerId={id}
             productId={productId}
             product={product}
-            unidades={unidades}
+            units={units}
           />
         </section>
       </main>

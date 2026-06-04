@@ -2,13 +2,15 @@ import { ArrowLeftIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactElement } from "react";
 
-import { getFacturas } from "./actions";
-import { FacturaList } from "./factura-list";
+import { t } from "@/i18n";
+
+import { getInvoices } from "./actions";
+import { InvoiceList } from "./invoice-list";
 
 export const dynamic = "force-dynamic";
 
-export default async function FacturasPage(): Promise<ReactElement> {
-  const facturas = await getFacturas();
+export default async function InvoicesPage(): Promise<ReactElement> {
+  const invoices = await getInvoices();
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
@@ -20,31 +22,31 @@ export default async function FacturasPage(): Promise<ReactElement> {
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-light text-[#3d3530]">Facturas</h1>
+          <h1 className="text-xl font-light text-[#3d3530]">{t.invoices.title}</h1>
         </div>
         <Link
-          href="/facturas/new"
+          href="/invoices/new"
           className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]"
         >
-          + Nueva
+          + {t.invoices.addShort}
         </Link>
       </header>
 
       <main className="flex-1 px-6 py-4">
-        {facturas.length === 0 ? (
+        {invoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <DocumentTextIcon className="mb-4 h-16 w-16 text-[#c4a77d]" />
-            <h2 className="mb-2 text-lg font-medium text-[#3d3530]">Sin facturas</h2>
-            <p className="mb-6 text-sm text-[#8b7355]">Carga tu primera factura</p>
+            <h2 className="mb-2 text-lg font-medium text-[#3d3530]">{t.invoices.emptyTitle}</h2>
+            <p className="mb-6 text-sm text-[#8b7355]">{t.invoices.emptyDescription}</p>
             <Link
-              href="/facturas/new"
+              href="/invoices/new"
               className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm"
             >
-              Nueva Factura
+              {t.invoices.newTitle}
             </Link>
           </div>
         ) : (
-          <FacturaList facturas={facturas} />
+          <InvoiceList invoices={invoices} />
         )}
       </main>
     </div>

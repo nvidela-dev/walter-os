@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 
 import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
+import { t } from "@/i18n";
 
 import { getRecipes } from "./actions";
 
@@ -11,7 +12,7 @@ export default async function RecipesPage(): Promise<ReactElement> {
 
   return (
     <ListPageShell
-      title="Recetas"
+      title={t.recipes.title}
       backHref="/"
       addHref="/recipes/new"
       items={recipes}
@@ -20,17 +21,17 @@ export default async function RecipesPage(): Promise<ReactElement> {
           key={recipe.id}
           href={`/recipes/${recipe.id}`}
           emoji="📿"
-          title={recipe.nombre}
-          subtitle={recipe.descripcion}
+          title={recipe.name}
+          subtitle={recipe.description}
         />
       )}
       emptyState={
         <EmptyState
           emoji="📿"
-          title="Sin recetas"
-          description="Agrega tus recetas aquí"
+          title={t.recipes.emptyTitle}
+          description={t.recipes.emptyDescription}
           ctaHref="/recipes/new"
-          ctaText="Agregar Receta"
+          ctaText={t.recipes.addCta}
         />
       }
     />

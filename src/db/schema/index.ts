@@ -1,37 +1,38 @@
-// Core entities - Spanish table names as per project requirements
+// Core entities. Code is English; physical table/column names stay Spanish
+// (see docs/i18n.md and src/i18n/glossary.ts).
 
 // Units of measure
-export * from "./unidades";
+export * from "./units";
 
 // Products
-export * from "./productos";
+export * from "./products";
 
 // Providers
-export * from "./proveedores";
+export * from "./providers";
 
 // Provider-Product relationship (N:N with prices)
-export * from "./proveedor-productos";
+export * from "./provider-products";
 
 // Employees
-export * from "./empleados";
+export * from "./employees";
 
 // Extra hours tracking
-export * from "./horas-extra";
+export * from "./extra-hours";
 
 // Recipes
-export * from "./recetas";
+export * from "./recipes";
 
 // Recipe ingredients (N:N with products)
-export * from "./receta-productos";
+export * from "./recipe-products";
 
 // Menu items
 export * from "./menu";
 
 // Invoices (header)
-export * from "./facturas";
+export * from "./invoices";
 
 // Invoice line items (snapshot of price/unit at time of invoice)
-export * from "./factura-lineas";
+export * from "./invoice-lines";
 
 // Append-only price change log (single source of truth for price evolution)
-export * from "./historial-precios";
+export * from "./price-history";

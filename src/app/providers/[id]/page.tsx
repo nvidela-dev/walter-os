@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 
 import { DeleteButton } from "@/components/delete-button";
 
-import { deleteProvider, getProviderWithProducts, getUnidades } from "../actions";
+import { deleteProvider, getProviderWithProducts, getUnits } from "../actions";
 import { ProviderForm } from "../provider-form";
 import { AddProductForm } from "./add-product-form";
 import { DebtForm } from "./debt-form";
@@ -21,9 +21,9 @@ export default async function ProviderPage({
   params,
 }: ProviderPageProps): Promise<ReactElement> {
   const { id } = await params;
-  const [provider, unidades] = await Promise.all([
+  const [provider, units] = await Promise.all([
     getProviderWithProducts(id),
-    getUnidades(),
+    getUnits(),
   ]);
 
   if (!provider) {
@@ -37,9 +37,9 @@ export default async function ProviderPage({
           <Link href="/providers" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]">
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-light text-[#3d3530]">{provider.nombre}</h1>
+          <h1 className="text-xl font-light text-[#3d3530]">{provider.name}</h1>
         </div>
-        <DeleteButton id={provider.id} name={provider.nombre} deleteAction={deleteProvider} redirectTo="/providers" />
+        <DeleteButton id={provider.id} name={provider.name} deleteAction={deleteProvider} redirectTo="/providers" />
       </header>
 
       <main className="flex-1 space-y-6 px-6 py-4">
@@ -47,17 +47,17 @@ export default async function ProviderPage({
           <ProviderForm provider={provider} />
         </section>
 
-        {provider.tipo === "producto" && (
+        {provider.type === "producto" && (
           <section className="rounded-2xl bg-[#f5f0e8] p-6">
-            <ProductList products={provider.productos} providerId={provider.id} />
+            <ProductList products={provider.products} providerId={provider.id} />
             <div className="mt-4 border-t border-[#e8e0d4] pt-4">
-              <AddProductForm providerId={provider.id} unidades={unidades} />
+              <AddProductForm providerId={provider.id} units={units} />
             </div>
           </section>
         )}
 
         <section className="rounded-2xl bg-[#f5f0e8] p-6">
-          <DebtForm providerId={provider.id} currentDebt={provider.deuda} />
+          <DebtForm providerId={provider.id} currentDebt={provider.debt} />
         </section>
       </main>
     </div>

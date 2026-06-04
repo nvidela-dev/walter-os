@@ -9,17 +9,18 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import {
-  facturaLineas,
-  facturas,
-  historialPrecios,
-  productos,
-  type Proveedor,
-  proveedores,
-  proveedorProductos,
-  type ProveedorTipo,
-  recetaProductos,
-  unidades,
+  invoiceLines,
+  invoices,
+  priceHistory,
+  products,
+  type Provider,
+  providerProducts,
+  providers,
+  type ProviderType,
+  recipeProducts,
+  units,
 } from "@/db/schema";
+import { t } from "@/i18n";
 import {
   actionError,
   actionOk,
@@ -32,48 +33,48 @@ import {
   moneySchema,
   nonNegativeMoneySchema,
   optionalTextSchema,
-  proveedorTipoSchema,
   providerDaysSchema,
+  providerTypeSchema,
   quantitySchema,
   requiredTextSchema,
   uuidSchema,
 } from "@/lib/validation";
 
 const providerInputSchema = z.object({
-  nombre: requiredTextSchema,
-  descripcion: optionalTextSchema,
-  tipo: proveedorTipoSchema,
-  dias: providerDaysSchema,
+  name: requiredTextSchema,
+  description: optionalTextSchema,
+  type: providerTypeSchema,
+  days: providerDaysSchema,
 });
 
 const debtInputSchema = z.object({
-  deuda: nonNegativeMoneySchema,
+  debt: nonNegativeMoneySchema,
 });
 
 const createProductInputSchema = z.object({
-  proveedorId: uuidSchema,
+  providerId: uuidSchema,
   productData: z.object({
-    nombre: requiredTextSchema,
-    descripcion: optionalTextSchema,
-    unidadId: uuidSchema,
+    name: requiredTextSchema,
+    description: optionalTextSchema,
+    unitId: uuidSchema,
   }),
-  precio: moneySchema,
-  cantidad: quantitySchema,
+  price: moneySchema,
+  quantity: quantitySchema,
 });
 
 const updateProductInputSchema = z.object({
-  proveedorId: uuidSchema,
-  productoId: uuidSchema,
+  providerId: uuidSchema,
+  productId: uuidSchema,
   data: z.object({
-    nombre: requiredTextSchema,
-    unidadId: uuidSchema,
-    precio: moneySchema,
+    name: requiredTextSchema,
+    unitId: uuidSchema,
+    price: moneySchema,
   }),
 });
 
 const productProviderInputSchema = z.object({
-  proveedorId: uuidSchema,
-  productoId: uuidSchema,
+  providerId: uuidSchema,
+  productId: uuidSchema,
 });
 
 export type ProviderInput = z.infer<typeof providerInputSchema>;
@@ -81,91 +82,91 @@ export type ProviderDebtInput = z.infer<typeof debtInputSchema>;
 
 export interface ProviderListRow {
   id: string;
-  nombre: string;
-  descripcion: string | null;
-  tipo: ProveedorTipo;
-  dias: string | null;
-  deuda: string;
+  name: string;
+  description: string | null;
+  type: ProviderType;
+  days: string | null;
+  debt: string;
   productCount: number;
 }
 
 export interface ProviderProduct {
   id: string;
-  productoId: string;
-  precio: string;
-  cantidad: string;
-  nombre: string;
-  unidadId: string | null;
-  unidad: string;
-  unidadNombre: string;
-  descripcion: string | null;
+  productId: string;
+  price: string;
+  quantity: string;
+  name: string;
+  unitId: string | null;
+  unit: string;
+  unitName: string;
+  description: string | null;
 }
 
 export interface ProductForProvider {
   id: string;
-  nombre: string;
-  unidadId: string | null;
-  unidad: string;
-  unidadNombre: string;
-  descripcion: string | null;
-  precio: string;
+  name: string;
+  unitId: string | null;
+  unit: string;
+  unitName: string;
+  description: string | null;
+  price: string;
 }
 
-export async function getUnidades(): Promise<{ id: string; codigo: string; nombre: string }[]> {
+export async function getUnits(): Promise<{ id: string; code: string; name: string }[]> {
   return db
-    .select({ id: unidades.id, codigo: unidades.codigo, nombre: unidades.nombre })
-    .from(unidades)
-    .orderBy(unidades.nombre);
+    .select({ id: units.id, code: units.code, name: units.name })
+    .from(units)
+    .orderBy(units.name);
 }
 
 export async function getProviders(): Promise<ProviderListRow[]> {
   const result = await db
     .select({
-      id: proveedores.id,
-      nombre: proveedores.nombre,
-      descripcion: proveedores.descripcion,
-      tipo: proveedores.tipo,
-      dias: proveedores.dias,
-      deuda: proveedores.deuda,
-      productCount: count(proveedorProductos.productoId),
+      id: providers.id,
+      name: providers.name,
+      description: providers.description,
+      type: providers.type,
+      days: providers.days,
+      debt: providers.debt,
+      productCount: count(providerProducts.productId),
     })
-    .from(proveedores)
-    .leftJoin(proveedorProductos, eq(proveedores.id, proveedorProductos.proveedorId))
-    .groupBy(proveedores.id)
-    .orderBy(proveedores.nombre);
+    .from(providers)
+    .leftJoin(providerProducts, eq(providers.id, providerProducts.providerId))
+    .groupBy(providers.id)
+    .orderBy(providers.name);
 
   return result;
 }
 
-export async function getProvider(id: string): Promise<Proveedor | null> {
-  const result = await db.select().from(proveedores).where(eq(proveedores.id, id));
+export async function getProvider(id: string): Promise<Provider | null> {
+  const result = await db.select().from(providers).where(eq(providers.id, id));
   return result[0] ?? null;
 }
 
 export async function getProviderWithProducts(
   id: string
-): Promise<(Proveedor & { productos: ProviderProduct[] }) | null> {
+): Promise<(Provider & { products: ProviderProduct[] }) | null> {
   const provider = await getProvider(id);
   if (!provider) return null;
 
-  const providerProducts = await db
+  const linkedProducts = await db
     .select({
-      id: productos.id,
-      productoId: proveedorProductos.productoId,
-      precio: proveedorProductos.precio,
-      cantidad: proveedorProductos.cantidad,
-      nombre: productos.nombre,
-      unidadId: productos.unidadId,
-      unidad: unidades.codigo,
-      unidadNombre: unidades.nombre,
-      descripcion: productos.descripcion,
+      id: products.id,
+      productId: providerProducts.productId,
+      price: providerProducts.price,
+      quantity: providerProducts.quantity,
+      name: products.name,
+      unitId: products.unitId,
+      unit: units.code,
+      unitName: units.name,
+      description: products.description,
     })
-    .from(proveedorProductos)
-    .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
-    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
-    .where(eq(proveedorProductos.proveedorId, id));
+    .from(providerProducts)
+    .innerJoin(products, eq(providerProducts.productId, products.id))
+    .innerJoin(units, eq(products.unitId, units.id))
+    .where(eq(providerProducts.providerId, id));
 
-  return { ...provider, productos: providerProducts };
+  return { ...provider, products: linkedProducts };
 }
 
 export async function createProvider(input: unknown): Promise<ActionResult<{ id: string }>> {
@@ -173,8 +174,8 @@ export async function createProvider(input: unknown): Promise<ActionResult<{ id:
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    const [created] = await db.insert(proveedores).values(parsed.data).returning({ id: proveedores.id });
-    if (!created) return actionError("No se pudo crear el proveedor.");
+    const [created] = await db.insert(providers).values(parsed.data).returning({ id: providers.id });
+    if (!created) return actionError(t.errors.provider.createFailed);
     revalidatePath("/providers");
     return actionOk(created);
   } catch (error) {
@@ -194,12 +195,12 @@ export async function updateProvider(
 
   try {
     const [updated] = await db
-      .update(proveedores)
+      .update(providers)
       .set({ ...parsed.data, updatedAt: new Date() })
-      .where(eq(proveedores.id, parsedId.data))
-      .returning({ id: proveedores.id });
+      .where(eq(providers.id, parsedId.data))
+      .returning({ id: providers.id });
 
-    if (!updated) return actionError("Proveedor no encontrado.");
+    if (!updated) return actionError(t.errors.provider.notFound);
 
     revalidatePath("/providers");
     revalidatePath(`/providers/${parsedId.data}`);
@@ -221,12 +222,12 @@ export async function updateProviderDebt(
 
   try {
     const [updated] = await db
-      .update(proveedores)
-      .set({ deuda: parsed.data.deuda, updatedAt: new Date() })
-      .where(eq(proveedores.id, parsedId.data))
-      .returning({ id: proveedores.id });
+      .update(providers)
+      .set({ debt: parsed.data.debt, updatedAt: new Date() })
+      .where(eq(providers.id, parsedId.data))
+      .returning({ id: providers.id });
 
-    if (!updated) return actionError("Proveedor no encontrado.");
+    if (!updated) return actionError(t.errors.provider.notFound);
 
     revalidatePath("/providers");
     revalidatePath(`/providers/${parsedId.data}`);
@@ -241,25 +242,25 @@ export async function deleteProvider(id: string): Promise<ActionResult> {
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
   try {
-    const [productLinks, invoices, priceHistory] = await Promise.all([
-      countRows(proveedorProductos, eq(proveedorProductos.proveedorId, parsedId.data)),
-      countRows(facturas, eq(facturas.proveedorId, parsedId.data)),
-      countRows(historialPrecios, eq(historialPrecios.proveedorId, parsedId.data)),
+    const [productLinks, invoiceCount, priceHistoryCount] = await Promise.all([
+      countRows(providerProducts, eq(providerProducts.providerId, parsedId.data)),
+      countRows(invoices, eq(invoices.providerId, parsedId.data)),
+      countRows(priceHistory, eq(priceHistory.providerId, parsedId.data)),
     ]);
 
     const blockMessage = getProviderDeleteBlock({
       products: productLinks,
-      invoices,
-      priceHistory,
+      invoices: invoiceCount,
+      priceHistory: priceHistoryCount,
     });
     if (blockMessage != null) return actionError(blockMessage);
 
     const [deleted] = await db
-      .delete(proveedores)
-      .where(eq(proveedores.id, parsedId.data))
-      .returning({ id: proveedores.id });
+      .delete(providers)
+      .where(eq(providers.id, parsedId.data))
+      .returning({ id: providers.id });
 
-    if (!deleted) return actionError("Proveedor no encontrado.");
+    if (!deleted) return actionError(t.errors.provider.notFound);
 
     revalidatePath("/providers");
     return actionOk(undefined);
@@ -269,58 +270,58 @@ export async function deleteProvider(id: string): Promise<ActionResult> {
 }
 
 export async function createProductForProvider(
-  proveedorId: string,
+  providerId: string,
   productData: unknown,
-  precio: string,
-  cantidad: string
-): Promise<ActionResult<{ id: string; nombre: string; unidadId: string; unidad: string }>> {
+  price: string,
+  quantity: string
+): Promise<ActionResult<{ id: string; name: string; unitId: string; unit: string }>> {
   const parsed = createProductInputSchema.safeParse({
-    proveedorId,
+    providerId,
     productData,
-    precio,
-    cantidad,
+    price,
+    quantity,
   });
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    const provider = await getProvider(parsed.data.proveedorId);
-    if (!provider) return actionError("Proveedor no encontrado.");
-    if (provider.tipo !== "producto") {
-      return actionError("Solo se pueden agregar productos a proveedores de productos.");
+    const provider = await getProvider(parsed.data.providerId);
+    if (!provider) return actionError(t.errors.provider.notFound);
+    if (provider.type !== "producto") {
+      return actionError(t.errors.provider.onlyProductProviders);
     }
 
-    const unidad = await getUnidadOrThrow(parsed.data.productData.unidadId);
+    const unit = await getUnitOrThrow(parsed.data.productData.unitId);
     const productId = randomUUID();
     const product = {
       id: productId,
-      nombre: parsed.data.productData.nombre,
-      descripcion: parsed.data.productData.descripcion,
-      unidadId: unidad.id,
-      unidad: unidad.codigo,
+      name: parsed.data.productData.name,
+      description: parsed.data.productData.description,
+      unitId: unit.id,
+      unit: unit.code,
     };
 
     await db.batch([
-      db.insert(productos).values(product),
-      db.insert(proveedorProductos).values({
-        proveedorId: parsed.data.proveedorId,
-        productoId: productId,
-        precio: parsed.data.precio,
-        cantidad: parsed.data.cantidad,
+      db.insert(products).values(product),
+      db.insert(providerProducts).values({
+        providerId: parsed.data.providerId,
+        productId,
+        price: parsed.data.price,
+        quantity: parsed.data.quantity,
       }),
-      db.insert(historialPrecios).values({
-        productoId: productId,
-        proveedorId: parsed.data.proveedorId,
-        precio: parsed.data.precio,
-        unidadId: unidad.id,
+      db.insert(priceHistory).values({
+        productId,
+        providerId: parsed.data.providerId,
+        price: parsed.data.price,
+        unitId: unit.id,
       }),
     ]);
 
-    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    revalidatePath(`/providers/${parsed.data.providerId}`);
     return actionOk({
       id: product.id,
-      nombre: product.nombre,
-      unidadId: unidad.id,
-      unidad: unidad.codigo,
+      name: product.name,
+      unitId: unit.id,
+      unit: unit.code,
     });
   } catch (error) {
     return unknownActionError(error);
@@ -328,46 +329,46 @@ export async function createProductForProvider(
 }
 
 export async function updateProductPrice(
-  proveedorId: string,
-  productoId: string,
-  precio: string
+  providerId: string,
+  productId: string,
+  price: string
 ): Promise<ActionResult> {
-  const parsed = productProviderInputSchema.extend({ precio: moneySchema }).safeParse({
-    proveedorId,
-    productoId,
-    precio,
+  const parsed = productProviderInputSchema.extend({ price: moneySchema }).safeParse({
+    providerId,
+    productId,
+    price,
   });
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    const [producto] = await db
-      .select({ unidadId: productos.unidadId })
-      .from(productos)
-      .where(eq(productos.id, parsed.data.productoId));
+    const [product] = await db
+      .select({ unitId: products.unitId })
+      .from(products)
+      .where(eq(products.id, parsed.data.productId));
 
-    if (producto?.unidadId == null) return actionError("Producto no encontrado.");
+    if (product?.unitId == null) return actionError(t.errors.product.notFound);
 
     const [updated] = await db
-      .update(proveedorProductos)
-      .set({ precio: parsed.data.precio, updatedAt: new Date() })
+      .update(providerProducts)
+      .set({ price: parsed.data.price, updatedAt: new Date() })
       .where(
         and(
-          eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
-          eq(proveedorProductos.productoId, parsed.data.productoId)
+          eq(providerProducts.providerId, parsed.data.providerId),
+          eq(providerProducts.productId, parsed.data.productId)
         )
       )
-      .returning({ productoId: proveedorProductos.productoId });
+      .returning({ productId: providerProducts.productId });
 
-    if (!updated) return actionError("Producto no encontrado para este proveedor.");
+    if (!updated) return actionError(t.errors.product.notFoundForProvider);
 
     await recordPriceChange({
-      productoId: parsed.data.productoId,
-      proveedorId: parsed.data.proveedorId,
-      precio: parsed.data.precio,
-      unidadId: producto.unidadId,
+      productId: parsed.data.productId,
+      providerId: parsed.data.providerId,
+      price: parsed.data.price,
+      unitId: product.unitId,
     });
 
-    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    revalidatePath(`/providers/${parsed.data.providerId}`);
     return actionOk(undefined);
   } catch (error) {
     return unknownActionError(error);
@@ -375,83 +376,83 @@ export async function updateProductPrice(
 }
 
 export async function getProductForProvider(
-  proveedorId: string,
-  productoId: string
+  providerId: string,
+  productId: string
 ): Promise<ProductForProvider | null> {
   const result = await db
     .select({
-      id: productos.id,
-      nombre: productos.nombre,
-      unidadId: productos.unidadId,
-      unidad: unidades.codigo,
-      unidadNombre: unidades.nombre,
-      descripcion: productos.descripcion,
-      precio: proveedorProductos.precio,
+      id: products.id,
+      name: products.name,
+      unitId: products.unitId,
+      unit: units.code,
+      unitName: units.name,
+      description: products.description,
+      price: providerProducts.price,
     })
-    .from(proveedorProductos)
-    .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
-    .innerJoin(unidades, eq(productos.unidadId, unidades.id))
+    .from(providerProducts)
+    .innerJoin(products, eq(providerProducts.productId, products.id))
+    .innerJoin(units, eq(products.unitId, units.id))
     .where(
       and(
-        eq(proveedorProductos.proveedorId, proveedorId),
-        eq(proveedorProductos.productoId, productoId)
+        eq(providerProducts.providerId, providerId),
+        eq(providerProducts.productId, productId)
       )
     );
   return result[0] ?? null;
 }
 
 export async function updateProduct(
-  proveedorId: string,
-  productoId: string,
+  providerId: string,
+  productId: string,
   data: unknown
 ): Promise<ActionResult> {
-  const parsed = updateProductInputSchema.safeParse({ proveedorId, productoId, data });
+  const parsed = updateProductInputSchema.safeParse({ providerId, productId, data });
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    const unidad = await getUnidadOrThrow(parsed.data.data.unidadId);
+    const unit = await getUnitOrThrow(parsed.data.data.unitId);
 
     const [existing] = await db
-      .select({ productoId: proveedorProductos.productoId })
-      .from(proveedorProductos)
+      .select({ productId: providerProducts.productId })
+      .from(providerProducts)
       .where(
         and(
-          eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
-          eq(proveedorProductos.productoId, parsed.data.productoId)
+          eq(providerProducts.providerId, parsed.data.providerId),
+          eq(providerProducts.productId, parsed.data.productId)
         )
       );
 
-    if (!existing) return actionError("Producto no encontrado para este proveedor.");
+    if (!existing) return actionError(t.errors.product.notFoundForProvider);
 
     await db.batch([
       db
-        .update(productos)
+        .update(products)
         .set({
-          nombre: parsed.data.data.nombre,
-          unidadId: unidad.id,
-          unidad: unidad.codigo,
+          name: parsed.data.data.name,
+          unitId: unit.id,
+          unit: unit.code,
           updatedAt: new Date(),
         })
-        .where(eq(productos.id, parsed.data.productoId)),
+        .where(eq(products.id, parsed.data.productId)),
       db
-        .update(proveedorProductos)
-        .set({ precio: parsed.data.data.precio, updatedAt: new Date() })
+        .update(providerProducts)
+        .set({ price: parsed.data.data.price, updatedAt: new Date() })
         .where(
           and(
-            eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
-            eq(proveedorProductos.productoId, parsed.data.productoId)
+            eq(providerProducts.providerId, parsed.data.providerId),
+            eq(providerProducts.productId, parsed.data.productId)
           )
         ),
-      db.insert(historialPrecios).values({
-        productoId: parsed.data.productoId,
-        proveedorId: parsed.data.proveedorId,
-        precio: parsed.data.data.precio,
-        unidadId: unidad.id,
+      db.insert(priceHistory).values({
+        productId: parsed.data.productId,
+        providerId: parsed.data.providerId,
+        price: parsed.data.data.price,
+        unitId: unit.id,
       }),
     ]);
 
-    revalidatePath(`/providers/${parsed.data.proveedorId}`);
-    revalidatePath(`/providers/${parsed.data.proveedorId}/products/${parsed.data.productoId}`);
+    revalidatePath(`/providers/${parsed.data.providerId}`);
+    revalidatePath(`/providers/${parsed.data.providerId}/products/${parsed.data.productId}`);
     return actionOk(undefined);
   } catch (error) {
     return unknownActionError(error);
@@ -459,62 +460,62 @@ export async function updateProduct(
 }
 
 export async function removeProductFromProvider(
-  proveedorId: string,
-  productoId: string
+  providerId: string,
+  productId: string
 ): Promise<ActionResult> {
-  const parsed = productProviderInputSchema.safeParse({ proveedorId, productoId });
+  const parsed = productProviderInputSchema.safeParse({ providerId, productId });
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    const [invoiceLines, priceHistory, recipeUses] = await Promise.all([
-      countRows(facturaLineas, eq(facturaLineas.productoId, parsed.data.productoId)),
-      countRows(historialPrecios, eq(historialPrecios.productoId, parsed.data.productoId)),
-      countRows(recetaProductos, eq(recetaProductos.productoId, parsed.data.productoId)),
+    const [invoiceLineCount, priceHistoryCount, recipeUses] = await Promise.all([
+      countRows(invoiceLines, eq(invoiceLines.productId, parsed.data.productId)),
+      countRows(priceHistory, eq(priceHistory.productId, parsed.data.productId)),
+      countRows(recipeProducts, eq(recipeProducts.productId, parsed.data.productId)),
     ]);
 
     const blockMessage = getProductDeleteBlock({
-      invoiceLines,
-      priceHistory,
+      invoiceLines: invoiceLineCount,
+      priceHistory: priceHistoryCount,
       recipes: recipeUses,
     });
     if (blockMessage != null) return actionError(blockMessage);
 
     await db.batch([
       db
-        .delete(proveedorProductos)
+        .delete(providerProducts)
         .where(
           and(
-            eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
-            eq(proveedorProductos.productoId, parsed.data.productoId)
+            eq(providerProducts.providerId, parsed.data.providerId),
+            eq(providerProducts.productId, parsed.data.productId)
           )
         ),
-      db.delete(productos).where(eq(productos.id, parsed.data.productoId)),
+      db.delete(products).where(eq(products.id, parsed.data.productId)),
     ]);
 
-    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    revalidatePath(`/providers/${parsed.data.providerId}`);
     return actionOk(undefined);
   } catch (error) {
     return unknownActionError(error);
   }
 }
 
-async function getUnidadOrThrow(unidadId: string): Promise<{ id: string; codigo: string }> {
-  const [unidad] = await db
-    .select({ id: unidades.id, codigo: unidades.codigo })
-    .from(unidades)
-    .where(eq(unidades.id, unidadId));
-  if (!unidad) throw expectedActionError("Seleccioná una unidad válida.");
-  return unidad;
+async function getUnitOrThrow(unitId: string): Promise<{ id: string; code: string }> {
+  const [unit] = await db
+    .select({ id: units.id, code: units.code })
+    .from(units)
+    .where(eq(units.id, unitId));
+  if (!unit) throw expectedActionError(t.errors.product.selectValidUnit);
+  return unit;
 }
 
 async function recordPriceChange(args: {
-  productoId: string;
-  proveedorId: string;
-  precio: string;
-  unidadId: string;
-  facturaId?: string;
+  productId: string;
+  providerId: string;
+  price: string;
+  unitId: string;
+  invoiceId?: string;
 }): Promise<void> {
-  await db.insert(historialPrecios).values(args);
+  await db.insert(priceHistory).values(args);
 }
 
 async function countRows(table: PgTable, where: SQL | undefined): Promise<number> {
