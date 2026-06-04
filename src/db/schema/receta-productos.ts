@@ -1,5 +1,5 @@
-import { pgTable, timestamp, uuid, numeric, primaryKey } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
+import { check, numeric, pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
 import { recetas } from "./recetas";
 import { productos } from "./productos";
 
@@ -11,11 +11,14 @@ export const recetaProductos = pgTable(
       .references(() => recetas.id, { onDelete: "cascade" }),
     productoId: uuid("producto_id")
       .notNull()
-      .references(() => productos.id, { onDelete: "cascade" }),
+      .references(() => productos.id, { onDelete: "restrict" }),
     cantidad: numeric("cantidad", { precision: 10, scale: 3 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [primaryKey({ columns: [table.recetaId, table.productoId] })]
+  (table) => [
+    primaryKey({ columns: [table.recetaId, table.productoId] }),
+    check("receta_productos_cantidad_positive", sql`${table.cantidad} > 0`),
+  ]
 );
 
 // Relations

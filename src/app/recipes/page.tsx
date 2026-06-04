@@ -1,6 +1,8 @@
 import { getRecipes } from "./actions";
 import { ListPageShell, EmptyState, ListPageRow } from "@/components/list-page-shell";
 
+export const dynamic = "force-dynamic";
+
 export default async function RecipesPage() {
   const recipes = await getRecipes();
 

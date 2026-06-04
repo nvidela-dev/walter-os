@@ -1,6 +1,8 @@
 import { getMenuItems } from "./actions";
 import { ListPageShell, EmptyState, ListPageRow } from "@/components/list-page-shell";
 
+export const dynamic = "force-dynamic";
+
 export default async function MenuPage() {
   const items = await getMenuItems();
 

@@ -1,9 +1,19 @@
 "use server";
 
 import { db } from "@/db";
-import { recetas, recetaProductos, productos, unidades, type NewReceta } from "@/db/schema";
+import { productos, recetaProductos, recetas, unidades } from "@/db/schema";
+import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const recipeInputSchema = z.object({
+  nombre: requiredTextSchema,
+  descripcion: optionalTextSchema,
+});
+
+export type RecipeInput = z.infer<typeof recipeInputSchema>;
 
 export async function getRecipes() {
   return db.select().from(recetas).orderBy(recetas.nombre);
@@ -18,7 +28,12 @@ export async function getRecipeWithIngredients(id: string) {
   const recipe = await getRecipe(id);
   if (!recipe) return null;
   const ingredients = await db
-    .select({ productoId: recetaProductos.productoId, cantidad: recetaProductos.cantidad, nombre: productos.nombre, unidad: unidades.codigo })
+    .select({
+      productoId: recetaProductos.productoId,
+      cantidad: recetaProductos.cantidad,
+      nombre: productos.nombre,
+      unidad: unidades.codigo,
+    })
     .from(recetaProductos)
     .innerJoin(productos, eq(recetaProductos.productoId, productos.id))
     .innerJoin(unidades, eq(productos.unidadId, unidades.id))
@@ -26,19 +41,61 @@ export async function getRecipeWithIngredients(id: string) {
   return { ...recipe, ingredientes: ingredients };
 }
 
-export async function createRecipe(data: NewReceta) {
-  const result = await db.insert(recetas).values(data).returning();
-  revalidatePath("/recipes");
-  return result[0];
+export async function createRecipe(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const parsed = recipeInputSchema.safeParse(input);
+  if (!parsed.success) return unknownActionError(parsed.error);
+
+  try {
+    const [created] = await db.insert(recetas).values(parsed.data).returning({ id: recetas.id });
+    revalidatePath("/recipes");
+    return actionOk(created);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function updateRecipe(id: string, data: Partial<NewReceta>) {
-  const result = await db.update(recetas).set({ ...data, updatedAt: new Date() }).where(eq(recetas.id, id)).returning();
-  revalidatePath("/recipes");
-  return result[0];
+export async function updateRecipe(
+  id: string,
+  input: unknown
+): Promise<ActionResult<{ id: string }>> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
+
+  const parsed = recipeInputSchema.safeParse(input);
+  if (!parsed.success) return unknownActionError(parsed.error);
+
+  try {
+    const [updated] = await db
+      .update(recetas)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(recetas.id, parsedId.data))
+      .returning({ id: recetas.id });
+
+    if (!updated) return actionError("Receta no encontrada.");
+
+    revalidatePath("/recipes");
+    revalidatePath(`/recipes/${parsedId.data}`);
+    return actionOk(updated);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function deleteRecipe(id: string) {
-  await db.delete(recetas).where(eq(recetas.id, id));
-  revalidatePath("/recipes");
+export async function deleteRecipe(id: string): Promise<ActionResult> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
+
+  try {
+    const [deleted] = await db
+      .delete(recetas)
+      .where(eq(recetas.id, parsedId.data))
+      .returning({ id: recetas.id });
+
+    if (!deleted) return actionError("Receta no encontrada.");
+
+    revalidatePath("/recipes");
+    return actionOk(undefined);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }

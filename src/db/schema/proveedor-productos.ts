@@ -1,5 +1,5 @@
-import { pgTable, timestamp, uuid, numeric, primaryKey } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
+import { check, numeric, pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
 import { proveedores } from "./proveedores";
 import { productos } from "./productos";
 
@@ -8,16 +8,20 @@ export const proveedorProductos = pgTable(
   {
     proveedorId: uuid("proveedor_id")
       .notNull()
-      .references(() => proveedores.id, { onDelete: "cascade" }),
+      .references(() => proveedores.id, { onDelete: "restrict" }),
     productoId: uuid("producto_id")
       .notNull()
-      .references(() => productos.id, { onDelete: "cascade" }),
+      .references(() => productos.id, { onDelete: "restrict" }),
     precio: numeric("precio", { precision: 10, scale: 2 }).notNull(),
     cantidad: numeric("cantidad", { precision: 10, scale: 2 }).notNull().default("1"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [primaryKey({ columns: [table.proveedorId, table.productoId] })]
+  (table) => [
+    primaryKey({ columns: [table.proveedorId, table.productoId] }),
+    check("proveedor_productos_precio_positive", sql`${table.precio} > 0`),
+    check("proveedor_productos_cantidad_positive", sql`${table.cantidad} > 0`),
+  ]
 );
 
 // Relations

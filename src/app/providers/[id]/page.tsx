@@ -8,6 +8,8 @@ import { AddProductForm } from "./add-product-form";
 import { DebtForm } from "./debt-form";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
+export const dynamic = "force-dynamic";
+
 interface ProviderPageProps {
   params: Promise<{ id: string }>;
 }

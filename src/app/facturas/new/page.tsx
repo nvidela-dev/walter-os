@@ -4,6 +4,8 @@ import { getFacturaFormData } from "../actions";
 import { getUnidades } from "@/app/providers/actions";
 import { FacturaForm } from "./factura-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function NuevaFacturaPage() {
   const [proveedores, unidades] = await Promise.all([
     getFacturaFormData(),

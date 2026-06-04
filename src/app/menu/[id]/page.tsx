@@ -4,6 +4,8 @@ import { getMenuItem, deleteMenuItem, getAllRecipes } from "../actions";
 import { MenuForm } from "../menu-form";
 import { DeleteButton } from "@/components/delete-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function MenuItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [item, recipes] = await Promise.all([getMenuItem(id), getAllRecipes()]);

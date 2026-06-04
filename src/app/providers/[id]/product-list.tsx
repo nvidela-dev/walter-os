@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { FormMessage } from "@/components/form-feedback";
 import { removeProductFromProvider } from "../actions";
 
 interface Product {
@@ -16,12 +17,17 @@ interface Product {
 
 export function ProductList({ products, providerId }: { products: Product[]; providerId: string }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleDelete(e: React.MouseEvent, productoId: string) {
     e.preventDefault();
     e.stopPropagation();
     setDeletingId(productoId);
-    await removeProductFromProvider(providerId, productoId);
+    setError(null);
+    const result = await removeProductFromProvider(providerId, productoId);
+    if (!result.ok) {
+      setError(result.error);
+    }
     setDeletingId(null);
   }
 
@@ -35,6 +41,7 @@ export function ProductList({ products, providerId }: { products: Product[]; pro
 
   return (
     <div className="space-y-2">
+      <FormMessage message={error} />
       {products.map((product) => (
         <Link
           key={product.productoId}
