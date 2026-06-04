@@ -5,8 +5,7 @@ import { type ReactElement, useMemo, useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
 import { t } from "@/i18n";
-
-import { togglePaid } from "./actions";
+import { togglePaid } from "@/lib/actions/invoices";
 
 interface InvoiceRow {
   id: string;

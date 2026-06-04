@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 
 import { t } from "@/i18n";
+import { getInvoices } from "@/lib/queries/invoices";
 
-import { getInvoices } from "./actions";
 import { InvoiceList } from "./invoice-list";
 
 export const dynamic = "force-dynamic";

@@ -2,10 +2,9 @@ import { ArrowLeftIcon, ChevronRightIcon, TruckIcon, WrenchScrewdriverIcon } fro
 import Link from "next/link";
 import type { ReactElement } from "react";
 
-import type { ProviderType } from "@/db/schema";
 import { t } from "@/i18n";
-
-import { getProviders } from "./actions";
+import { getProviders } from "@/lib/queries/providers";
+import type { ProviderType } from "@/lib/types/providers";
 
 export const dynamic = "force-dynamic";
 

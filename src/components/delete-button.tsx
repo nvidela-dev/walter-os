@@ -1,5 +1,6 @@
 "use client";
 
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
@@ -7,6 +8,7 @@ import { t } from "@/i18n";
 import type { ActionResult } from "@/lib/action-result";
 
 import { FormMessage } from "./form-feedback";
+import { Button } from "./ui/button";
 
 interface DeleteButtonProps {
   id: string;
@@ -46,12 +48,12 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
           <p className="mb-6 text-sm text-[#8b7355]">{t.deleteDialog.confirm(name)}</p>
           <FormMessage message={error} />
           <div className="flex gap-3">
-            <button onClick={() => { setShowConfirm(false); }} disabled={isDeleting}
-              className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]">{t.common.cancel}</button>
-            <button onClick={() => void handleDelete()} disabled={isDeleting}
-              className="flex-1 rounded-xl bg-[#a68b5b] py-3 text-sm font-medium text-white disabled:opacity-50">
+            <Button onClick={() => { setShowConfirm(false); }} disabled={isDeleting}
+              variant="secondary" className="flex-1 py-3 text-sm">{t.common.cancel}</Button>
+            <Button onClick={() => void handleDelete()} disabled={isDeleting}
+              variant="danger" className="flex-1 py-3 text-sm">
               {isDeleting ? t.common.loading : t.common.delete}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -59,12 +61,14 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
   }
 
   return (
-    <button
+    <Button
       onClick={() => { setShowConfirm(true); }}
       aria-label={t.deleteDialog.trigger(name)}
-      className="rounded-full bg-[#f5f0e8] p-2 text-[#8b7355]"
+      variant="ghost"
+      size="icon"
+      className="rounded-full"
     >
-      🗑
-    </button>
+      <TrashIcon className="h-5 w-5" />
+    </Button>
   );
 }

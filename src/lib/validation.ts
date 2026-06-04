@@ -8,6 +8,11 @@ const decimalPattern = (scale: number): RegExp => new RegExp(`^\\d+(\\.\\d{1,${s
 
 export const uuidSchema = z.uuid(t.validation.invalidId);
 
+export function parseUuidOrNull(value: string): string | null {
+  const parsed = uuidSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
 export const requiredTextSchema = z
   .string()
   .trim()

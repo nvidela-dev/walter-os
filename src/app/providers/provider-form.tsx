@@ -4,18 +4,20 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
-import type { Provider, ProviderType } from "@/db/schema";
+import { useActionForm } from "@/components/hooks/use-action-form";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
 import { t } from "@/i18n";
+import { createProvider, updateProvider } from "@/lib/actions/providers";
 import { getFormString } from "@/lib/form";
-
-import { createProvider, updateProvider } from "./actions";
+import type { ProviderType, ProviderView } from "@/lib/types/providers";
 
 const DAY_KEYS = ["L", "M", "X", "J", "V", "S", "D"] as const;
 
-export function ProviderForm({ provider }: { provider?: Provider }): ReactElement {
+export function ProviderForm({ provider }: { provider?: ProviderView }): ReactElement {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, isSubmitting, runAction } = useActionForm();
   const [type, setType] = useState<ProviderType>(provider?.type ?? "producto");
   const [selectedDays, setSelectedDays] = useState<string[]>(
     provider?.days != null ? provider.days.split(",") : []
@@ -30,8 +32,6 @@ export function ProviderForm({ provider }: { provider?: Provider }): ReactElemen
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
     const formData = new FormData(e.currentTarget);
     const data = {
       name: getFormString(formData, "name"),
@@ -41,20 +41,12 @@ export function ProviderForm({ provider }: { provider?: Provider }): ReactElemen
     };
 
     if (isEditing) {
-      const result = await updateProvider(provider.id, data);
-      if (!result.ok) {
-        setError(result.error);
-        setIsSubmitting(false);
-        return;
-      }
+      const result = await runAction(() => updateProvider(provider.id, data));
+      if (!result.ok) return;
       router.push(`/providers/${provider.id}`);
     } else {
-      const result = await createProvider(data);
-      if (!result.ok) {
-        setError(result.error);
-        setIsSubmitting(false);
-        return;
-      }
+      const result = await runAction(() => createProvider(data));
+      if (!result.ok) return;
       router.push(`/providers/${result.data.id}`);
     }
   }
@@ -63,45 +55,50 @@ export function ProviderForm({ provider }: { provider?: Provider }): ReactElemen
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
       <div>
-        <label className="mb-2 block text-xs font-medium text-[#8b7355]">{t.providers.fields.type}</label>
+        <p className="mb-2 text-xs font-medium text-[#8b7355]">{t.providers.fields.type}</p>
         <div className="grid grid-cols-2 gap-2">
-          <button
+          <Button
             type="button"
             onClick={() => { setType("producto"); }}
-            className={`rounded-xl py-3 text-sm font-medium transition-colors ${
-              type === "producto" ? "bg-[#c4a77d] text-white" : "bg-[#e8e0d4] text-[#8b7355]"
-            }`}
+            variant={type === "producto" ? "primary" : "ghost"}
+            className="py-3 text-sm"
           >
             {t.providers.types.producto}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => { setType("servicio"); }}
-            className={`rounded-xl py-3 text-sm font-medium transition-colors ${
-              type === "servicio" ? "bg-[#c4a77d] text-white" : "bg-[#e8e0d4] text-[#8b7355]"
-            }`}
+            variant={type === "servicio" ? "primary" : "ghost"}
+            className="py-3 text-sm"
           >
             {t.providers.types.servicio}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div>
-        <label htmlFor="name" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.providers.fields.name}</label>
-        <input type="text" id="name" name="name" required defaultValue={provider?.name}
+      <FormField htmlFor="provider-name" label={t.providers.fields.name}>
+        <Input
+          type="text"
+          id="provider-name"
+          name="name"
+          required
+          defaultValue={provider?.name}
           placeholder={t.providers.fields.namePlaceholder}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
+        />
+      </FormField>
 
-      <div>
-        <label htmlFor="description" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.providers.fields.description}</label>
-        <input type="text" id="description" name="description" defaultValue={provider?.description ?? ""}
+      <FormField htmlFor="provider-description" label={t.providers.fields.description}>
+        <Input
+          type="text"
+          id="provider-description"
+          name="description"
+          defaultValue={provider?.description ?? ""}
           placeholder={t.providers.fields.descriptionPlaceholder}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
+        />
+      </FormField>
 
       <div>
-        <label className="mb-2 block text-xs font-medium text-[#8b7355]">{t.providers.fields.visitDays}</label>
+        <p className="mb-2 text-xs font-medium text-[#8b7355]">{t.providers.fields.visitDays}</p>
         <div className="flex gap-2">
           {DAY_KEYS.map((key) => (
             <button
@@ -121,10 +118,9 @@ export function ProviderForm({ provider }: { provider?: Provider }): ReactElemen
         </div>
       </div>
 
-      <button type="submit" disabled={isSubmitting}
-        className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">
+      <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
         {isSubmitting ? t.common.saving : isEditing ? t.common.saveChanges : t.providers.create}
-      </button>
+      </Button>
     </form>
   );
 }
