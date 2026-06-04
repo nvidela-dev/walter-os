@@ -2,19 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { db } from "@/db";
 import { productos, type Receta, recetaProductos, recetas, unidades } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
-import { optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
+import { uuidSchema } from "@/lib/validation";
 
-const recipeInputSchema = z.object({
-  nombre: requiredTextSchema,
-  descripcion: optionalTextSchema,
-});
-
-export type RecipeInput = z.infer<typeof recipeInputSchema>;
+import { recipeInputSchema } from "./schema";
 
 export interface RecipeIngredient {
   productoId: string;

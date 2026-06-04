@@ -1,17 +1,23 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { type ReactElement, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
 
-import { FormMessage } from "@/components/form-feedback";
-import { getFormString } from "@/lib/form";
+import { FieldError, FormMessage } from "@/components/form-feedback";
 
 import { createProductForProvider } from "../actions";
+import { addProductFormSchema,type AddProductFormValues } from "../schema";
 
 interface UnidadOption {
   id: string;
   codigo: string;
   nombre: string;
 }
+
+const fieldClass =
+  "w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none";
 
 export function AddProductForm({
   providerId,
@@ -21,42 +27,47 @@ export function AddProductForm({
   unidades: UnidadOption[];
 }): ReactElement {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const defaultUnidadId =
     unidades.find((u) => u.codigo === "unidad")?.id ?? unidades[0]?.id ?? "";
 
-  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<AddProductFormValues, unknown, z.output<typeof addProductFormSchema>>({
+    resolver: zodResolver(addProductFormSchema),
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      unidadId: defaultUnidadId,
+      precio: "",
+      cantidad: "1",
+    },
+  });
 
-    const formData = new FormData(e.currentTarget);
+  const onSubmit = handleSubmit(async (data) => {
     const result = await createProductForProvider(
       providerId,
-      {
-        nombre: getFormString(formData, "nombre"),
-        unidadId: getFormString(formData, "unidadId"),
-        descripcion: getFormString(formData, "descripcion") || null,
-      },
-      getFormString(formData, "precio"),
-      getFormString(formData, "cantidad")
+      { nombre: data.nombre, descripcion: data.descripcion, unidadId: data.unidadId },
+      data.precio,
+      data.cantidad
     );
-
-    setIsSubmitting(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
+    if (result.ok) {
+      reset();
+      setIsOpen(false);
+    } else {
+      setError("root", { message: result.error });
     }
-    setIsOpen(false);
-    e.currentTarget.reset();
-  }
+  });
 
   if (!isOpen) {
     return (
       <button
-        onClick={() => { setIsOpen(true); }}
+        onClick={() => {
+          setIsOpen(true);
+        }}
         className="w-full rounded-xl border-2 border-dashed border-[#c4a77d] py-4 text-sm font-medium text-[#c4a77d] hover:bg-white"
       >
         + Agregar Producto
@@ -65,58 +76,45 @@ export function AddProductForm({
   }
 
   return (
-    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 rounded-xl bg-white p-4">
-      <FormMessage message={error} />
+    <form onSubmit={(e) => void onSubmit(e)} className="space-y-4 rounded-xl bg-white p-4">
+      <FormMessage message={errors.root?.message ?? null} />
       <div>
-        <input
-          type="text"
-          name="nombre"
-          required
-          placeholder="Nombre del producto"
-          className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
-        />
+        <input type="text" placeholder="Nombre del producto" {...register("nombre")} className={fieldClass} />
+        <FieldError message={errors.nombre?.message} />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>
           <input
             type="number"
-            name="cantidad"
             step="0.01"
-            required
-            defaultValue="1"
             placeholder="Cant."
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
+            {...register("cantidad")}
+            className={fieldClass}
           />
+          <FieldError message={errors.cantidad?.message} />
         </div>
         <div>
-          <select
-            name="unidadId"
-            defaultValue={defaultUnidadId}
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
-          >
+          <select {...register("unidadId")} className={fieldClass}>
             {unidades.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.nombre}
               </option>
             ))}
           </select>
+          <FieldError message={errors.unidadId?.message} />
         </div>
         <div>
-          <input
-            type="number"
-            name="precio"
-            step="0.01"
-            required
-            placeholder="Precio"
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
-          />
+          <input type="number" step="0.01" placeholder="Precio" {...register("precio")} className={fieldClass} />
+          <FieldError message={errors.precio?.message} />
         </div>
       </div>
 
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => { setIsOpen(false); }}
+          onClick={() => {
+            setIsOpen(false);
+          }}
           className="flex-1 rounded-lg border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
         >
           Cancelar

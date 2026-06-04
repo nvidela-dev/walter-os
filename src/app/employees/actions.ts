@@ -9,21 +9,9 @@ import { db } from "@/db";
 import { type Empleado, empleados, type HoraExtra,horasExtra } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { getEmployeeDeleteBlock } from "@/lib/delete-guards";
-import {
-  isoDateSchema,
-  moneySchema,
-  requiredTextSchema,
-  uuidSchema,
-} from "@/lib/validation";
+import { isoDateSchema, moneySchema, uuidSchema } from "@/lib/validation";
 
-const employeeInputSchema = z.object({
-  nombre: requiredTextSchema,
-  salarioMensual: moneySchema,
-  horasFijasSemanales: z.coerce
-    .number()
-    .int("Las horas semanales deben ser un número entero.")
-    .positive("Las horas semanales deben ser mayores que cero."),
-});
+import { employeeInputSchema } from "./schema";
 
 const extraHoursInputSchema = z.object({
   empleadoId: uuidSchema,
@@ -35,7 +23,6 @@ const extraHoursInputSchema = z.object({
   montoPagado: moneySchema,
 });
 
-export type EmployeeInput = z.infer<typeof employeeInputSchema>;
 export type ExtraHoursInput = z.infer<typeof extraHoursInputSchema>;
 
 export async function getEmployees(): Promise<Empleado[]> {

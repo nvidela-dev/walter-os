@@ -20,3 +20,8 @@ export function FormMessage({
 
   return <p className={`rounded-xl px-4 py-3 text-sm ${classes} ${className}`}>{message}</p>;
 }
+
+export function FieldError({ message }: { message?: string }): ReactElement | null {
+  if (message == null || message === "") return null;
+  return <p className="mt-1 text-xs text-amber-700">{message}</p>;
+}

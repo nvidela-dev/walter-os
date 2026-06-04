@@ -30,25 +30,13 @@ import {
 import { getProductDeleteBlock, getProviderDeleteBlock } from "@/lib/delete-guards";
 import {
   moneySchema,
-  nonNegativeMoneySchema,
   optionalTextSchema,
-  proveedorTipoSchema,
-  providerDaysSchema,
   quantitySchema,
   requiredTextSchema,
   uuidSchema,
 } from "@/lib/validation";
 
-const providerInputSchema = z.object({
-  nombre: requiredTextSchema,
-  descripcion: optionalTextSchema,
-  tipo: proveedorTipoSchema,
-  dias: providerDaysSchema,
-});
-
-const debtInputSchema = z.object({
-  deuda: nonNegativeMoneySchema,
-});
+import { debtInputSchema, providerInputSchema } from "./schema";
 
 const createProductInputSchema = z.object({
   proveedorId: uuidSchema,
@@ -75,9 +63,6 @@ const productProviderInputSchema = z.object({
   proveedorId: uuidSchema,
   productoId: uuidSchema,
 });
-
-export type ProviderInput = z.infer<typeof providerInputSchema>;
-export type ProviderDebtInput = z.infer<typeof debtInputSchema>;
 
 export interface ProviderListRow {
   id: string;

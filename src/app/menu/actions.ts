@@ -2,25 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { db } from "@/db";
 import { menu, type MenuItem, recetas } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
-import { moneySchema, optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
+import { uuidSchema } from "@/lib/validation";
 
-const menuItemInputSchema = z.object({
-  nombre: requiredTextSchema,
-  descripcion: optionalTextSchema,
-  precioVenta: moneySchema,
-  recetaId: z
-    .string()
-    .trim()
-    .transform((value) => (value.length > 0 ? value : null))
-    .pipe(uuidSchema.nullable()),
-});
-
-export type MenuItemInput = z.infer<typeof menuItemInputSchema>;
+import { menuItemInputSchema } from "./schema";
 
 export interface MenuItemRow {
   id: string;

@@ -25,7 +25,7 @@ export const isoDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe tener formato AAAA-MM-DD.");
 
-export function positiveDecimalSchema(scale = 2): z.ZodType<string> {
+export function positiveDecimalSchema(scale = 2): z.ZodType<string, string> {
   return z
     .string()
     .trim()
@@ -34,7 +34,7 @@ export function positiveDecimalSchema(scale = 2): z.ZodType<string> {
     .transform((value) => toDecimalString(value, scale));
 }
 
-export function nonNegativeDecimalSchema(scale = 2): z.ZodType<string> {
+export function nonNegativeDecimalSchema(scale = 2): z.ZodType<string, string> {
   return z
     .string()
     .trim()
