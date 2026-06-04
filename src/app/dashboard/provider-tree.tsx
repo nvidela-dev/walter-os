@@ -25,7 +25,9 @@ import {
   useState,
 } from "react";
 
-import type { ProviderNode, TreeInvoice } from "./queries";
+import { getProductPriceHistory, type PriceHistoryRow } from "@/app/invoices/actions";
+
+import type { ProviderNode, TreeInvoice, TreeProduct } from "./queries";
 
 // Everforest (dark, medium) — a woodsy palette: warm tan foreground over
 // muted forest-green backgrounds, with earthy accent hues.
@@ -265,18 +267,21 @@ function buildInvoiceBuffer(provider: ProviderNode, invoice: TreeInvoice): React
   return lines;
 }
 
-function InvoicePanel({
-  provider,
-  invoice,
+function BufferView({
+  bufferName,
+  lines,
+  statusLabel,
+  statusColor,
+  headerExtra,
   onClose,
 }: {
-  provider: ProviderNode;
-  invoice: TreeInvoice;
+  bufferName: string;
+  lines: ReactNode[];
+  statusLabel: string;
+  statusColor: string;
+  headerExtra?: ReactNode;
   onClose: () => void;
 }): ReactElement {
-  const buffer = buildInvoiceBuffer(provider, invoice);
-  const bufferName = `invoice://${invoice.number ?? invoice.id.slice(0, 8)}`;
-
   return (
     <aside
       className="flex w-[44%] min-w-[320px] max-w-xl flex-col border-l"
@@ -287,20 +292,23 @@ function InvoicePanel({
         style={{ backgroundColor: c.bg1, borderColor: c.bg3 }}
       >
         <span style={{ color: c.grey }}>{bufferName}</span>
-        <button
-          type="button"
-          onClick={onClose}
-          title="close (Esc)"
-          aria-label="close"
-          className="rounded p-1 hover:bg-[#3d484d]"
-          style={{ color: c.grey }}
-        >
-          <XMarkIcon className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {headerExtra}
+          <button
+            type="button"
+            onClick={onClose}
+            title="close (Esc)"
+            aria-label="close"
+            className="rounded p-1 hover:bg-[#3d484d]"
+            style={{ color: c.grey }}
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto py-1 text-[13px]">
-        {buffer.map((node, i) => (
+        {lines.map((node, i) => (
           <div key={i} className="flex leading-6 hover:bg-[#272e33]">
             <span
               className="w-10 shrink-0 select-none pr-3 text-right"
@@ -317,23 +325,173 @@ function InvoicePanel({
         className="flex items-stretch justify-between border-t text-[11px]"
         style={{ backgroundColor: c.bg1, borderColor: c.bg3 }}
       >
-        <span className="px-3 py-1 font-semibold" style={{ backgroundColor: c.blue, color: c.bg0 }}>
-          INVOICE
+        <span
+          className="px-3 py-1 font-semibold"
+          style={{ backgroundColor: statusColor, color: c.bg0 }}
+        >
+          {statusLabel}
         </span>
         <span className="px-3 py-1" style={{ color: c.grey }}>
-          {buffer.length} lines
+          {lines.length} lines
         </span>
       </div>
     </aside>
   );
 }
 
-// ── tree ────────────────────────────────────────────────────────────────────
-
-interface Selection {
+function InvoicePanel({
+  provider,
+  invoice,
+  onClose,
+}: {
   provider: ProviderNode;
   invoice: TreeInvoice;
+  onClose: () => void;
+}): ReactElement {
+  return (
+    <BufferView
+      bufferName={`invoice://${invoice.number ?? invoice.id.slice(0, 8)}`}
+      lines={buildInvoiceBuffer(provider, invoice)}
+      statusLabel="INVOICE"
+      statusColor={c.blue}
+      onClose={onClose}
+    />
+  );
 }
+
+function buildProductBuffer(
+  provider: ProviderNode,
+  product: TreeProduct,
+  history: PriceHistoryRow[] | null,
+  error: string | null
+): ReactNode[] {
+  const blank = <span>{" "}</span>;
+  const lines: ReactNode[] = [];
+  lines.push(
+    <span style={{ color: c.grey0 }}>
+      # product <span style={{ color: c.fg }}>{product.name}</span>
+    </span>,
+    blank,
+    bufferField("provider", <span style={{ color: c.fg }}>{provider.name}</span>),
+    bufferField("type", <span style={{ color: c.aqua }}>{provider.type}</span>),
+    bufferField("unit", <span style={{ color: c.fg }}>{product.unit}</span>),
+    bufferField(
+      "price",
+      <>
+        <Money value={product.price} />{" "}
+        <span style={{ color: c.grey0 }}>/{product.unit} (current)</span>
+      </>
+    ),
+    blank
+  );
+
+  if (error != null) {
+    lines.push(
+      <span className="italic" style={{ color: c.red }}>
+        {error}
+      </span>
+    );
+    return lines;
+  }
+  if (history == null) {
+    lines.push(
+      <span className="italic" style={{ color: c.grey0 }}>
+        loading price history…
+      </span>
+    );
+    return lines;
+  }
+
+  lines.push(<span style={{ color: c.grey0 }}># price history ({history.length})</span>);
+  if (history.length === 0) {
+    lines.push(
+      <span className="italic" style={{ color: c.grey0 }}>
+        (no recorded changes)
+      </span>
+    );
+    return lines;
+  }
+
+  for (const [idx, row] of history.entries()) {
+    const older = history[idx + 1];
+    let trend: ReactNode = <span style={{ color: c.grey0 }}> </span>;
+    if (older != null) {
+      const diff = Number(row.price) - Number(older.price);
+      if (diff > 0) trend = <span style={{ color: c.red }}>↑</span>;
+      else if (diff < 0) trend = <span style={{ color: c.green }}>↓</span>;
+      else trend = <span style={{ color: c.grey0 }}>·</span>;
+    }
+    const date = row.invoiceDate ?? new Date(row.createdAt).toISOString().slice(0, 10);
+    lines.push(
+      <span className="flex flex-wrap items-center gap-x-3">
+        <span style={{ color: c.grey }}>{date}</span>
+        <Money value={row.price} />
+        {trend}
+        {row.invoiceNumber != null && (
+          <span style={{ color: c.orange }}>#{row.invoiceNumber}</span>
+        )}
+      </span>
+    );
+  }
+  return lines;
+}
+
+function ProductPanel({
+  provider,
+  product,
+  onClose,
+}: {
+  provider: ProviderNode;
+  product: TreeProduct;
+  onClose: () => void;
+}): ReactElement {
+  const [history, setHistory] = useState<PriceHistoryRow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Panel is keyed per product, so it remounts fresh — no in-effect reset needed.
+  // `token` lives on an object so a stale async resolve after unmount is ignored.
+  useEffect(() => {
+    const token = { active: true };
+    void (async (): Promise<void> => {
+      try {
+        const rows = await getProductPriceHistory(product.productId, { providerId: provider.id });
+        if (token.active) setHistory(rows);
+      } catch {
+        if (token.active) setError("failed to load price history");
+      }
+    })();
+    return (): void => {
+      token.active = false;
+    };
+  }, [provider.id, product.productId]);
+
+  return (
+    <BufferView
+      bufferName={`product://${product.name}`}
+      lines={buildProductBuffer(provider, product, history, error)}
+      statusLabel="PRODUCT"
+      statusColor={c.purple}
+      headerExtra={
+        <Link
+          href={`/providers/${provider.id}/products/${product.productId}`}
+          title="open detail page"
+          aria-label="open detail page"
+          className="rounded p-1 hover:bg-[#3d484d]"
+          style={{ color: c.grey }}
+        >
+          <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+        </Link>
+      }
+      onClose={onClose}
+    />
+  );
+}
+
+// ── tree ────────────────────────────────────────────────────────────────────
+
+type Selection =
+  | { kind: "invoice"; provider: ProviderNode; invoice: TreeInvoice }
+  | { kind: "product"; provider: ProviderNode; product: TreeProduct };
 
 export function ProviderTree({ providers }: { providers: ProviderNode[] }): ReactElement {
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
@@ -547,21 +705,33 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
                         (provider.products.length === 0 ? (
                           <EmptyLeaf depth={2} text="no products" />
                         ) : (
-                          provider.products.map((product) => (
-                            <Row
-                              key={product.productId}
-                              depth={2}
-                              icon={CubeIcon}
-                              iconColor={c.fg}
-                              label={product.name}
-                              meta={
-                                <>
-                                  <Money value={product.price} /> /{product.unit}
-                                </>
-                              }
-                              href={`/providers/${provider.id}/products/${product.productId}`}
-                            />
-                          ))
+                          provider.products.map((product) => {
+                            const productSelected =
+                              selected?.kind === "product" &&
+                              selected.product.productId === product.productId &&
+                              selected.provider.id === provider.id;
+                            return (
+                              <Row
+                                key={product.productId}
+                                depth={2}
+                                icon={CubeIcon}
+                                iconColor={productSelected ? c.yellow : c.fg}
+                                label={
+                                  <span style={{ color: productSelected ? c.yellow : c.fg }}>
+                                    {product.name}
+                                  </span>
+                                }
+                                meta={
+                                  <>
+                                    <Money value={product.price} /> /{product.unit}
+                                  </>
+                                }
+                                onOpen={() => {
+                                  setSelected({ kind: "product", provider, product });
+                                }}
+                              />
+                            );
+                          })
                         ))}
 
                       {/* invoices group */}
@@ -583,7 +753,8 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
                         ) : (
                           provider.invoices.map((invoice) => {
                             const invoiceOpen = expandedOf(`i:${invoice.id}`);
-                            const isSelected = selected?.invoice.id === invoice.id;
+                            const isSelected =
+                              selected?.kind === "invoice" && selected.invoice.id === invoice.id;
                             return (
                               <div key={invoice.id}>
                                 <Row
@@ -613,7 +784,7 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
                                     </>
                                   }
                                   onOpen={() => {
-                                    setSelected({ provider, invoice });
+                                    setSelected({ kind: "invoice", provider, invoice });
                                   }}
                                 />
                                 {invoiceOpen &&
@@ -651,15 +822,25 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
           )}
         </div>
 
-        {selected != null && (
-          <InvoicePanel
-            provider={selected.provider}
-            invoice={selected.invoice}
-            onClose={() => {
-              setSelected(null);
-            }}
-          />
-        )}
+        {selected != null &&
+          (selected.kind === "invoice" ? (
+            <InvoicePanel
+              provider={selected.provider}
+              invoice={selected.invoice}
+              onClose={() => {
+                setSelected(null);
+              }}
+            />
+          ) : (
+            <ProductPanel
+              key={`${selected.provider.id}:${selected.product.productId}`}
+              provider={selected.provider}
+              product={selected.product}
+              onClose={() => {
+                setSelected(null);
+              }}
+            />
+          ))}
       </div>
 
       {/* lualine */}
