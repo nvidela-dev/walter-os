@@ -3,16 +3,14 @@
 import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
+import { useActionForm } from "@/components/hooks/use-action-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { t } from "@/i18n";
+import { createProductForProvider } from "@/lib/actions/products";
 import { getFormString } from "@/lib/form";
-
-import { createProductForProvider } from "../actions";
-
-interface UnitOption {
-  id: string;
-  code: string;
-  name: string;
-}
+import type { UnitOption } from "@/lib/types/providers";
 
 export function AddProductForm({
   providerId,
@@ -22,46 +20,41 @@ export function AddProductForm({
   units: UnitOption[];
 }): ReactElement {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, isSubmitting, runAction } = useActionForm();
 
   const defaultUnitId =
     units.find((u) => u.code === "unidad")?.id ?? units[0]?.id ?? "";
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
-    const result = await createProductForProvider(
-      providerId,
-      {
-        name: getFormString(formData, "name"),
-        unitId: getFormString(formData, "unitId"),
-        description: getFormString(formData, "description") || null,
-      },
-      getFormString(formData, "price"),
-      getFormString(formData, "quantity")
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const result = await runAction(() =>
+      createProductForProvider(
+        providerId,
+        {
+          name: getFormString(formData, "name"),
+          unitId: getFormString(formData, "unitId"),
+          description: getFormString(formData, "description") || null,
+        },
+        getFormString(formData, "price"),
+        getFormString(formData, "quantity")
+      )
     );
-
-    setIsSubmitting(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
+    if (!result.ok) return;
     setIsOpen(false);
-    e.currentTarget.reset();
+    form.reset();
   }
 
   if (!isOpen) {
     return (
-      <button
+      <Button
         onClick={() => { setIsOpen(true); }}
-        className="w-full rounded-xl border-2 border-dashed border-[#c4a77d] py-4 text-sm font-medium text-[#c4a77d] hover:bg-white"
+        variant="secondary"
+        className="w-full border-dashed border-[#c4a77d] py-4 text-sm text-[#c4a77d] hover:bg-white"
       >
         + {t.products.addCta}
-      </button>
+      </Button>
     );
   }
 
@@ -69,66 +62,71 @@ export function AddProductForm({
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 rounded-xl bg-white p-4">
       <FormMessage message={error} />
       <div>
-        <input
+        <Input
           type="text"
           name="name"
           required
+          aria-label={t.products.fields.name}
           placeholder={t.products.fields.namePlaceholder}
-          className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
+          className="rounded-lg px-3"
         />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <input
+          <Input
             type="number"
             name="quantity"
             step="0.01"
             required
+            aria-label={t.products.fields.packQuantity}
             defaultValue="1"
             placeholder={t.products.fields.quantityPlaceholder}
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
+            className="rounded-lg px-3"
           />
         </div>
         <div>
-          <select
+          <Select
             name="unitId"
+            aria-label={t.products.fields.unit}
             defaultValue={defaultUnitId}
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
+            className="rounded-lg px-3"
           >
             {units.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
-          <input
+          <Input
             type="number"
             name="price"
             step="0.01"
             required
+            aria-label={t.products.fields.price}
             placeholder={t.products.fields.pricePlaceholder}
-            className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
+            className="rounded-lg px-3"
           />
         </div>
       </div>
 
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={() => { setIsOpen(false); }}
-          className="flex-1 rounded-lg border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
+          variant="secondary"
+          className="flex-1 rounded-lg py-3 text-sm"
         >
           {t.common.cancel}
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
+          className="flex-1 rounded-lg py-3 text-sm"
         >
           {isSubmitting ? t.products.adding : t.common.add}
-        </button>
+        </Button>
       </div>
     </form>
   );

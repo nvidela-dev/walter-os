@@ -1,9 +1,9 @@
+import { UserGroupIcon } from "@heroicons/react/24/outline";
 import type { ReactElement } from "react";
 
 import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
 import { t } from "@/i18n";
-
-import { getEmployees } from "./actions";
+import { getEmployees } from "@/lib/queries/employees";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +20,14 @@ export default async function EmployeesPage(): Promise<ReactElement> {
         <ListPageRow
           key={emp.id}
           href={`/employees/${emp.id}`}
-          emoji="🙏"
+          icon={UserGroupIcon}
           title={emp.name}
           subtitle={t.employees.monthlyPay(emp.monthlySalary)}
         />
       )}
       emptyState={
         <EmptyState
-          emoji="🙏"
+          icon={UserGroupIcon}
           title={t.employees.emptyTitle}
           description={t.employees.emptyDescription}
           ctaHref="/employees/new"

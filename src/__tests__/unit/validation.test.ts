@@ -4,6 +4,7 @@ import {
   moneySchema,
   nonNegativeMoneySchema,
   optionalTextSchema,
+  parseUuidOrNull,
   providerDaysSchema,
   quantitySchema,
   requiredTextSchema,
@@ -18,8 +19,11 @@ describe("validation primitives", () => {
   });
 
   it("validates UUID values", () => {
-    expect(uuidSchema.safeParse("5ac23a65-cc36-410d-a92d-5c84944d638c").success).toBe(true);
+    const id = "5ac23a65-cc36-410d-a92d-5c84944d638c";
+    expect(uuidSchema.safeParse(id).success).toBe(true);
     expect(uuidSchema.safeParse("nope").success).toBe(false);
+    expect(parseUuidOrNull(id)).toBe(id);
+    expect(parseUuidOrNull("nope")).toBeNull();
   });
 
   it("normalizes money and quantity decimals", () => {

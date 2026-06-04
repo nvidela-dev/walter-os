@@ -1,27 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactElement, useState } from "react";
+import type { ReactElement } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
+import { useActionForm } from "@/components/hooks/use-action-form";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { t } from "@/i18n";
+import { updateProduct } from "@/lib/actions/products";
 import { getFormString } from "@/lib/form";
-
-import { updateProduct } from "../../../actions";
-
-interface Product {
-  id: string;
-  name: string;
-  unitId: string | null;
-  price: string;
-  description: string | null;
-}
-
-interface UnitOption {
-  id: string;
-  code: string;
-  name: string;
-}
+import type { ProductForProvider, UnitOption } from "@/lib/types/providers";
 
 export function ProductEditForm({
   providerId,
@@ -31,12 +22,11 @@ export function ProductEditForm({
 }: {
   providerId: string;
   productId: string;
-  product: Product;
+  product: ProductForProvider;
   units: UnitOption[];
 }): ReactElement {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, isSubmitting, runAction } = useActionForm();
 
   const defaultUnitId =
     product.unitId ??
@@ -46,8 +36,6 @@ export function ProductEditForm({
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
 
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -56,66 +44,56 @@ export function ProductEditForm({
       price: getFormString(formData, "price"),
     };
 
-    const result = await updateProduct(providerId, productId, data);
-    if (!result.ok) {
-      setError(result.error);
-      setIsSubmitting(false);
-      return;
-    }
+    const result = await runAction(() => updateProduct(providerId, productId, data));
+    if (!result.ok) return;
     router.push(`/providers/${providerId}`);
   }
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
-      <div>
-        <label htmlFor="name" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.products.fields.name}</label>
-        <input
+      <FormField htmlFor="product-name" label={t.products.fields.name}>
+        <Input
           type="text"
-          id="name"
+          id="product-name"
           name="name"
           required
           defaultValue={product.name}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="unitId" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.products.fields.unit}</label>
-        <select
-          id="unitId"
+      <FormField htmlFor="product-unit" label={t.products.fields.unit}>
+        <Select
+          id="product-unit"
           name="unitId"
           defaultValue={defaultUnitId}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         >
           {units.map((u) => (
             <option key={u.id} value={u.id}>
               {u.name}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </FormField>
 
-      <div>
-        <label htmlFor="price" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.products.fields.price}</label>
-        <input
+      <FormField htmlFor="product-price" label={t.products.fields.price}>
+        <Input
           type="number"
-          id="price"
+          id="product-price"
           name="price"
           step="0.01"
           required
           defaultValue={product.price}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
         />
-      </div>
+      </FormField>
 
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50"
+        className="w-full py-4 text-base"
       >
         {isSubmitting ? t.common.saving : t.common.saveChanges}
-      </button>
+      </Button>
     </form>
   );
 }

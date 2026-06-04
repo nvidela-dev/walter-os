@@ -1,45 +1,56 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactElement, useState } from "react";
+import type { ReactElement } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
-import type { Recipe } from "@/db/schema";
+import { useActionForm } from "@/components/hooks/use-action-form";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { t } from "@/i18n";
+import { createRecipe, updateRecipe } from "@/lib/actions/recipes";
 import { getFormString } from "@/lib/form";
+import type { RecipeView } from "@/lib/types/recipes";
 
-import { createRecipe, updateRecipe } from "./actions";
-
-export function RecipeForm({ recipe }: { recipe?: Recipe }): ReactElement {
+export function RecipeForm({ recipe }: { recipe?: RecipeView }): ReactElement {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, isSubmitting, runAction } = useActionForm();
   const isEditing = !!recipe;
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
     const formData = new FormData(e.currentTarget);
     const data = {
       name: getFormString(formData, "name"),
       description: getFormString(formData, "description") || null,
     };
-    const result = isEditing ? await updateRecipe(recipe.id, data) : await createRecipe(data);
-    if (!result.ok) {
-      setError(result.error);
-      setIsSubmitting(false);
-      return;
-    }
+    const result = await runAction(() =>
+      isEditing ? updateRecipe(recipe.id, data) : createRecipe(data)
+    );
+    if (!result.ok) return;
     router.push("/recipes");
   }
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.recipes.fields.name}</label><input type="text" name="name" required defaultValue={recipe?.name} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <div><label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.recipes.fields.instructions}</label><textarea name="description" rows={5} defaultValue={recipe?.description ?? ""} placeholder={t.recipes.fields.instructionsPlaceholder} className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" /></div>
-      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">{isSubmitting ? t.common.loading : isEditing ? t.common.save : t.recipes.addCta}</button>
+      <FormField htmlFor="recipe-name" label={t.recipes.fields.name}>
+        <Input id="recipe-name" name="name" required defaultValue={recipe?.name} />
+      </FormField>
+      <FormField htmlFor="recipe-description" label={t.recipes.fields.instructions}>
+        <Textarea
+          id="recipe-description"
+          name="description"
+          rows={5}
+          defaultValue={recipe?.description ?? ""}
+          placeholder={t.recipes.fields.instructionsPlaceholder}
+        />
+      </FormField>
+      <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
+        {isSubmitting ? t.common.loading : isEditing ? t.common.save : t.recipes.addCta}
+      </Button>
     </form>
   );
 }
