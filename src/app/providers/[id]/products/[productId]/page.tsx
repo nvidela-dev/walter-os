@@ -1,11 +1,12 @@
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 
+import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
+import { getProductForProvider } from "@/lib/queries/products";
+import { getProvider } from "@/lib/queries/providers";
+import { getUnits } from "@/lib/queries/units";
 
-import { getProductForProvider, getProvider, getUnits } from "../../../actions";
 import { ProductEditForm } from "./product-edit-form";
 
 export const dynamic = "force-dynamic";
@@ -31,12 +32,7 @@ export default async function ProductEditPage({
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
-      <header className="sticky top-0 z-10 flex items-center gap-4 bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
-        <Link href={`/providers/${id}`} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]">
-          <ArrowLeftIcon className="h-5 w-5" />
-        </Link>
-        <h1 className="text-xl font-light text-[#3d3530]">{t.products.editTitle}</h1>
-      </header>
+      <PageHeader backHref={`/providers/${id}`} title={t.products.editTitle} />
 
       <main className="flex-1 px-6 py-4">
         <section className="rounded-2xl bg-[#f5f0e8] p-6">

@@ -28,13 +28,11 @@ import {
   useTransition,
 } from "react";
 
-import {
-  createInvoice,
-  getProductPriceHistory,
-  type PriceHistoryRow,
-} from "@/app/invoices/actions";
-import { createProductForProvider } from "@/app/providers/actions";
+import { createInvoice } from "@/lib/actions/invoices";
+import { createProductForProvider } from "@/lib/actions/products";
+import type { PriceHistoryRow } from "@/lib/types/invoices";
 
+import { fetchProductPriceHistory } from "./actions";
 import type { ProviderNode, TreeInvoice, TreeProduct } from "./queries";
 
 interface Unit {
@@ -468,7 +466,7 @@ function ProductPanel({
     const token = { active: true };
     void (async (): Promise<void> => {
       try {
-        const rows = await getProductPriceHistory(product.productId, { providerId: provider.id });
+        const rows = await fetchProductPriceHistory(product.productId, provider.id);
         if (token.active) setHistory(rows);
       } catch {
         if (token.active) setError("failed to load price history");

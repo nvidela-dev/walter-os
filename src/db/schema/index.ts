@@ -1,5 +1,5 @@
 // Core entities. Code is English; physical table/column names stay Spanish
-// (see docs/i18n.md and src/i18n/glossary.ts).
+// (see docs/i18n.md).
 
 // Units of measure
 export * from "./units";

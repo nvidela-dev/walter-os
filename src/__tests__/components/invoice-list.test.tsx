@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { actionError, actionOk } from "@/lib/action-result";
 
-vi.mock("@/app/invoices/actions", () => ({
+vi.mock("@/lib/actions/invoices", () => ({
   togglePaid: vi.fn(),
 }));
 

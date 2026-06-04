@@ -5,8 +5,7 @@ import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
 import { t } from "@/i18n";
-
-import { removeProductFromProvider } from "../actions";
+import { removeProductFromProvider } from "@/lib/actions/products";
 
 interface Product {
   id: string;
@@ -33,11 +32,16 @@ export function ProductList({
     e.stopPropagation();
     setDeletingId(productId);
     setError(null);
-    const result = await removeProductFromProvider(providerId, productId);
-    if (!result.ok) {
-      setError(result.error);
+    try {
+      const result = await removeProductFromProvider(providerId, productId);
+      if (!result.ok) {
+        setError(result.error);
+      }
+    } catch {
+      setError(t.errors.generic);
+    } finally {
+      setDeletingId(null);
     }
-    setDeletingId(null);
   }
 
   if (products.length === 0) {

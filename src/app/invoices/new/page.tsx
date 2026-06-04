@@ -1,11 +1,11 @@
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactElement } from "react";
 
-import { getUnits } from "@/app/providers/actions";
+import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
+import { getInvoiceFormData } from "@/lib/queries/invoices";
+import { getUnits } from "@/lib/queries/units";
 
-import { getInvoiceFormData } from "../actions";
 import { InvoiceForm } from "./invoice-form";
 
 export const dynamic = "force-dynamic";
@@ -18,15 +18,7 @@ export default async function NewInvoicePage(): Promise<ReactElement> {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
-      <header className="sticky top-0 z-10 flex items-center gap-4 bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
-        <Link
-          href="/"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-        </Link>
-        <h1 className="text-xl font-light text-[#3d3530]">{t.invoices.newTitle}</h1>
-      </header>
+      <PageHeader backHref="/" title={t.invoices.newTitle} />
 
       <main className="flex-1 px-6 py-4 pb-24">
         {providers.length === 0 ? (

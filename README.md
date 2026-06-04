@@ -39,6 +39,30 @@ A mobile-first PWA for small restaurant operations.
 - **Recetas** - Recipes and product ingredient quantities.
 - **Menu** - Sellable menu items and optional recipe links.
 
+## Architecture
+
+Walter OS keeps the App Router focused on pages and feature UI, while shared
+application contracts live under `src/lib`:
+
+```text
+App Router pages -> server-only queries -> Drizzle / Neon
+Client components -> mutation-only Server Actions -> use cases when needed -> Drizzle / Neon
+```
+
+- `src/app/` contains pages and route-colocated feature components. Complex UI,
+  such as invoice creation, is split into local components and hooks.
+- `src/lib/actions/` contains mutation boundaries only. Actions validate input,
+  call the relevant workflow, revalidate routes, and return `ActionResult`.
+- `src/lib/queries/` contains server-only reads used by pages.
+- `src/lib/validators/` and `src/lib/types/` contain reusable feature contracts.
+- `src/lib/use-cases/` is reserved for workflows with meaningful domain
+  orchestration. Simple CRUD stays in its action rather than adding layers.
+- `src/db/schema/` remains the database contract, with English code identifiers
+  mapped to the existing Spanish physical table and column names.
+
+The app intentionally keeps the existing invoice `paid` boolean and does not add
+an authorization matrix or lifecycle state machine.
+
 ## Data And Validation
 
 - Server actions validate public mutation inputs with Zod before writes.

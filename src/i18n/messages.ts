@@ -2,7 +2,7 @@
 // UI COPY — every Spanish string the app renders or returns lives here.
 //
 // Code stays English; this dictionary is the only place Spanish text appears
-// (besides the physical DB identifiers documented in glossary.ts). If you ever
+// (besides the physical DB identifiers in Drizzle schema files). If you ever
 // add a second language, this file becomes the `es` message catalog as-is.
 //
 // Convention: nest by feature; use functions for interpolated strings.
@@ -28,6 +28,7 @@ export const t = {
     delete: "Eliminar",
     edit: "Editar",
     close: "Cerrar",
+    back: "Volver",
     loading: "...",
   },
 

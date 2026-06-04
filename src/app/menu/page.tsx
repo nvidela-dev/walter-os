@@ -1,9 +1,9 @@
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import type { ReactElement } from "react";
 
 import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
 import { t } from "@/i18n";
-
-import { getMenuItems } from "./actions";
+import { getMenuItems } from "@/lib/queries/menu";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +20,14 @@ export default async function MenuPage(): Promise<ReactElement> {
         <ListPageRow
           key={item.id}
           href={`/menu/${item.id}`}
-          emoji="☕"
+          icon={ClipboardDocumentListIcon}
           title={item.name}
           subtitle={`$${item.sellPrice}${item.recipeName != null ? ` · ${item.recipeName}` : ""}`}
         />
       )}
       emptyState={
         <EmptyState
-          emoji="☕"
+          icon={ClipboardDocumentListIcon}
           title={t.menu.emptyTitle}
           description={t.menu.emptyDescription}
           ctaHref="/menu/new"

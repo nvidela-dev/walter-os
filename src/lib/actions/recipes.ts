@@ -2,55 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { db } from "@/db";
-import { products, type Recipe, recipeProducts, recipes, units } from "@/db/schema";
+import { recipes } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
-import { optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
-
-const recipeInputSchema = z.object({
-  name: requiredTextSchema,
-  description: optionalTextSchema,
-});
-
-export type RecipeInput = z.infer<typeof recipeInputSchema>;
-
-export interface RecipeIngredient {
-  productId: string;
-  quantity: string;
-  name: string;
-  unit: string;
-}
-
-export async function getRecipes(): Promise<Recipe[]> {
-  return db.select().from(recipes).orderBy(recipes.name);
-}
-
-export async function getRecipe(id: string): Promise<Recipe | null> {
-  const result = await db.select().from(recipes).where(eq(recipes.id, id));
-  return result[0] ?? null;
-}
-
-export async function getRecipeWithIngredients(
-  id: string
-): Promise<(Recipe & { ingredients: RecipeIngredient[] }) | null> {
-  const recipe = await getRecipe(id);
-  if (!recipe) return null;
-  const ingredients = await db
-    .select({
-      productId: recipeProducts.productId,
-      quantity: recipeProducts.quantity,
-      name: products.name,
-      unit: units.code,
-    })
-    .from(recipeProducts)
-    .innerJoin(products, eq(recipeProducts.productId, products.id))
-    .innerJoin(units, eq(products.unitId, units.id))
-    .where(eq(recipeProducts.recipeId, id));
-  return { ...recipe, ingredients };
-}
+import { uuidSchema } from "@/lib/validation";
+import { recipeInputSchema } from "@/lib/validators/recipes";
 
 export async function createRecipe(input: unknown): Promise<ActionResult<{ id: string }>> {
   const parsed = recipeInputSchema.safeParse(input);

@@ -2,55 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { db } from "@/db";
-import { menu, type MenuItem, recipes } from "@/db/schema";
+import { menu } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
-import { moneySchema, optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
-
-const menuItemInputSchema = z.object({
-  name: requiredTextSchema,
-  description: optionalTextSchema,
-  sellPrice: moneySchema,
-  recipeId: z
-    .string()
-    .trim()
-    .transform((value) => (value.length > 0 ? value : null))
-    .pipe(uuidSchema.nullable()),
-});
-
-export type MenuItemInput = z.infer<typeof menuItemInputSchema>;
-
-export interface MenuItemRow {
-  id: string;
-  name: string;
-  description: string | null;
-  sellPrice: string;
-  recipeId: string | null;
-  recipeName: string | null;
-}
-
-export async function getMenuItems(): Promise<MenuItemRow[]> {
-  return db
-    .select({
-      id: menu.id,
-      name: menu.name,
-      description: menu.description,
-      sellPrice: menu.sellPrice,
-      recipeId: menu.recipeId,
-      recipeName: recipes.name,
-    })
-    .from(menu)
-    .leftJoin(recipes, eq(menu.recipeId, recipes.id))
-    .orderBy(menu.name);
-}
-
-export async function getMenuItem(id: string): Promise<MenuItem | null> {
-  const result = await db.select().from(menu).where(eq(menu.id, id));
-  return result[0] ?? null;
-}
+import { uuidSchema } from "@/lib/validation";
+import { menuItemInputSchema } from "@/lib/validators/menu";
 
 export async function createMenuItem(input: unknown): Promise<ActionResult<{ id: string }>> {
   const parsed = menuItemInputSchema.safeParse(input);
@@ -110,8 +68,4 @@ export async function deleteMenuItem(id: string): Promise<ActionResult> {
   } catch (error) {
     return unknownActionError(error);
   }
-}
-
-export async function getAllRecipes(): Promise<{ id: string; name: string }[]> {
-  return db.select({ id: recipes.id, name: recipes.name }).from(recipes).orderBy(recipes.name);
 }

@@ -1,31 +1,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactElement, useState } from "react";
+import type { ReactElement } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
-import type { MenuItem } from "@/db/schema";
+import { useActionForm } from "@/components/hooks/use-action-form";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { t } from "@/i18n";
+import { createMenuItem, updateMenuItem } from "@/lib/actions/menu";
 import { getFormString } from "@/lib/form";
-
-import { createMenuItem, updateMenuItem } from "./actions";
+import type { MenuItemView, RecipeOption } from "@/lib/types/menu";
 
 export function MenuForm({
   item,
   recipes,
 }: {
-  item?: MenuItem;
-  recipes: { id: string; name: string }[];
+  item?: MenuItemView;
+  recipes: RecipeOption[];
 }): ReactElement {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, isSubmitting, runAction } = useActionForm();
   const isEditing = !!item;
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
     const formData = new FormData(e.currentTarget);
     const data = {
       name: getFormString(formData, "name"),
@@ -34,49 +36,44 @@ export function MenuForm({
       recipeId: getFormString(formData, "recipeId") || null,
     };
 
-    const result = isEditing ? await updateMenuItem(item.id, data) : await createMenuItem(data);
-    if (!result.ok) {
-      setError(result.error);
-      setIsSubmitting(false);
-      return;
-    }
+    const result = await runAction(() =>
+      isEditing ? updateMenuItem(item.id, data) : createMenuItem(data)
+    );
+    if (!result.ok) return;
     router.push("/menu");
   }
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
-      <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.name}</label>
-        <input type="text" name="name" required defaultValue={item?.name}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
+      <FormField htmlFor="menu-name" label={t.menu.fields.name}>
+        <Input id="menu-name" name="name" required defaultValue={item?.name} />
+      </FormField>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.sellPrice}</label>
-        <input type="number" name="sellPrice" step="0.01" required defaultValue={item?.sellPrice}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
+      <FormField htmlFor="menu-price" label={t.menu.fields.sellPrice}>
+        <Input id="menu-price" name="sellPrice" type="number" step="0.01" required defaultValue={item?.sellPrice} />
+      </FormField>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.recipe}</label>
-        <select name="recipeId" defaultValue={item?.recipeId ?? ""}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none">
+      <FormField htmlFor="menu-recipe" label={t.menu.fields.recipe}>
+        <Select id="menu-recipe" name="recipeId" defaultValue={item?.recipeId ?? ""}>
           <option value="">{t.menu.fields.noRecipe}</option>
           {recipes.map((recipe) => <option key={recipe.id} value={recipe.id}>{recipe.name}</option>)}
-        </select>
-      </div>
+        </Select>
+      </FormField>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.description}</label>
-        <textarea name="description" rows={3} defaultValue={item?.description ?? ""} placeholder={t.menu.fields.descriptionPlaceholder}
-          className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
-      </div>
+      <FormField htmlFor="menu-description" label={t.menu.fields.description}>
+        <Textarea
+          id="menu-description"
+          name="description"
+          rows={3}
+          defaultValue={item?.description ?? ""}
+          placeholder={t.menu.fields.descriptionPlaceholder}
+        />
+      </FormField>
 
-      <button type="submit" disabled={isSubmitting}
-        className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">
+      <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
         {isSubmitting ? t.common.loading : isEditing ? t.common.save : t.menu.addCta}
-      </button>
+      </Button>
     </form>
   );
 }

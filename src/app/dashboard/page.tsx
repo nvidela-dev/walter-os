@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { getUnits } from "@/app/providers/actions";
+import { getUnits } from "@/lib/queries/units";
 
 import { ProviderTree } from "./provider-tree";
 import { getProviderTree } from "./queries";
