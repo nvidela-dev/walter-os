@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createProvider, updateProvider } from "./actions";
 import type { Proveedor, ProveedorTipo } from "@/db/schema";
+import { FormMessage } from "@/components/form-feedback";
 
 const DAYS = [
   { key: "L", label: "Lunes" },
@@ -18,6 +19,7 @@ const DAYS = [
 export function ProviderForm({ provider }: { provider?: Proveedor }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [tipo, setTipo] = useState<ProveedorTipo>(provider?.tipo ?? "producto");
   const [selectedDays, setSelectedDays] = useState<string[]>(
     provider?.dias ? provider.dias.split(",") : []
@@ -33,6 +35,7 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     const formData = new FormData(e.currentTarget);
     const data = {
       nombre: formData.get("nombre") as string,
@@ -42,16 +45,27 @@ export function ProviderForm({ provider }: { provider?: Proveedor }) {
     };
 
     if (isEditing) {
-      await updateProvider(provider.id, data);
+      const result = await updateProvider(provider.id, data);
+      if (!result.ok) {
+        setError(result.error);
+        setIsSubmitting(false);
+        return;
+      }
       router.push(`/providers/${provider.id}`);
     } else {
-      const newProvider = await createProvider(data);
-      router.push(`/providers/${newProvider.id}`);
+      const result = await createProvider(data);
+      if (!result.ok) {
+        setError(result.error);
+        setIsSubmitting(false);
+        return;
+      }
+      router.push(`/providers/${result.data.id}`);
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <FormMessage message={error} />
       <div>
         <label className="mb-2 block text-xs font-medium text-[#8b7355]">Tipo</label>
         <div className="grid grid-cols-2 gap-2">

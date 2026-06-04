@@ -4,6 +4,8 @@ import { getProvider, getProductForProvider, getUnidades } from "../../../action
 import { ProductEditForm } from "./product-edit-form";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
+export const dynamic = "force-dynamic";
+
 interface ProductEditPageProps {
   params: Promise<{ id: string; productId: string }>;
 }

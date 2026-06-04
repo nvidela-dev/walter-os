@@ -2,17 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FormMessage } from "@/components/form-feedback";
 import { createMenuItem, updateMenuItem } from "./actions";
 import type { MenuItem } from "@/db/schema";
 
 export function MenuForm({ item, recipes }: { item?: MenuItem; recipes: { id: string; nombre: string }[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isEditing = !!item;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     const formData = new FormData(e.currentTarget);
     const recetaId = formData.get("recetaId") as string;
     const data = {
@@ -22,13 +25,18 @@ export function MenuForm({ item, recipes }: { item?: MenuItem; recipes: { id: st
       recetaId: recetaId || null,
     };
 
-    if (isEditing) await updateMenuItem(item.id, data);
-    else await createMenuItem(data);
+    const result = isEditing ? await updateMenuItem(item.id, data) : await createMenuItem(data);
+    if (!result.ok) {
+      setError(result.error);
+      setIsSubmitting(false);
+      return;
+    }
     router.push("/menu");
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <FormMessage message={error} />
       <div>
         <label className="mb-2 block text-sm font-medium text-[#3d3530]">Nombre del Plato</label>
         <input type="text" name="nombre" required defaultValue={item?.nombre}

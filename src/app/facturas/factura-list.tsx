@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { FormMessage } from "@/components/form-feedback";
 import { togglePaid } from "./actions";
 
 interface FacturaRow {
@@ -22,7 +23,15 @@ const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: "paid", label: "Pagadas" },
 ];
 
-export function FacturaList({ facturas }: { facturas: FacturaRow[] }) {
+type TogglePaidAction = typeof togglePaid;
+
+export function FacturaList({
+  facturas,
+  togglePaidAction = togglePaid,
+}: {
+  facturas: FacturaRow[];
+  togglePaidAction?: TogglePaidAction;
+}) {
   const [filter, setFilter] = useState<Filter>("all");
 
   const counts = useMemo(() => {
@@ -72,7 +81,7 @@ export function FacturaList({ facturas }: { facturas: FacturaRow[] }) {
       ) : (
         <div className="space-y-2">
           {filtered.map((factura) => (
-            <FacturaRow key={factura.id} factura={factura} />
+            <FacturaRow key={factura.id} factura={factura} togglePaidAction={togglePaidAction} />
           ))}
         </div>
       )}
@@ -80,65 +89,80 @@ export function FacturaList({ facturas }: { facturas: FacturaRow[] }) {
   );
 }
 
-function FacturaRow({ factura }: { factura: FacturaRow }) {
+function FacturaRow({
+  factura,
+  togglePaidAction,
+}: {
+  factura: FacturaRow;
+  togglePaidAction: TogglePaidAction;
+}) {
   const [isPending, startTransition] = useTransition();
   const [optimisticPaid, setOptimisticPaid] = useState(factura.paid);
+  const [error, setError] = useState<string | null>(null);
 
   function handleToggle() {
     if (isPending) return;
     const next = !optimisticPaid;
     setOptimisticPaid(next);
+    setError(null);
     startTransition(async () => {
       try {
-        await togglePaid(factura.id);
+        const result = await togglePaidAction(factura.id);
+        if (!result.ok) {
+          setError(result.error);
+          setOptimisticPaid(!next);
+        }
       } catch {
-        // revert on failure
+        setError("No se pudo actualizar la factura.");
         setOptimisticPaid(!next);
       }
     });
   }
 
   return (
-    <div
-      className={`flex items-center gap-4 rounded-2xl p-4 transition-colors ${
-        optimisticPaid ? "bg-[#f5f0e8]/60" : "bg-[#f5f0e8]"
-      }`}
-    >
-      <button
-        type="button"
-        onClick={handleToggle}
-        disabled={isPending}
-        aria-label={optimisticPaid ? "Marcar como pendiente" : "Marcar como pagada"}
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
-          optimisticPaid
-            ? "border-emerald-600 bg-emerald-600 text-white"
-            : "border-[#c4a77d] bg-white"
-        } ${isPending ? "opacity-60" : ""}`}
+    <div className="space-y-2">
+      <div
+        className={`flex items-center gap-4 rounded-2xl p-4 transition-colors ${
+          optimisticPaid ? "bg-[#f5f0e8]/60" : "bg-[#f5f0e8]"
+        }`}
       >
-        {optimisticPaid && <CheckIcon className="h-4 w-4" />}
-      </button>
+        <button
+          type="button"
+          onClick={handleToggle}
+          disabled={isPending}
+          aria-label={optimisticPaid ? "Marcar como pendiente" : "Marcar como pagada"}
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+            optimisticPaid
+              ? "border-emerald-600 bg-emerald-600 text-white"
+              : "border-[#c4a77d] bg-white"
+          } ${isPending ? "opacity-60" : ""}`}
+        >
+          {optimisticPaid && <CheckIcon className="h-4 w-4" />}
+        </button>
 
-      <div className="flex-1 min-w-0">
-        <p
-          className={`truncate font-medium ${
+        <div className="min-w-0 flex-1">
+          <p
+            className={`truncate font-medium ${
+              optimisticPaid ? "text-[#8b7355]" : "text-[#3d3530]"
+            }`}
+          >
+            {factura.proveedorNombre}
+          </p>
+          <p className="text-xs text-[#8b7355]">
+            {factura.fecha}
+            {factura.numero && <> · #{factura.numero}</>}
+          </p>
+        </div>
+
+        <div
+          className={`text-right text-sm font-medium ${
             optimisticPaid ? "text-[#8b7355]" : "text-[#3d3530]"
           }`}
         >
-          {factura.proveedorNombre}
-        </p>
-        <p className="text-xs text-[#8b7355]">
-          {factura.fecha}
-          {factura.numero && <> · #{factura.numero}</>}
-        </p>
+          ${factura.total}
+        </div>
       </div>
-
-      <div
-        className={`text-right text-sm font-medium ${
-          optimisticPaid ? "text-[#8b7355]" : "text-[#3d3530]"
-        }`}
-      >
-        ${factura.total}
-      </div>
+      <FormMessage message={error} />
     </div>
   );
 }

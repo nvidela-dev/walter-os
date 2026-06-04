@@ -4,6 +4,8 @@ import { getEmployee, deleteEmployee } from "../actions";
 import { EmployeeForm } from "../employee-form";
 import { DeleteButton } from "@/components/delete-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function EmployeePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const employee = await getEmployee(id);

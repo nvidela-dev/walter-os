@@ -3,6 +3,8 @@ import { getProviders } from "./actions";
 import { TruckIcon, ArrowLeftIcon, ChevronRightIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 import type { ProveedorTipo } from "@/db/schema";
 
+export const dynamic = "force-dynamic";
+
 const TABS: { value: ProveedorTipo; label: string }[] = [
   { value: "producto", label: "Productos" },
   { value: "servicio", label: "Servicios" },

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FormMessage } from "@/components/form-feedback";
 import { updateProduct } from "../../../actions";
 
 interface Product {
@@ -31,6 +32,7 @@ export function ProductEditForm({
 }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const defaultUnidadId =
     product.unidadId ??
@@ -41,6 +43,7 @@ export function ProductEditForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -49,12 +52,18 @@ export function ProductEditForm({
       precio: formData.get("precio") as string,
     };
 
-    await updateProduct(providerId, productId, data);
+    const result = await updateProduct(providerId, productId, data);
+    if (!result.ok) {
+      setError(result.error);
+      setIsSubmitting(false);
+      return;
+    }
     router.push(`/providers/${providerId}`);
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <FormMessage message={error} />
       <div>
         <label htmlFor="nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">Nombre</label>
         <input

@@ -1,16 +1,79 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import {
-  proveedores,
-  proveedorProductos,
-  productos,
-  unidades,
+  facturaLineas,
+  facturas,
   historialPrecios,
-  type NewProveedor,
+  productos,
+  proveedorProductos,
+  proveedores,
+  recetaProductos,
+  unidades,
 } from "@/db/schema";
-import { eq, and, count } from "drizzle-orm";
+import {
+  actionError,
+  actionOk,
+  expectedActionError,
+  type ActionResult,
+  unknownActionError,
+} from "@/lib/action-result";
+import {
+  moneySchema,
+  nonNegativeMoneySchema,
+  optionalTextSchema,
+  providerDaysSchema,
+  proveedorTipoSchema,
+  quantitySchema,
+  requiredTextSchema,
+  uuidSchema,
+} from "@/lib/validation";
+import { getProductDeleteBlock, getProviderDeleteBlock } from "@/lib/delete-guards";
+import { and, count, eq, type SQL } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const providerInputSchema = z.object({
+  nombre: requiredTextSchema,
+  descripcion: optionalTextSchema,
+  tipo: proveedorTipoSchema,
+  dias: providerDaysSchema,
+});
+
+const debtInputSchema = z.object({
+  deuda: nonNegativeMoneySchema,
+});
+
+const createProductInputSchema = z.object({
+  proveedorId: uuidSchema,
+  productData: z.object({
+    nombre: requiredTextSchema,
+    descripcion: optionalTextSchema,
+    unidadId: uuidSchema,
+  }),
+  precio: moneySchema,
+  cantidad: quantitySchema,
+});
+
+const updateProductInputSchema = z.object({
+  proveedorId: uuidSchema,
+  productoId: uuidSchema,
+  data: z.object({
+    nombre: requiredTextSchema,
+    unidadId: uuidSchema,
+    precio: moneySchema,
+  }),
+});
+
+const productProviderInputSchema = z.object({
+  proveedorId: uuidSchema,
+  productoId: uuidSchema,
+});
+
+export type ProviderInput = z.infer<typeof providerInputSchema>;
+export type ProviderDebtInput = z.infer<typeof debtInputSchema>;
 
 export async function getUnidades() {
   return db
@@ -67,96 +130,209 @@ export async function getProviderWithProducts(id: string) {
   return { ...provider, productos: providerProducts };
 }
 
-export async function createProvider(data: NewProveedor) {
-  const result = await db.insert(proveedores).values(data).returning();
-  revalidatePath("/providers");
-  return result[0];
+export async function createProvider(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const parsed = providerInputSchema.safeParse(input);
+  if (!parsed.success) return unknownActionError(parsed.error);
+
+  try {
+    const [created] = await db.insert(proveedores).values(parsed.data).returning({ id: proveedores.id });
+    revalidatePath("/providers");
+    return actionOk(created);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function updateProvider(id: string, data: Partial<NewProveedor>) {
-  const result = await db
-    .update(proveedores)
-    .set({ ...data, updatedAt: new Date() })
-    .where(eq(proveedores.id, id))
-    .returning();
-  revalidatePath("/providers");
-  revalidatePath(`/providers/${id}`);
-  return result[0];
+export async function updateProvider(
+  id: string,
+  input: unknown
+): Promise<ActionResult<{ id: string }>> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
+
+  const parsed = providerInputSchema.safeParse(input);
+  if (!parsed.success) return unknownActionError(parsed.error);
+
+  try {
+    const [updated] = await db
+      .update(proveedores)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(proveedores.id, parsedId.data))
+      .returning({ id: proveedores.id });
+
+    if (!updated) return actionError("Proveedor no encontrado.");
+
+    revalidatePath("/providers");
+    revalidatePath(`/providers/${parsedId.data}`);
+    return actionOk(updated);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function deleteProvider(id: string) {
-  await db.delete(proveedores).where(eq(proveedores.id, id));
-  revalidatePath("/providers");
+export async function updateProviderDebt(
+  id: string,
+  input: unknown
+): Promise<ActionResult<{ id: string }>> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
+
+  const parsed = debtInputSchema.safeParse(input);
+  if (!parsed.success) return unknownActionError(parsed.error);
+
+  try {
+    const [updated] = await db
+      .update(proveedores)
+      .set({ deuda: parsed.data.deuda, updatedAt: new Date() })
+      .where(eq(proveedores.id, parsedId.data))
+      .returning({ id: proveedores.id });
+
+    if (!updated) return actionError("Proveedor no encontrado.");
+
+    revalidatePath("/providers");
+    revalidatePath(`/providers/${parsedId.data}`);
+    return actionOk(updated);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-// Create a product and link it to a provider
+export async function deleteProvider(id: string): Promise<ActionResult> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
+
+  try {
+    const [productLinks, invoices, priceHistory] = await Promise.all([
+      countRows(proveedorProductos, eq(proveedorProductos.proveedorId, parsedId.data)),
+      countRows(facturas, eq(facturas.proveedorId, parsedId.data)),
+      countRows(historialPrecios, eq(historialPrecios.proveedorId, parsedId.data)),
+    ]);
+
+    const blockMessage = getProviderDeleteBlock({
+      products: productLinks,
+      invoices,
+      priceHistory,
+    });
+    if (blockMessage) return actionError(blockMessage);
+
+    const [deleted] = await db
+      .delete(proveedores)
+      .where(eq(proveedores.id, parsedId.data))
+      .returning({ id: proveedores.id });
+
+    if (!deleted) return actionError("Proveedor no encontrado.");
+
+    revalidatePath("/providers");
+    return actionOk(undefined);
+  } catch (error) {
+    return unknownActionError(error);
+  }
+}
+
 export async function createProductForProvider(
   proveedorId: string,
-  productData: { nombre: string; descripcion: string | null; unidadId: string },
+  productData: unknown,
   precio: string,
   cantidad: string
-) {
-  const unidad = await getUnidadOrThrow(productData.unidadId);
-
-  // Dual-write: populate the legacy `unidad` text column alongside `unidad_id`
-  // so a rollback to the previous deploy still has the old field available.
-  const [product] = await db
-    .insert(productos)
-    .values({
-      nombre: productData.nombre,
-      descripcion: productData.descripcion,
-      unidadId: unidad.id,
-      unidad: unidad.codigo,
-    })
-    .returning();
-
-  await db.insert(proveedorProductos).values({
+): Promise<ActionResult<{ id: string; nombre: string; unidadId: string; unidad: string }>> {
+  const parsed = createProductInputSchema.safeParse({
     proveedorId,
-    productoId: product.id,
+    productData,
     precio,
     cantidad,
   });
+  if (!parsed.success) return unknownActionError(parsed.error);
 
-  await recordPriceChange({
-    productoId: product.id,
-    proveedorId,
-    precio,
-    unidadId: unidad.id,
-  });
+  try {
+    const provider = await getProvider(parsed.data.proveedorId);
+    if (!provider) return actionError("Proveedor no encontrado.");
+    if (provider.tipo !== "producto") {
+      return actionError("Solo se pueden agregar productos a proveedores de productos.");
+    }
 
-  revalidatePath(`/providers/${proveedorId}`);
-  return product;
+    const unidad = await getUnidadOrThrow(parsed.data.productData.unidadId);
+    const productId = randomUUID();
+    const product = {
+      id: productId,
+      nombre: parsed.data.productData.nombre,
+      descripcion: parsed.data.productData.descripcion,
+      unidadId: unidad.id,
+      unidad: unidad.codigo,
+    };
+
+    await db.batch([
+      db.insert(productos).values(product),
+      db.insert(proveedorProductos).values({
+        proveedorId: parsed.data.proveedorId,
+        productoId: productId,
+        precio: parsed.data.precio,
+        cantidad: parsed.data.cantidad,
+      }),
+      db.insert(historialPrecios).values({
+        productoId: productId,
+        proveedorId: parsed.data.proveedorId,
+        precio: parsed.data.precio,
+        unidadId: unidad.id,
+      }),
+    ]);
+
+    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    return actionOk({
+      id: product.id,
+      nombre: product.nombre,
+      unidadId: unidad.id,
+      unidad: unidad.codigo,
+    });
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
 export async function updateProductPrice(
   proveedorId: string,
   productoId: string,
   precio: string
-) {
-  await db
-    .update(proveedorProductos)
-    .set({ precio, updatedAt: new Date() })
-    .where(
-      and(
-        eq(proveedorProductos.proveedorId, proveedorId),
-        eq(proveedorProductos.productoId, productoId)
-      )
-    );
+): Promise<ActionResult> {
+  const parsed = productProviderInputSchema.extend({ precio: moneySchema }).safeParse({
+    proveedorId,
+    productoId,
+    precio,
+  });
+  if (!parsed.success) return unknownActionError(parsed.error);
 
-  const [producto] = await db
-    .select({ unidadId: productos.unidadId })
-    .from(productos)
-    .where(eq(productos.id, productoId));
-  if (producto?.unidadId) {
+  try {
+    const [producto] = await db
+      .select({ unidadId: productos.unidadId })
+      .from(productos)
+      .where(eq(productos.id, parsed.data.productoId));
+
+    if (!producto?.unidadId) return actionError("Producto no encontrado.");
+
+    const [updated] = await db
+      .update(proveedorProductos)
+      .set({ precio: parsed.data.precio, updatedAt: new Date() })
+      .where(
+        and(
+          eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
+          eq(proveedorProductos.productoId, parsed.data.productoId)
+        )
+      )
+      .returning({ productoId: proveedorProductos.productoId });
+
+    if (!updated) return actionError("Producto no encontrado para este proveedor.");
+
     await recordPriceChange({
-      productoId,
-      proveedorId,
-      precio,
+      productoId: parsed.data.productoId,
+      proveedorId: parsed.data.proveedorId,
+      precio: parsed.data.precio,
       unidadId: producto.unidadId,
     });
-  }
 
-  revalidatePath(`/providers/${proveedorId}`);
+    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    return actionOk(undefined);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
 export async function getProductForProvider(proveedorId: string, productoId: string) {
@@ -185,54 +361,99 @@ export async function getProductForProvider(proveedorId: string, productoId: str
 export async function updateProduct(
   proveedorId: string,
   productoId: string,
-  data: { nombre: string; unidadId: string; precio: string }
-) {
-  const unidad = await getUnidadOrThrow(data.unidadId);
+  data: unknown
+): Promise<ActionResult> {
+  const parsed = updateProductInputSchema.safeParse({ proveedorId, productoId, data });
+  if (!parsed.success) return unknownActionError(parsed.error);
 
-  await db
-    .update(productos)
-    .set({
-      nombre: data.nombre,
-      unidadId: unidad.id,
-      unidad: unidad.codigo,
-      updatedAt: new Date(),
-    })
-    .where(eq(productos.id, productoId));
+  try {
+    const unidad = await getUnidadOrThrow(parsed.data.data.unidadId);
 
-  await db
-    .update(proveedorProductos)
-    .set({ precio: data.precio, updatedAt: new Date() })
-    .where(
-      and(
-        eq(proveedorProductos.proveedorId, proveedorId),
-        eq(proveedorProductos.productoId, productoId)
-      )
-    );
+    const [existing] = await db
+      .select({ productoId: proveedorProductos.productoId })
+      .from(proveedorProductos)
+      .where(
+        and(
+          eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
+          eq(proveedorProductos.productoId, parsed.data.productoId)
+        )
+      );
 
-  await recordPriceChange({
-    productoId,
-    proveedorId,
-    precio: data.precio,
-    unidadId: unidad.id,
-  });
+    if (!existing) return actionError("Producto no encontrado para este proveedor.");
 
-  revalidatePath(`/providers/${proveedorId}`);
-  revalidatePath(`/providers/${proveedorId}/products/${productoId}`);
+    await db.batch([
+      db
+        .update(productos)
+        .set({
+          nombre: parsed.data.data.nombre,
+          unidadId: unidad.id,
+          unidad: unidad.codigo,
+          updatedAt: new Date(),
+        })
+        .where(eq(productos.id, parsed.data.productoId)),
+      db
+        .update(proveedorProductos)
+        .set({ precio: parsed.data.data.precio, updatedAt: new Date() })
+        .where(
+          and(
+            eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
+            eq(proveedorProductos.productoId, parsed.data.productoId)
+          )
+        ),
+      db.insert(historialPrecios).values({
+        productoId: parsed.data.productoId,
+        proveedorId: parsed.data.proveedorId,
+        precio: parsed.data.data.precio,
+        unidadId: unidad.id,
+      }),
+    ]);
+
+    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    revalidatePath(`/providers/${parsed.data.proveedorId}/products/${parsed.data.productoId}`);
+    return actionOk(undefined);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function removeProductFromProvider(proveedorId: string, productoId: string) {
-  // Remove the link
-  await db
-    .delete(proveedorProductos)
-    .where(
-      and(
-        eq(proveedorProductos.proveedorId, proveedorId),
-        eq(proveedorProductos.productoId, productoId)
-      )
-    );
-  // Delete the product itself since products must belong to a provider
-  await db.delete(productos).where(eq(productos.id, productoId));
-  revalidatePath(`/providers/${proveedorId}`);
+export async function removeProductFromProvider(
+  proveedorId: string,
+  productoId: string
+): Promise<ActionResult> {
+  const parsed = productProviderInputSchema.safeParse({ proveedorId, productoId });
+  if (!parsed.success) return unknownActionError(parsed.error);
+
+  try {
+    const [invoiceLines, priceHistory, recipeUses] = await Promise.all([
+      countRows(facturaLineas, eq(facturaLineas.productoId, parsed.data.productoId)),
+      countRows(historialPrecios, eq(historialPrecios.productoId, parsed.data.productoId)),
+      countRows(recetaProductos, eq(recetaProductos.productoId, parsed.data.productoId)),
+    ]);
+
+    const blockMessage = getProductDeleteBlock({
+      invoiceLines,
+      priceHistory,
+      recipes: recipeUses,
+    });
+    if (blockMessage) return actionError(blockMessage);
+
+    await db.batch([
+      db
+        .delete(proveedorProductos)
+        .where(
+          and(
+            eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
+            eq(proveedorProductos.productoId, parsed.data.productoId)
+          )
+        ),
+      db.delete(productos).where(eq(productos.id, parsed.data.productoId)),
+    ]);
+
+    revalidatePath(`/providers/${parsed.data.proveedorId}`);
+    return actionOk(undefined);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
 async function getUnidadOrThrow(unidadId: string) {
@@ -240,11 +461,11 @@ async function getUnidadOrThrow(unidadId: string) {
     .select({ id: unidades.id, codigo: unidades.codigo })
     .from(unidades)
     .where(eq(unidades.id, unidadId));
-  if (!unidad) throw new Error(`Unknown unidadId: ${unidadId}`);
+  if (!unidad) throw expectedActionError("Seleccioná una unidad válida.");
   return unidad;
 }
 
-export async function recordPriceChange(args: {
+async function recordPriceChange(args: {
   productoId: string;
   proveedorId: string;
   precio: string;
@@ -252,4 +473,9 @@ export async function recordPriceChange(args: {
   facturaId?: string;
 }) {
   await db.insert(historialPrecios).values(args);
+}
+
+async function countRows(table: PgTable, where: SQL | undefined) {
+  const [row] = await db.select({ value: count() }).from(table).where(where);
+  return row?.value ?? 0;
 }

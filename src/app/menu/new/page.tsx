@@ -2,6 +2,8 @@ import Link from "next/link";
 import { MenuForm } from "../menu-form";
 import { getAllRecipes } from "../actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewMenuItemPage() {
   const recipes = await getAllRecipes();
 

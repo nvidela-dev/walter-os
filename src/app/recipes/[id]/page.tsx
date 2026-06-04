@@ -4,6 +4,8 @@ import { getRecipeWithIngredients, deleteRecipe } from "../actions";
 import { RecipeForm } from "../recipe-form";
 import { DeleteButton } from "@/components/delete-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const recipe = await getRecipeWithIngredients(id);

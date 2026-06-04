@@ -3,6 +3,8 @@ import { ArrowLeftIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { getFacturas } from "./actions";
 import { FacturaList } from "./factura-list";
 
+export const dynamic = "force-dynamic";
+
 export default async function FacturasPage() {
   const facturas = await getFacturas();
 

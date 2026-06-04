@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FormMessage } from "@/components/form-feedback";
 import { createProductForProvider } from "../actions";
 
 interface UnidadOption {
@@ -18,6 +19,7 @@ export function AddProductForm({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const defaultUnidadId =
     unidades.find((u) => u.codigo === "unidad")?.id ?? unidades[0]?.id ?? "";
@@ -25,9 +27,10 @@ export function AddProductForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
     const formData = new FormData(e.currentTarget);
-    await createProductForProvider(
+    const result = await createProductForProvider(
       providerId,
       {
         nombre: formData.get("nombre") as string,
@@ -39,6 +42,10 @@ export function AddProductForm({
     );
 
     setIsSubmitting(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
     setIsOpen(false);
     e.currentTarget.reset();
   }
@@ -56,6 +63,7 @@ export function AddProductForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-4">
+      <FormMessage message={error} />
       <div>
         <input
           type="text"

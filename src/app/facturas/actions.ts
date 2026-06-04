@@ -3,8 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import {
-  facturas,
   facturaLineas,
+  facturas,
   historialPrecios,
   proveedorProductos,
   proveedores,
@@ -12,34 +12,55 @@ import {
   unidades,
   type ProveedorTipo,
 } from "@/db/schema";
-import { and, asc, desc, eq, gt, ne, notExists, sql } from "drizzle-orm";
+import {
+  actionError,
+  actionOk,
+  expectedActionError,
+  type ActionResult,
+  unknownActionError,
+} from "@/lib/action-result";
+import { multiplyDecimalStrings, sumDecimalStrings } from "@/lib/money";
+import { getFacturaDeleteBlock } from "@/lib/delete-guards";
+import {
+  isoDateSchema,
+  moneySchema,
+  optionalTextSchema,
+  quantitySchema,
+  uuidSchema,
+} from "@/lib/validation";
+import { and, asc, count, desc, eq, gt, inArray, ne, notExists, sql, type SQL } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-interface CreateFacturaBase {
-  proveedorId: string;
-  fecha: string; // YYYY-MM-DD
-  numero?: string | null;
-  notas?: string | null;
-}
+const facturaBaseSchema = z.object({
+  proveedorId: uuidSchema,
+  fecha: isoDateSchema,
+  numero: optionalTextSchema,
+  notas: optionalTextSchema,
+});
 
-interface CreateFacturaProductoInput extends CreateFacturaBase {
-  lineas: Array<{
-    productoId: string;
-    unidadId: string;
-    precioUnit: string;
-    cantidad: string;
-  }>;
-  monto?: never;
-}
+const facturaProductoSchema = facturaBaseSchema.extend({
+  lineas: z
+    .array(
+      z.object({
+        productoId: uuidSchema,
+        precioUnit: moneySchema,
+        cantidad: quantitySchema,
+      })
+    )
+    .min(1, "Agregá al menos una línea."),
+  monto: z.never().optional(),
+});
 
-interface CreateFacturaServicioInput extends CreateFacturaBase {
-  monto: string;
-  lineas?: never;
-}
+const facturaServicioSchema = facturaBaseSchema.extend({
+  monto: moneySchema,
+  lineas: z.never().optional(),
+});
 
-export type CreateFacturaInput =
-  | CreateFacturaProductoInput
-  | CreateFacturaServicioInput;
+const createFacturaSchema = z.union([facturaProductoSchema, facturaServicioSchema]);
+
+export type CreateFacturaInput = z.input<typeof createFacturaSchema>;
 
 export async function getFacturaFormData() {
   const rows = await db
@@ -86,7 +107,6 @@ export async function getFacturaFormData() {
       };
       grouped.set(r.proveedorId, entry);
     }
-    // A left-joined row with no product row means the provider has no catalog yet.
     if (!r.productoId || !r.unidadId || !r.productoNombre || !r.unidadCodigo || r.precioActual === null) {
       continue;
     }
@@ -188,143 +208,204 @@ export async function getProductPriceHistory(
     .orderBy(desc(historialPrecios.createdAt));
 }
 
-export async function createFactura(input: CreateFacturaInput) {
-  const facturaId = randomUUID();
+export async function createFactura(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const parsed = createFacturaSchema.safeParse(input);
+  if (!parsed.success) return unknownActionError(parsed.error);
 
-  if ("monto" in input && input.monto !== undefined) {
-    const montoNum = Number(input.monto);
-    if (!isFinite(montoNum) || montoNum <= 0) {
-      throw new Error("Monto inválido");
+  try {
+    const provider = await getProviderForFactura(parsed.data.proveedorId);
+    if (!provider) return actionError("Proveedor no encontrado.");
+
+    const facturaId = randomUUID();
+
+    if ("monto" in parsed.data && parsed.data.monto !== undefined) {
+      if (provider.tipo !== "servicio") {
+        return actionError("Las facturas de servicio requieren un proveedor de servicios.");
+      }
+
+      await db.insert(facturas).values({
+        id: facturaId,
+        proveedorId: parsed.data.proveedorId,
+        fecha: parsed.data.fecha,
+        numero: parsed.data.numero,
+        notas: parsed.data.notas,
+        monto: parsed.data.monto,
+        total: parsed.data.monto,
+      });
+
+      revalidateFacturaPaths(parsed.data.proveedorId);
+      return actionOk({ id: facturaId });
     }
-    const monto = montoNum.toFixed(2);
 
-    await db.insert(facturas).values({
-      id: facturaId,
-      proveedorId: input.proveedorId,
-      fecha: input.fecha,
-      numero: input.numero ?? null,
-      notas: input.notas ?? null,
-      monto,
-      total: monto,
-    });
+    if (provider.tipo !== "producto") {
+      return actionError("Las facturas de productos requieren un proveedor de productos.");
+    }
 
-    revalidatePath("/facturas");
-    revalidatePath(`/providers/${input.proveedorId}`);
-
-    return { id: facturaId };
-  }
-
-  if (!input.lineas || input.lineas.length === 0) {
-    throw new Error("Factura must have at least one line");
-  }
-
-  // Server-side total computation. Never trust client.
-  const lineasWithTotals = input.lineas.map((l) => ({
-    ...l,
-    total: (Number(l.precioUnit) * Number(l.cantidad)).toFixed(2),
-  }));
-  const facturaTotal = lineasWithTotals
-    .reduce((sum, l) => sum + Number(l.total), 0)
-    .toFixed(2);
-
-  // Dedupe lines by producto — if a factura has two lines for the same product,
-  // the last one wins for the "current price" cache.
-  const latestPerProduct = new Map<string, string>();
-  for (const l of lineasWithTotals) {
-    latestPerProduct.set(l.productoId, l.precioUnit);
-  }
-
-  const insertFactura = db.insert(facturas).values({
-    id: facturaId,
-    proveedorId: input.proveedorId,
-    fecha: input.fecha,
-    numero: input.numero ?? null,
-    notas: input.notas ?? null,
-    total: facturaTotal,
-  });
-
-  const insertLineas = db.insert(facturaLineas).values(
-    lineasWithTotals.map((l) => ({
-      facturaId,
-      productoId: l.productoId,
-      unidadId: l.unidadId,
-      precioUnit: l.precioUnit,
-      cantidad: l.cantidad,
-      total: l.total,
-    }))
-  );
-
-  const insertHistory = db.insert(historialPrecios).values(
-    lineasWithTotals.map((l) => ({
-      productoId: l.productoId,
-      proveedorId: input.proveedorId,
-      precio: l.precioUnit,
-      unidadId: l.unidadId,
-      facturaId,
-    }))
-  );
-
-  // Conditional cache update: only refresh proveedor_productos.precio when no
-  // later-dated factura already exists for this (proveedor, producto). Prevents
-  // backdated invoices from clobbering the current price.
-  const priceUpdates = [...latestPerProduct.entries()].map(([productoId, precio]) =>
-    db
-      .update(proveedorProductos)
-      .set({ precio, updatedAt: new Date() })
+    const productIds = [...new Set(parsed.data.lineas.map((linea) => linea.productoId))];
+    const catalogRows = await db
+      .select({
+        productoId: proveedorProductos.productoId,
+        unidadId: productos.unidadId,
+        nombre: productos.nombre,
+      })
+      .from(proveedorProductos)
+      .innerJoin(productos, eq(proveedorProductos.productoId, productos.id))
       .where(
         and(
-          eq(proveedorProductos.proveedorId, input.proveedorId),
-          eq(proveedorProductos.productoId, productoId),
-          notExists(
-            db
-              .select({ one: sql`1` })
-              .from(facturas)
-              .innerJoin(facturaLineas, eq(facturaLineas.facturaId, facturas.id))
-              .where(
-                and(
-                  eq(facturas.proveedorId, input.proveedorId),
-                  eq(facturaLineas.productoId, productoId),
-                  gt(facturas.fecha, input.fecha),
-                  ne(facturas.id, facturaId)
+          eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
+          inArray(proveedorProductos.productoId, productIds)
+        )
+      );
+
+    const productById = new Map(catalogRows.map((row) => [row.productoId, row]));
+    const missingProduct = productIds.find((productId) => !productById.get(productId)?.unidadId);
+    if (missingProduct) {
+      throw expectedActionError("La factura incluye un producto que no pertenece a este proveedor.");
+    }
+
+    const lineasWithTotals = parsed.data.lineas.map((linea) => {
+      const product = productById.get(linea.productoId)!;
+      return {
+        ...linea,
+        unidadId: product.unidadId!,
+        total: multiplyDecimalStrings(linea.precioUnit, linea.cantidad),
+      };
+    });
+
+    const facturaTotal = sumDecimalStrings(lineasWithTotals.map((linea) => linea.total));
+
+    const latestPerProduct = new Map<string, string>();
+    for (const linea of lineasWithTotals) {
+      latestPerProduct.set(linea.productoId, linea.precioUnit);
+    }
+
+    const insertFactura = db.insert(facturas).values({
+      id: facturaId,
+      proveedorId: parsed.data.proveedorId,
+      fecha: parsed.data.fecha,
+      numero: parsed.data.numero,
+      notas: parsed.data.notas,
+      total: facturaTotal,
+    });
+
+    const insertLineas = db.insert(facturaLineas).values(
+      lineasWithTotals.map((linea) => ({
+        facturaId,
+        productoId: linea.productoId,
+        unidadId: linea.unidadId,
+        precioUnit: linea.precioUnit,
+        cantidad: linea.cantidad,
+        total: linea.total,
+      }))
+    );
+
+    const insertHistory = db.insert(historialPrecios).values(
+      lineasWithTotals.map((linea) => ({
+        productoId: linea.productoId,
+        proveedorId: parsed.data.proveedorId,
+        precio: linea.precioUnit,
+        unidadId: linea.unidadId,
+        facturaId,
+      }))
+    );
+
+    const priceUpdates = [...latestPerProduct.entries()].map(([productoId, precio]) =>
+      db
+        .update(proveedorProductos)
+        .set({ precio, updatedAt: new Date() })
+        .where(
+          and(
+            eq(proveedorProductos.proveedorId, parsed.data.proveedorId),
+            eq(proveedorProductos.productoId, productoId),
+            notExists(
+              db
+                .select({ one: sql`1` })
+                .from(facturas)
+                .innerJoin(facturaLineas, eq(facturaLineas.facturaId, facturas.id))
+                .where(
+                  and(
+                    eq(facturas.proveedorId, parsed.data.proveedorId),
+                    eq(facturaLineas.productoId, productoId),
+                    gt(facturas.fecha, parsed.data.fecha),
+                    ne(facturas.id, facturaId)
+                  )
                 )
-              )
+            )
           )
         )
-      )
-  );
+    );
 
-  await db.batch([insertFactura, insertLineas, insertHistory, ...priceUpdates]);
+    await db.batch([insertFactura, insertLineas, insertHistory, ...priceUpdates]);
 
-  revalidatePath("/facturas");
-  revalidatePath(`/providers/${input.proveedorId}`);
-
-  return { id: facturaId };
+    revalidateFacturaPaths(parsed.data.proveedorId);
+    return actionOk({ id: facturaId });
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function togglePaid(id: string) {
-  const [updated] = await db
-    .update(facturas)
-    .set({ paid: sql`NOT ${facturas.paid}`, updatedAt: new Date() })
-    .where(eq(facturas.id, id))
-    .returning({ paid: facturas.paid });
+export async function togglePaid(id: string): Promise<ActionResult<{ paid: boolean }>> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
 
-  if (!updated) throw new Error(`Factura not found: ${id}`);
+  try {
+    const [updated] = await db
+      .update(facturas)
+      .set({ paid: sql`NOT ${facturas.paid}`, updatedAt: new Date() })
+      .where(eq(facturas.id, parsedId.data))
+      .returning({ paid: facturas.paid });
 
-  revalidatePath("/facturas");
-  revalidatePath(`/facturas/${id}`);
-  return updated.paid;
+    if (!updated) return actionError("Factura no encontrada.");
+
+    revalidatePath("/facturas");
+    revalidatePath(`/facturas/${parsedId.data}`);
+    return actionOk(updated);
+  } catch (error) {
+    return unknownActionError(error);
+  }
 }
 
-export async function deleteFactura(id: string) {
-  // Lineas cascade via FK. historial_precios.factura_id is SET NULL —
-  // the price history is preserved, just disconnected from the deleted invoice.
-  const [deleted] = await db
-    .delete(facturas)
-    .where(eq(facturas.id, id))
-    .returning({ proveedorId: facturas.proveedorId });
+export async function deleteFactura(id: string): Promise<ActionResult> {
+  const parsedId = uuidSchema.safeParse(id);
+  if (!parsedId.success) return unknownActionError(parsedId.error);
 
-  if (!deleted) throw new Error(`Factura not found: ${id}`);
+  try {
+    const [lineas, history] = await Promise.all([
+      countRows(facturaLineas, eq(facturaLineas.facturaId, parsedId.data)),
+      countRows(historialPrecios, eq(historialPrecios.facturaId, parsedId.data)),
+    ]);
 
+    const blockMessage = getFacturaDeleteBlock({ lines: lineas, priceHistory: history });
+    if (blockMessage) return actionError(blockMessage);
+
+    const [deleted] = await db
+      .delete(facturas)
+      .where(eq(facturas.id, parsedId.data))
+      .returning({ proveedorId: facturas.proveedorId });
+
+    if (!deleted) return actionError("Factura no encontrada.");
+
+    revalidateFacturaPaths(deleted.proveedorId);
+    return actionOk(undefined);
+  } catch (error) {
+    return unknownActionError(error);
+  }
+}
+
+async function getProviderForFactura(id: string) {
+  const [provider] = await db
+    .select({ id: proveedores.id, tipo: proveedores.tipo })
+    .from(proveedores)
+    .where(eq(proveedores.id, id));
+  return provider ?? null;
+}
+
+function revalidateFacturaPaths(proveedorId: string) {
   revalidatePath("/facturas");
-  revalidatePath(`/providers/${deleted.proveedorId}`);
+  revalidatePath(`/providers/${proveedorId}`);
+}
+
+async function countRows(table: PgTable, where: SQL | undefined) {
+  const [row] = await db.select({ value: count() }).from(table).where(where);
+  return row?.value ?? 0;
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TrashIcon, PlusIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { createFactura } from "../actions";
 import { createProductForProvider, updateProduct } from "@/app/providers/actions";
+import { FormMessage } from "@/components/form-feedback";
 import type { ProveedorTipo } from "@/db/schema";
 
 const NEW_PRODUCT_VALUE = "__new__";
@@ -175,13 +176,17 @@ export function FacturaForm({
       }
       startTransition(async () => {
         try {
-          await createFactura({
+          const result = await createFactura({
             proveedorId,
             fecha,
             numero: numero.trim() || null,
             notas: notas.trim() || null,
             monto,
           });
+          if (!result.ok) {
+            setError(result.error);
+            return;
+          }
           router.push("/");
         } catch (err) {
           setError(err instanceof Error ? err.message : "Error al crear la factura.");
@@ -222,13 +227,17 @@ export function FacturaForm({
 
     startTransition(async () => {
       try {
-        await createFactura({
+        const result = await createFactura({
           proveedorId,
           fecha,
           numero: numero.trim() || null,
           notas: notas.trim() || null,
           lineas: payloadLineas,
         });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
         router.push("/");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al crear la factura.");
@@ -505,11 +514,7 @@ export function FacturaForm({
           <span className="text-2xl font-light text-[#3d3530]">${total.toFixed(2)}</span>
         </div>
 
-        {error && (
-          <p className="mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            {error}
-          </p>
-        )}
+        <FormMessage message={error} className="mb-3" />
 
         <button
           type="submit"
@@ -587,11 +592,16 @@ function EditProductModal({
 
     setIsSaving(true);
     try {
-      await updateProduct(proveedorId, producto.id, {
+      const result = await updateProduct(proveedorId, producto.id, {
         nombre: producto.nombre,
         unidadId,
         precio,
       });
+      if (!result.ok) {
+        setError(result.error);
+        setIsSaving(false);
+        return;
+      }
       onSaved(precio);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar.");
@@ -662,11 +672,7 @@ function EditProductModal({
           />
         </div>
 
-        {error && (
-          <p className="mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            {error}
-          </p>
-        )}
+        <FormMessage message={error} className="mb-3" />
 
         <div className="flex gap-2">
           <button
@@ -735,16 +741,21 @@ function AddProductModal({
 
     setIsSaving(true);
     try {
-      const created = await createProductForProvider(
+      const result = await createProductForProvider(
         proveedorId,
         { nombre: trimmed, descripcion: null, unidadId },
         precio,
         cantidad
       );
+      if (!result.ok) {
+        setError(result.error);
+        setIsSaving(false);
+        return;
+      }
       const unidad = unidades.find((u) => u.id === unidadId);
       onCreated({
-        id: created.id,
-        nombre: created.nombre,
+        id: result.data.id,
+        nombre: result.data.nombre,
         unidadId,
         unidadCodigo: unidad?.codigo ?? "",
         precioActual: precio,
@@ -844,11 +855,7 @@ function AddProductModal({
           </div>
         </div>
 
-        {error && (
-          <p className="mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            {error}
-          </p>
-        )}
+        <FormMessage message={error} className="mb-3" />
 
         <div className="flex gap-2">
           <button
