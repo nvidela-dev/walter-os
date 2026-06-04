@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { PencilSquareIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { TrashIcon, PlusIcon, PencilSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { createFactura } from "../actions";
+import { type ReactElement, useMemo, useState, useTransition } from "react";
+
 import { createProductForProvider, updateProduct } from "@/app/providers/actions";
 import { FormMessage } from "@/components/form-feedback";
 import type { ProveedorTipo } from "@/db/schema";
+
+import { createFactura } from "../actions";
 
 const NEW_PRODUCT_VALUE = "__new__";
 
@@ -44,7 +46,7 @@ interface LineaState {
 
 const emptyLinea = (): LineaState => ({ productoId: "", cantidad: "1", precioUnit: "" });
 
-const todayLocal = () => {
+const todayLocal = (): string => {
   const now = new Date();
   const offsetMs = now.getTimezoneOffset() * 60_000;
   return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
@@ -59,7 +61,7 @@ export function FacturaForm({
 }: {
   proveedores: FormProveedor[];
   unidades: UnidadOption[];
-}) {
+}): ReactElement {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +107,7 @@ export function FacturaForm({
   );
   const total = tipo === "servicio" ? Number(monto || 0) : lineasTotal;
 
-  function changeTipo(next: ProveedorTipo) {
+  function changeTipo(next: ProveedorTipo): void {
     if (next === tipo) return;
     setTipo(next);
     setProveedorId("");
@@ -114,16 +116,16 @@ export function FacturaForm({
     setError(null);
   }
 
-  function changeProveedor(id: string) {
+  function changeProveedor(id: string): void {
     setProveedorId(id);
     setLineas([emptyLinea()]);
   }
 
-  function updateLinea(idx: number, patch: Partial<LineaState>) {
+  function updateLinea(idx: number, patch: Partial<LineaState>): void {
     setLineas((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
   }
 
-  function selectProducto(idx: number, productoId: string) {
+  function selectProducto(idx: number, productoId: string): void {
     if (productoId === NEW_PRODUCT_VALUE) {
       setCreatingLineIdx(idx);
       return;
@@ -135,7 +137,7 @@ export function FacturaForm({
     });
   }
 
-  function handleProductCreated(idx: number, producto: FormProducto) {
+  function handleProductCreated(idx: number, producto: FormProducto): void {
     if (!proveedor) return;
     setNewProductsByProveedor((prev) => {
       const existing = prev[proveedor.id] ?? [];
@@ -151,15 +153,15 @@ export function FacturaForm({
     router.refresh();
   }
 
-  function addLinea() {
+  function addLinea(): void {
     setLineas((prev) => [...prev, emptyLinea()]);
   }
 
-  function removeLinea(idx: number) {
+  function removeLinea(idx: number): void {
     setLineas((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SyntheticEvent): void {
     e.preventDefault();
     setError(null);
 
@@ -195,12 +197,12 @@ export function FacturaForm({
       return;
     }
 
-    const payloadLineas: Array<{
+    const payloadLineas: {
       productoId: string;
       unidadId: string;
       precioUnit: string;
       cantidad: string;
-    }> = [];
+    }[] = [];
     for (const l of lineas) {
       const producto = productoById.get(l.productoId);
       if (!producto) {
@@ -257,7 +259,7 @@ export function FacturaForm({
                 <button
                   key={tab.value}
                   type="button"
-                  onClick={() => changeTipo(tab.value)}
+                  onClick={() => { changeTipo(tab.value); }}
                   className={`rounded-xl py-2.5 text-center text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-[#c4a77d] text-white shadow-sm"
@@ -279,7 +281,7 @@ export function FacturaForm({
             id="proveedor"
             required
             value={proveedorId}
-            onChange={(e) => changeProveedor(e.target.value)}
+            onChange={(e) => { changeProveedor(e.target.value); }}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
             <option value="">
@@ -307,7 +309,7 @@ export function FacturaForm({
               id="fecha"
               required
               value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
+              onChange={(e) => { setFecha(e.target.value); }}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
             />
           </div>
@@ -319,7 +321,7 @@ export function FacturaForm({
               type="text"
               id="numero"
               value={numero}
-              onChange={(e) => setNumero(e.target.value)}
+              onChange={(e) => { setNumero(e.target.value); }}
               placeholder="0001-00012345"
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
             />
@@ -334,7 +336,7 @@ export function FacturaForm({
             id="notas"
             rows={2}
             value={notas}
-            onChange={(e) => setNotas(e.target.value)}
+            onChange={(e) => { setNotas(e.target.value); }}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
@@ -358,7 +360,7 @@ export function FacturaForm({
               required
               disabled={!proveedor}
               value={monto}
-              onChange={(e) => setMonto(e.target.value)}
+              onChange={(e) => { setMonto(e.target.value); }}
               className={numericInputClass}
             />
           </div>
@@ -394,7 +396,7 @@ export function FacturaForm({
                     required
                     disabled={!proveedor}
                     value={linea.productoId}
-                    onChange={(e) => selectProducto(idx, e.target.value)}
+                    onChange={(e) => { selectProducto(idx, e.target.value); }}
                     className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none disabled:bg-[#faf8f5] disabled:text-[#c4a77d]"
                   >
                     <option value="">
@@ -414,7 +416,7 @@ export function FacturaForm({
                   {producto && (
                     <button
                       type="button"
-                      onClick={() => setEditingLineIdx(idx)}
+                      onClick={() => { setEditingLineIdx(idx); }}
                       aria-label="Editar producto"
                       title="Editar producto"
                       className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
@@ -425,7 +427,7 @@ export function FacturaForm({
                   {lineas.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeLinea(idx)}
+                      onClick={() => { removeLinea(idx); }}
                       aria-label="Quitar línea"
                       className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
                     >
@@ -447,7 +449,7 @@ export function FacturaForm({
                     min="0"
                     required
                     value={linea.cantidad}
-                    onChange={(e) => updateLinea(idx, { cantidad: e.target.value })}
+                    onChange={(e) => { updateLinea(idx, { cantidad: e.target.value }); }}
                     className={numericInputClass}
                   />
                 </div>
@@ -474,7 +476,7 @@ export function FacturaForm({
                     required
                     disabled={!producto}
                     value={linea.precioUnit}
-                    onChange={(e) => updateLinea(idx, { precioUnit: e.target.value })}
+                    onChange={(e) => { updateLinea(idx, { precioUnit: e.target.value }); }}
                     className={numericInputClass}
                   />
                 </div>
@@ -482,7 +484,7 @@ export function FacturaForm({
 
               <div className="flex items-center justify-between border-t border-[#f5f0e8] pt-3 text-sm">
                 <div className="text-[#8b7355]">
-                  {isNewPrice && producto && (
+                  {isNewPrice && (
                     <span className="text-amber-700">
                       Nuevo precio (antes ${producto.precioActual})
                     </span>
@@ -525,8 +527,9 @@ export function FacturaForm({
         </button>
       </section>
 
-      {editingLineIdx !== null && proveedor && (() => {
+      {editingLineIdx !== null && proveedor && ((): ReactElement | null => {
         const linea = lineas[editingLineIdx];
+        if (!linea) return null;
         const producto = productoById.get(linea.productoId);
         if (!producto) return null;
         return (
@@ -535,7 +538,7 @@ export function FacturaForm({
             producto={producto}
             unidades={unidades}
             initialPrecio={linea.precioUnit || producto.precioActual}
-            onClose={() => setEditingLineIdx(null)}
+            onClose={() => { setEditingLineIdx(null); }}
             onSaved={(newPrecio) => {
               updateLinea(editingLineIdx, { precioUnit: newPrecio });
               setEditingLineIdx(null);
@@ -550,8 +553,8 @@ export function FacturaForm({
           proveedorId={proveedor.id}
           proveedorNombre={proveedor.nombre}
           unidades={unidades}
-          onClose={() => setCreatingLineIdx(null)}
-          onCreated={(producto) => handleProductCreated(creatingLineIdx, producto)}
+          onClose={() => { setCreatingLineIdx(null); }}
+          onCreated={(producto) => { handleProductCreated(creatingLineIdx, producto); }}
         />
       )}
     </form>
@@ -572,13 +575,13 @@ function EditProductModal({
   initialPrecio: string;
   onClose: () => void;
   onSaved: (newPrecio: string) => void;
-}) {
+}): ReactElement {
   const [unidadId, setUnidadId] = useState(producto.unidadId);
   const [precio, setPrecio] = useState(initialPrecio);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     setError(null);
     const precioNum = Number(precio);
     if (!isFinite(precioNum) || precioNum <= 0) {
@@ -643,7 +646,7 @@ function EditProductModal({
           <select
             id="modal-unidad"
             value={unidadId}
-            onChange={(e) => setUnidadId(e.target.value)}
+            onChange={(e) => { setUnidadId(e.target.value); }}
             disabled={isSaving}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
@@ -666,7 +669,7 @@ function EditProductModal({
             step="0.01"
             min="0"
             value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
+            onChange={(e) => { setPrecio(e.target.value); }}
             disabled={isSaving}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           />
@@ -685,7 +688,7 @@ function EditProductModal({
           </button>
           <button
             type="button"
-            onClick={handleSave}
+            onClick={() => void handleSave()}
             disabled={isSaving}
             className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
           >
@@ -709,7 +712,7 @@ function AddProductModal({
   unidades: UnidadOption[];
   onClose: () => void;
   onCreated: (producto: FormProducto) => void;
-}) {
+}): ReactElement {
   const [nombre, setNombre] = useState("");
   const [unidadId, setUnidadId] = useState(unidades[0]?.id ?? "");
   const [precio, setPrecio] = useState("");
@@ -717,7 +720,7 @@ function AddProductModal({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     setError(null);
     const trimmed = nombre.trim();
     if (!trimmed) {
@@ -794,7 +797,7 @@ function AddProductModal({
             id="new-prod-nombre"
             type="text"
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            onChange={(e) => { setNombre(e.target.value); }}
             disabled={isSaving}
             autoFocus
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
@@ -808,7 +811,7 @@ function AddProductModal({
           <select
             id="new-prod-unidad"
             value={unidadId}
-            onChange={(e) => setUnidadId(e.target.value)}
+            onChange={(e) => { setUnidadId(e.target.value); }}
             disabled={isSaving}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
@@ -832,7 +835,7 @@ function AddProductModal({
               step="0.01"
               min="0"
               value={precio}
-              onChange={(e) => setPrecio(e.target.value)}
+              onChange={(e) => { setPrecio(e.target.value); }}
               disabled={isSaving}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
             />
@@ -848,7 +851,7 @@ function AddProductModal({
               step="0.01"
               min="0"
               value={cantidad}
-              onChange={(e) => setCantidad(e.target.value)}
+              onChange={(e) => { setCantidad(e.target.value); }}
               disabled={isSaving}
               className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
             />
@@ -868,7 +871,7 @@ function AddProductModal({
           </button>
           <button
             type="button"
-            onClick={handleSave}
+            onClick={() => void handleSave()}
             disabled={isSaving}
             className="flex-1 rounded-xl bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
           >

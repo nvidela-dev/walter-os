@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { MenuForm } from "../menu-form";
+import type { ReactElement } from "react";
+
 import { getAllRecipes } from "../actions";
+import { MenuForm } from "../menu-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewMenuItemPage() {
+export default async function NewMenuItemPage(): Promise<ReactElement> {
   const recipes = await getAllRecipes();
 
   return (

@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { check, date, integer, numeric, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+
 import { empleados } from "./empleados";
 
 export const horasExtra = pgTable(

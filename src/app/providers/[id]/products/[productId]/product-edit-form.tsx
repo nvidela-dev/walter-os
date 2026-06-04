@@ -1,8 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
+
 import { FormMessage } from "@/components/form-feedback";
+import { getFormString } from "@/lib/form";
+
 import { updateProduct } from "../../../actions";
 
 interface Product {
@@ -29,7 +32,7 @@ export function ProductEditForm({
   productId: string;
   product: Product;
   unidades: UnidadOption[];
-}) {
+}): ReactElement {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,16 +43,16 @@ export function ProductEditForm({
     unidades[0]?.id ??
     "";
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      nombre: formData.get("nombre") as string,
-      unidadId: formData.get("unidadId") as string,
-      precio: formData.get("precio") as string,
+      nombre: getFormString(formData, "nombre"),
+      unidadId: getFormString(formData, "unidadId"),
+      precio: getFormString(formData, "precio"),
     };
 
     const result = await updateProduct(providerId, productId, data);
@@ -62,7 +65,7 @@ export function ProductEditForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
       <div>
         <label htmlFor="nombre" className="mb-2 block text-xs font-medium text-[#8b7355]">Nombre</label>

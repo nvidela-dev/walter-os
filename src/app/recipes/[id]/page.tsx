@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRecipeWithIngredients, deleteRecipe } from "../actions";
-import { RecipeForm } from "../recipe-form";
+import type { ReactElement } from "react";
+
 import { DeleteButton } from "@/components/delete-button";
+
+import { deleteRecipe, getRecipeWithIngredients } from "../actions";
+import { RecipeForm } from "../recipe-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RecipePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<ReactElement> {
   const { id } = await params;
   const recipe = await getRecipeWithIngredients(id);
   if (!recipe) notFound();

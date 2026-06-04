@@ -1,22 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
+
 import { FormMessage } from "@/components/form-feedback";
+import { getFormString } from "@/lib/form";
+
 import { updateProviderDebt } from "../actions";
 
-export function DebtForm({ providerId, currentDebt }: { providerId: string; currentDebt: string }) {
+export function DebtForm({
+  providerId,
+  currentDebt,
+}: {
+  providerId: string;
+  currentDebt: string;
+}): ReactElement {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     setIsSubmitting(true);
     setSaved(false);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const deuda = formData.get("deuda") as string || "0";
+    const deuda = getFormString(formData, "deuda") || "0";
 
     const result = await updateProviderDebt(providerId, { deuda });
     setIsSubmitting(false);
@@ -26,11 +35,11 @@ export function DebtForm({ providerId, currentDebt }: { providerId: string; curr
     }
     setSaved(true);
 
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => { setSaved(false); }, 2000);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-3">
       <FormMessage message={error} />
       <div className="flex items-end gap-3">
         <div className="flex-1">

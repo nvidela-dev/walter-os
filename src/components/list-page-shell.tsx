@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 interface ListPageShellProps<T> {
   title: string;
@@ -10,7 +10,7 @@ interface ListPageShellProps<T> {
   emptyState: ReactNode;
 }
 
-export function ListPageShell<T>({ title, backHref, addHref, items, renderItem, emptyState }: ListPageShellProps<T>) {
+export function ListPageShell<T>({ title, backHref, addHref, items, renderItem, emptyState }: ListPageShellProps<T>): ReactElement {
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
@@ -35,7 +35,7 @@ interface EmptyStateProps {
   ctaText: string;
 }
 
-export function EmptyState({ emoji, title, description, ctaHref, ctaText }: EmptyStateProps) {
+export function EmptyState({ emoji, title, description, ctaHref, ctaText }: EmptyStateProps): ReactElement {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <span className="mb-4 text-5xl">{emoji}</span>
@@ -53,13 +53,13 @@ interface ListPageRowProps {
   subtitle?: ReactNode;
 }
 
-export function ListPageRow({ href, emoji, title, subtitle }: ListPageRowProps) {
+export function ListPageRow({ href, emoji, title, subtitle }: ListPageRowProps): ReactElement {
   return (
     <Link href={href} className="flex items-center gap-4 rounded-2xl bg-[#f5f0e8] p-5 transition-colors hover:bg-[#e8e0d4] active:scale-[0.99]">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8e0d4] text-xl">{emoji}</div>
       <div className="flex-1">
         <h3 className="font-medium text-[#3d3530]">{title}</h3>
-        {subtitle && <p className="text-sm text-[#8b7355] line-clamp-1">{subtitle}</p>}
+        {subtitle != null && <p className="text-sm text-[#8b7355] line-clamp-1">{subtitle}</p>}
       </div>
       <span className="text-[#c4a77d]">→</span>
     </Link>

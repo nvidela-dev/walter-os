@@ -1,7 +1,9 @@
 import Link from "next/link";
+import type { ReactElement } from "react";
+
 import { ProviderForm } from "../provider-form";
 
-export default function NewProviderPage() {
+export default function NewProviderPage(): ReactElement {
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
       <header className="sticky top-0 z-10 flex items-center gap-4 bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">

@@ -1,7 +1,12 @@
 "use server";
 
+import { count, eq, type SQL } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
 import { db } from "@/db";
-import { empleados, horasExtra } from "@/db/schema";
+import { type Empleado, empleados, type HoraExtra,horasExtra } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { getEmployeeDeleteBlock } from "@/lib/delete-guards";
 import {
@@ -10,10 +15,6 @@ import {
   requiredTextSchema,
   uuidSchema,
 } from "@/lib/validation";
-import { count, eq, type SQL } from "drizzle-orm";
-import type { PgTable } from "drizzle-orm/pg-core";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 const employeeInputSchema = z.object({
   nombre: requiredTextSchema,
@@ -37,16 +38,18 @@ const extraHoursInputSchema = z.object({
 export type EmployeeInput = z.infer<typeof employeeInputSchema>;
 export type ExtraHoursInput = z.infer<typeof extraHoursInputSchema>;
 
-export async function getEmployees() {
+export async function getEmployees(): Promise<Empleado[]> {
   return db.select().from(empleados).orderBy(empleados.nombre);
 }
 
-export async function getEmployee(id: string) {
+export async function getEmployee(id: string): Promise<Empleado | null> {
   const result = await db.select().from(empleados).where(eq(empleados.id, id));
   return result[0] ?? null;
 }
 
-export async function getEmployeeWithHours(id: string) {
+export async function getEmployeeWithHours(
+  id: string
+): Promise<(Empleado & { horasExtra: HoraExtra[] }) | null> {
   const employee = await getEmployee(id);
   if (!employee) return null;
   const hours = await db.select().from(horasExtra).where(eq(horasExtra.empleadoId, id));
@@ -62,6 +65,7 @@ export async function createEmployee(input: unknown): Promise<ActionResult<{ id:
       .insert(empleados)
       .values(parsed.data)
       .returning({ id: empleados.id });
+    if (!created) return actionError("No se pudo registrar al empleado.");
     revalidatePath("/employees");
     return actionOk(created);
   } catch (error) {
@@ -103,7 +107,7 @@ export async function deleteEmployee(id: string): Promise<ActionResult> {
   try {
     const extraHours = await countRows(horasExtra, eq(horasExtra.empleadoId, parsedId.data));
     const blockMessage = getEmployeeDeleteBlock({ extraHours });
-    if (blockMessage) return actionError(blockMessage);
+    if (blockMessage != null) return actionError(blockMessage);
 
     const [deleted] = await db
       .delete(empleados)
@@ -132,7 +136,7 @@ export async function addExtraHours(input: unknown): Promise<ActionResult> {
   }
 }
 
-async function countRows(table: PgTable, where: SQL | undefined) {
+async function countRows(table: PgTable, where: SQL | undefined): Promise<number> {
   const [row] = await db.select({ value: count() }).from(table).where(where);
   return row?.value ?? 0;
 }

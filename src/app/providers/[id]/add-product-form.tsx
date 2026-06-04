@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
+
 import { FormMessage } from "@/components/form-feedback";
+import { getFormString } from "@/lib/form";
+
 import { createProductForProvider } from "../actions";
 
 interface UnidadOption {
@@ -16,7 +19,7 @@ export function AddProductForm({
 }: {
   providerId: string;
   unidades: UnidadOption[];
-}) {
+}): ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +27,7 @@ export function AddProductForm({
   const defaultUnidadId =
     unidades.find((u) => u.codigo === "unidad")?.id ?? unidades[0]?.id ?? "";
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -33,12 +36,12 @@ export function AddProductForm({
     const result = await createProductForProvider(
       providerId,
       {
-        nombre: formData.get("nombre") as string,
-        unidadId: formData.get("unidadId") as string,
-        descripcion: (formData.get("descripcion") as string) || null,
+        nombre: getFormString(formData, "nombre"),
+        unidadId: getFormString(formData, "unidadId"),
+        descripcion: getFormString(formData, "descripcion") || null,
       },
-      formData.get("precio") as string,
-      formData.get("cantidad") as string
+      getFormString(formData, "precio"),
+      getFormString(formData, "cantidad")
     );
 
     setIsSubmitting(false);
@@ -53,7 +56,7 @@ export function AddProductForm({
   if (!isOpen) {
     return (
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => { setIsOpen(true); }}
         className="w-full rounded-xl border-2 border-dashed border-[#c4a77d] py-4 text-sm font-medium text-[#c4a77d] hover:bg-white"
       >
         + Agregar Producto
@@ -62,7 +65,7 @@ export function AddProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-4">
+    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 rounded-xl bg-white p-4">
       <FormMessage message={error} />
       <div>
         <input
@@ -113,7 +116,7 @@ export function AddProductForm({
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => setIsOpen(false)}
+          onClick={() => { setIsOpen(false); }}
           className="flex-1 rounded-lg border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
         >
           Cancelar

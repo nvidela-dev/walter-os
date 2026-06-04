@@ -1,12 +1,15 @@
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProviderWithProducts, getUnidades, deleteProvider } from "../actions";
-import { ProviderForm } from "../provider-form";
+import type { ReactElement } from "react";
+
 import { DeleteButton } from "@/components/delete-button";
-import { ProductList } from "./product-list";
+
+import { deleteProvider, getProviderWithProducts, getUnidades } from "../actions";
+import { ProviderForm } from "../provider-form";
 import { AddProductForm } from "./add-product-form";
 import { DebtForm } from "./debt-form";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ProductList } from "./product-list";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +17,9 @@ interface ProviderPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ProviderPage({ params }: ProviderPageProps) {
+export default async function ProviderPage({
+  params,
+}: ProviderPageProps): Promise<ReactElement> {
   const { id } = await params;
   const [provider, unidades] = await Promise.all([
     getProviderWithProducts(id),

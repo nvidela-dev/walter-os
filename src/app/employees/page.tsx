@@ -1,9 +1,12 @@
+import type { ReactElement } from "react";
+
+import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
+
 import { getEmployees } from "./actions";
-import { ListPageShell, EmptyState, ListPageRow } from "@/components/list-page-shell";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmployeesPage() {
+export default async function EmployeesPage(): Promise<ReactElement> {
   const employees = await getEmployees();
 
   return (

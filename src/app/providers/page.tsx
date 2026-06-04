@@ -1,7 +1,10 @@
+import { ArrowLeftIcon, ChevronRightIcon, TruckIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { getProviders } from "./actions";
-import { TruckIcon, ArrowLeftIcon, ChevronRightIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
+import type { ReactElement } from "react";
+
 import type { ProveedorTipo } from "@/db/schema";
+
+import { getProviders } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +21,9 @@ interface ProvidersPageProps {
   searchParams: Promise<{ tipo?: string }>;
 }
 
-export default async function ProvidersPage({ searchParams }: ProvidersPageProps) {
+export default async function ProvidersPage({
+  searchParams,
+}: ProvidersPageProps): Promise<ReactElement> {
   const { tipo: tipoParam } = await searchParams;
   const activeTipo: ProveedorTipo = isProveedorTipo(tipoParam) ? tipoParam : "producto";
   const allProviders = await getProviders();
@@ -80,14 +85,14 @@ export default async function ProvidersPage({ searchParams }: ProvidersPageProps
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-[#3d3530]">{provider.nombre}</h3>
-                  {provider.descripcion && (
+                  {provider.descripcion != null && (
                     <p className="text-sm text-[#8b7355]">{provider.descripcion}</p>
                   )}
                   {Number(provider.deuda) > 0 && (
                     <p className="text-sm text-[#a68b5b]">Deuda: ${provider.deuda}</p>
                   )}
                 </div>
-                {provider.dias && (
+                {provider.dias != null && (
                   <div className="flex gap-1">
                     {provider.dias.split(",").map((day) => (
                       <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-medium text-amber-700">

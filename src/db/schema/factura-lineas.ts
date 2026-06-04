@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { check, numeric, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+
 import { facturas } from "./facturas";
 import { productos } from "./productos";
 import { unidades } from "./unidades";

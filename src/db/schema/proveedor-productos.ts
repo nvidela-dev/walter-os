@@ -1,7 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import { check, numeric, pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
-import { proveedores } from "./proveedores";
+
 import { productos } from "./productos";
+import { proveedores } from "./proveedores";
 
 export const proveedorProductos = pgTable(
   "proveedor_productos",

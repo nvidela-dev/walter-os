@@ -1,39 +1,43 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+
+import { and, count, eq, type SQL } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
 import { db } from "@/db";
 import {
   facturaLineas,
   facturas,
   historialPrecios,
   productos,
-  proveedorProductos,
+  type Proveedor,
   proveedores,
+  proveedorProductos,
+  type ProveedorTipo,
   recetaProductos,
   unidades,
 } from "@/db/schema";
 import {
   actionError,
   actionOk,
-  expectedActionError,
   type ActionResult,
+  expectedActionError,
   unknownActionError,
 } from "@/lib/action-result";
+import { getProductDeleteBlock, getProviderDeleteBlock } from "@/lib/delete-guards";
 import {
   moneySchema,
   nonNegativeMoneySchema,
   optionalTextSchema,
-  providerDaysSchema,
   proveedorTipoSchema,
+  providerDaysSchema,
   quantitySchema,
   requiredTextSchema,
   uuidSchema,
 } from "@/lib/validation";
-import { getProductDeleteBlock, getProviderDeleteBlock } from "@/lib/delete-guards";
-import { and, count, eq, type SQL } from "drizzle-orm";
-import type { PgTable } from "drizzle-orm/pg-core";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 const providerInputSchema = z.object({
   nombre: requiredTextSchema,
@@ -75,14 +79,46 @@ const productProviderInputSchema = z.object({
 export type ProviderInput = z.infer<typeof providerInputSchema>;
 export type ProviderDebtInput = z.infer<typeof debtInputSchema>;
 
-export async function getUnidades() {
+export interface ProviderListRow {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  tipo: ProveedorTipo;
+  dias: string | null;
+  deuda: string;
+  productCount: number;
+}
+
+export interface ProviderProduct {
+  id: string;
+  productoId: string;
+  precio: string;
+  cantidad: string;
+  nombre: string;
+  unidadId: string | null;
+  unidad: string;
+  unidadNombre: string;
+  descripcion: string | null;
+}
+
+export interface ProductForProvider {
+  id: string;
+  nombre: string;
+  unidadId: string | null;
+  unidad: string;
+  unidadNombre: string;
+  descripcion: string | null;
+  precio: string;
+}
+
+export async function getUnidades(): Promise<{ id: string; codigo: string; nombre: string }[]> {
   return db
     .select({ id: unidades.id, codigo: unidades.codigo, nombre: unidades.nombre })
     .from(unidades)
     .orderBy(unidades.nombre);
 }
 
-export async function getProviders() {
+export async function getProviders(): Promise<ProviderListRow[]> {
   const result = await db
     .select({
       id: proveedores.id,
@@ -101,12 +137,14 @@ export async function getProviders() {
   return result;
 }
 
-export async function getProvider(id: string) {
+export async function getProvider(id: string): Promise<Proveedor | null> {
   const result = await db.select().from(proveedores).where(eq(proveedores.id, id));
   return result[0] ?? null;
 }
 
-export async function getProviderWithProducts(id: string) {
+export async function getProviderWithProducts(
+  id: string
+): Promise<(Proveedor & { productos: ProviderProduct[] }) | null> {
   const provider = await getProvider(id);
   if (!provider) return null;
 
@@ -136,6 +174,7 @@ export async function createProvider(input: unknown): Promise<ActionResult<{ id:
 
   try {
     const [created] = await db.insert(proveedores).values(parsed.data).returning({ id: proveedores.id });
+    if (!created) return actionError("No se pudo crear el proveedor.");
     revalidatePath("/providers");
     return actionOk(created);
   } catch (error) {
@@ -213,7 +252,7 @@ export async function deleteProvider(id: string): Promise<ActionResult> {
       invoices,
       priceHistory,
     });
-    if (blockMessage) return actionError(blockMessage);
+    if (blockMessage != null) return actionError(blockMessage);
 
     const [deleted] = await db
       .delete(proveedores)
@@ -306,7 +345,7 @@ export async function updateProductPrice(
       .from(productos)
       .where(eq(productos.id, parsed.data.productoId));
 
-    if (!producto?.unidadId) return actionError("Producto no encontrado.");
+    if (producto?.unidadId == null) return actionError("Producto no encontrado.");
 
     const [updated] = await db
       .update(proveedorProductos)
@@ -335,7 +374,10 @@ export async function updateProductPrice(
   }
 }
 
-export async function getProductForProvider(proveedorId: string, productoId: string) {
+export async function getProductForProvider(
+  proveedorId: string,
+  productoId: string
+): Promise<ProductForProvider | null> {
   const result = await db
     .select({
       id: productos.id,
@@ -435,7 +477,7 @@ export async function removeProductFromProvider(
       priceHistory,
       recipes: recipeUses,
     });
-    if (blockMessage) return actionError(blockMessage);
+    if (blockMessage != null) return actionError(blockMessage);
 
     await db.batch([
       db
@@ -456,7 +498,7 @@ export async function removeProductFromProvider(
   }
 }
 
-async function getUnidadOrThrow(unidadId: string) {
+async function getUnidadOrThrow(unidadId: string): Promise<{ id: string; codigo: string }> {
   const [unidad] = await db
     .select({ id: unidades.id, codigo: unidades.codigo })
     .from(unidades)
@@ -471,11 +513,11 @@ async function recordPriceChange(args: {
   precio: string;
   unidadId: string;
   facturaId?: string;
-}) {
+}): Promise<void> {
   await db.insert(historialPrecios).values(args);
 }
 
-async function countRows(table: PgTable, where: SQL | undefined) {
+async function countRows(table: PgTable, where: SQL | undefined): Promise<number> {
   const [row] = await db.select({ value: count() }).from(table).where(where);
   return row?.value ?? 0;
 }

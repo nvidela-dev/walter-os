@@ -1,29 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { type ReactElement, useState } from "react";
+
 import type { ActionResult } from "@/lib/action-result";
+
 import { FormMessage } from "./form-feedback";
-import { useState } from "react";
 
 interface DeleteButtonProps {
   id: string;
   name: string;
-  deleteAction: (id: string) => Promise<void | ActionResult>;
+  deleteAction: (id: string) => Promise<ActionResult>;
   redirectTo: string;
 }
 
-export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButtonProps) {
+export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButtonProps): ReactElement {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleDelete() {
+  async function handleDelete(): Promise<void> {
     setIsDeleting(true);
     setError(null);
     try {
       const result = await deleteAction(id);
-      if (result && !result.ok) {
+      if (!result.ok) {
         setError(result.error);
         setIsDeleting(false);
         return;
@@ -45,9 +47,9 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
           </p>
           <FormMessage message={error} />
           <div className="flex gap-3">
-            <button onClick={() => setShowConfirm(false)} disabled={isDeleting}
+            <button onClick={() => { setShowConfirm(false); }} disabled={isDeleting}
               className="flex-1 rounded-xl border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]">Cancelar</button>
-            <button onClick={handleDelete} disabled={isDeleting}
+            <button onClick={() => void handleDelete()} disabled={isDeleting}
               className="flex-1 rounded-xl bg-[#a68b5b] py-3 text-sm font-medium text-white disabled:opacity-50">
               {isDeleting ? "..." : "Eliminar"}
             </button>
@@ -59,7 +61,7 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
 
   return (
     <button
-      onClick={() => setShowConfirm(true)}
+      onClick={() => { setShowConfirm(true); }}
       aria-label={`Eliminar ${name}`}
       className="rounded-full bg-[#f5f0e8] p-2 text-[#8b7355]"
     >
