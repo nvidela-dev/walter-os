@@ -10,11 +10,13 @@ import {
   ChevronRightIcon,
   CubeIcon,
   DocumentTextIcon,
+  PlusIcon,
   ReceiptPercentIcon,
   TruckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   type ComponentType,
   type CSSProperties,
@@ -23,9 +25,14 @@ import {
   useEffect,
   useMemo,
   useState,
+  useTransition,
 } from "react";
 
-import { getProductPriceHistory, type PriceHistoryRow } from "@/app/invoices/actions";
+import {
+  createInvoice,
+  getProductPriceHistory,
+  type PriceHistoryRow,
+} from "@/app/invoices/actions";
 
 import type { ProviderNode, TreeInvoice, TreeProduct } from "./queries";
 
@@ -487,6 +494,353 @@ function ProductPanel({
   );
 }
 
+// ── add invoice ("A") ───────────────────────────────────────────────────────
+
+function num(value: string): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function todayLocal(): string {
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
+}
+
+const fieldClass =
+  "w-full rounded border border-[#3d484d] bg-[#2d353b] px-2 py-1 text-[13px] text-[#d3c6aa] outline-none focus:border-[#a7c080] placeholder:text-[#7a8478]";
+
+function AddInvoicePanel({
+  providers,
+  onClose,
+  onCreated,
+}: {
+  providers: ProviderNode[];
+  onClose: () => void;
+  onCreated: () => void;
+}): ReactElement {
+  const [providerId, setProviderId] = useState("");
+  const [date, setDate] = useState(todayLocal);
+  const [number, setNumber] = useState("");
+  const [notes, setNotes] = useState("");
+  const [amount, setAmount] = useState("");
+  const [lineInputs, setLineInputs] = useState<Record<string, { qty: string; price: string }>>({});
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const provider = providers.find((p) => p.id === providerId) ?? null;
+  const isService = provider?.type === "servicio";
+  const products = provider?.products ?? [];
+
+  function changeProvider(id: string): void {
+    setProviderId(id);
+    setAmount("");
+    setError(null);
+    const p = providers.find((x) => x.id === id);
+    const next: Record<string, { qty: string; price: string }> = {};
+    if (p != null) {
+      for (const prod of p.products) next[prod.productId] = { qty: "", price: prod.price };
+    }
+    setLineInputs(next);
+  }
+
+  function updateLine(productId: string, patch: Partial<{ qty: string; price: string }>): void {
+    setLineInputs((prev) => {
+      const cur = prev[productId] ?? { qty: "", price: "" };
+      return { ...prev, [productId]: { ...cur, ...patch } };
+    });
+  }
+
+  let total = 0;
+  if (isService) {
+    total = num(amount);
+  } else {
+    for (const prod of products) {
+      const li = lineInputs[prod.productId];
+      if (li != null) total += num(li.qty) * num(li.price);
+    }
+  }
+
+  function submit(): void {
+    setError(null);
+    if (provider == null) {
+      setError("select a provider");
+      return;
+    }
+    const trimmedNumber = number.trim();
+    const trimmedNotes = notes.trim();
+    const base = {
+      providerId: provider.id,
+      date,
+      number: trimmedNumber === "" ? null : trimmedNumber,
+      notes: trimmedNotes === "" ? null : trimmedNotes,
+    };
+
+    let input: Record<string, unknown>;
+    if (isService) {
+      if (num(amount) <= 0) {
+        setError("enter an amount greater than 0");
+        return;
+      }
+      input = { ...base, amount };
+    } else {
+      const lines: { productId: string; unitPrice: string; quantity: string }[] = [];
+      for (const prod of products) {
+        const li = lineInputs[prod.productId];
+        if (li == null || num(li.qty) <= 0) continue;
+        if (num(li.price) <= 0) {
+          setError(`enter a price for ${prod.name}`);
+          return;
+        }
+        lines.push({ productId: prod.productId, unitPrice: li.price, quantity: li.qty });
+      }
+      if (lines.length === 0) {
+        setError("add a quantity to at least one product");
+        return;
+      }
+      input = { ...base, lines };
+    }
+
+    startTransition(async () => {
+      try {
+        const result = await createInvoice(input);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        onCreated();
+      } catch {
+        setError("failed to create invoice");
+      }
+    });
+  }
+
+  return (
+    <aside
+      className="flex w-[44%] min-w-[340px] max-w-xl flex-col border-l"
+      style={{ borderColor: c.bg3, backgroundColor: c.bg0 }}
+      onKeyDown={(e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+          e.preventDefault();
+          submit();
+        }
+      }}
+    >
+      <div
+        className="flex items-center justify-between border-b px-3 py-1.5 text-xs"
+        style={{ backgroundColor: c.bg1, borderColor: c.bg3 }}
+      >
+        <span style={{ color: c.grey }}>invoice://new</span>
+        <button
+          type="button"
+          onClick={onClose}
+          title="cancel (Esc)"
+          aria-label="cancel"
+          className="rounded p-1 hover:bg-[#3d484d]"
+          style={{ color: c.grey }}
+        >
+          <XMarkIcon className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="flex-1 space-y-3 overflow-auto px-3 py-3 text-[13px]">
+        <div>
+          <label className="mb-1 block text-[11px]" style={{ color: c.blue }}>
+            provider
+          </label>
+          <select
+            autoFocus
+            value={providerId}
+            onChange={(e) => {
+              changeProvider(e.target.value);
+            }}
+            className={fieldClass}
+          >
+            <option value="">select provider…</option>
+            {providers.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} · {p.type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="mb-1 block text-[11px]" style={{ color: c.blue }}>
+              date
+            </label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+              }}
+              className={`${fieldClass} [color-scheme:dark]`}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px]" style={{ color: c.blue }}>
+              number
+            </label>
+            <input
+              type="text"
+              value={number}
+              onChange={(e) => {
+                setNumber(e.target.value);
+              }}
+              placeholder="optional"
+              className={fieldClass}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-[11px]" style={{ color: c.blue }}>
+            notes
+          </label>
+          <input
+            type="text"
+            value={notes}
+            onChange={(e) => {
+              setNotes(e.target.value);
+            }}
+            placeholder="optional"
+            className={fieldClass}
+          />
+        </div>
+
+        {provider == null ? (
+          <p className="italic" style={{ color: c.grey0 }}>
+            pick a provider to add line items
+          </p>
+        ) : isService ? (
+          <div>
+            <label className="mb-1 block text-[11px]" style={{ color: c.blue }}>
+              amount
+            </label>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={amount}
+              onChange={(e) => {
+                setAmount(e.target.value);
+              }}
+              placeholder="0.00"
+              className={fieldClass}
+            />
+          </div>
+        ) : (
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-[11px]" style={{ color: c.blue }}>
+                line items
+              </span>
+              <span className="text-[11px]" style={{ color: c.grey0 }}>
+                qty × price
+              </span>
+            </div>
+            {products.length === 0 ? (
+              <p className="italic" style={{ color: c.grey0 }}>
+                no products in catalog — add one from the provider page first
+              </p>
+            ) : (
+              <div className="space-y-1">
+                {products.map((prod) => {
+                  const li = lineInputs[prod.productId] ?? { qty: "", price: prod.price };
+                  const active = num(li.qty) > 0;
+                  const changed = li.price.trim() !== "" && num(li.price) !== num(prod.price);
+                  return (
+                    <div
+                      key={prod.productId}
+                      className="flex items-center gap-2 rounded px-1 py-0.5"
+                      style={{ backgroundColor: active ? c.bg2 : "transparent" }}
+                    >
+                      <span
+                        className="w-28 shrink-0 truncate"
+                        style={{ color: active ? c.fg : c.grey }}
+                      >
+                        {prod.name}
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        value={li.qty}
+                        onChange={(e) => {
+                          updateLine(prod.productId, { qty: e.target.value });
+                        }}
+                        placeholder="0"
+                        aria-label={`quantity for ${prod.name}`}
+                        className={`${fieldClass} w-14`}
+                      />
+                      <span className="w-6 shrink-0 text-[11px]" style={{ color: c.grey0 }}>
+                        {prod.unit}
+                      </span>
+                      <span style={{ color: c.grey0 }}>×</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        value={li.price}
+                        onChange={(e) => {
+                          updateLine(prod.productId, { price: e.target.value });
+                        }}
+                        aria-label={`price for ${prod.name}`}
+                        className={`${fieldClass} w-20`}
+                      />
+                      {changed && (
+                        <span
+                          className="shrink-0 text-[11px]"
+                          style={{ color: c.orange }}
+                          title="price changed — recorded in history"
+                        >
+                          was ${prod.price}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="border-t" style={{ borderColor: c.bg3, backgroundColor: c.bg1 }}>
+        {error != null && (
+          <div className="px-3 py-1 text-[12px]" style={{ color: c.red }}>
+            {error}
+          </div>
+        )}
+        <div className="flex items-center justify-between px-3 py-1.5">
+          <span className="text-[11px]" style={{ color: c.grey0 }}>
+            ⌘⏎ save · esc cancel
+          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-[12px]" style={{ color: c.grey }}>
+              total <span style={{ color: c.yellow }}>${total.toFixed(2)}</span>
+            </span>
+            <button
+              type="button"
+              onClick={submit}
+              disabled={isPending}
+              className="rounded px-3 py-1 text-[12px] font-semibold disabled:opacity-50"
+              style={{ backgroundColor: c.green, color: c.bg0 }}
+            >
+              {isPending ? "saving…" : "save"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 // ── tree ────────────────────────────────────────────────────────────────────
 
 type Selection =
@@ -497,6 +851,8 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Selection | null>(null);
+  const [adding, setAdding] = useState(false);
+  const router = useRouter();
 
   const searching = query.trim() !== "";
 
@@ -543,15 +899,27 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
   }, [filtered]);
 
   useEffect(() => {
-    if (selected == null) return;
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") setSelected(null);
+      if (e.key === "Escape") {
+        if (adding) setAdding(false);
+        else if (selected != null) setSelected(null);
+        return;
+      }
+      // "A" opens the add-invoice editor — vim-style, ignored while typing.
+      if ((e.key === "a" || e.key === "A") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+        if (tag === "input" || tag === "textarea" || tag === "select") return;
+        if (adding) return;
+        e.preventDefault();
+        setSelected(null);
+        setAdding(true);
+      }
     };
     window.addEventListener("keydown", onKey);
     return (): void => {
       window.removeEventListener("keydown", onKey);
     };
-  }, [selected]);
+  }, [adding, selected]);
 
   // While searching, force every surviving branch open so matches are visible.
   const expandedOf = (id: string): boolean => (searching ? true : open.has(id));
@@ -590,6 +958,23 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
           <span style={{ color: c.green }}>providers</span>
         </div>
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              setSelected(null);
+              setAdding(true);
+            }}
+            title="add invoice (A)"
+            aria-label="add invoice"
+            className="flex items-center gap-1 rounded px-1.5 py-1 hover:bg-[#3d484d]"
+            style={{ color: c.green }}
+          >
+            <PlusIcon className="h-4 w-4" />
+            <span className="text-[11px]">invoice</span>
+            <kbd className="rounded px-1 text-[10px]" style={{ backgroundColor: c.bg3, color: c.grey }}>
+              A
+            </kbd>
+          </button>
           <ToolbarButton
             onClick={() => {
               setOpen(new Set(allIds));
@@ -822,8 +1207,19 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
           )}
         </div>
 
-        {selected != null &&
-          (selected.kind === "invoice" ? (
+        {adding ? (
+          <AddInvoicePanel
+            providers={providers}
+            onClose={() => {
+              setAdding(false);
+            }}
+            onCreated={() => {
+              setAdding(false);
+              router.refresh();
+            }}
+          />
+        ) : selected != null ? (
+          selected.kind === "invoice" ? (
             <InvoicePanel
               provider={selected.provider}
               invoice={selected.invoice}
@@ -840,7 +1236,8 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
                 setSelected(null);
               }}
             />
-          ))}
+          )
+        ) : null}
       </div>
 
       {/* lualine */}
