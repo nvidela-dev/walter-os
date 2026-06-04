@@ -33,8 +33,15 @@ import {
   getProductPriceHistory,
   type PriceHistoryRow,
 } from "@/app/invoices/actions";
+import { createProductForProvider } from "@/app/providers/actions";
 
 import type { ProviderNode, TreeInvoice, TreeProduct } from "./queries";
+
+interface Unit {
+  id: string;
+  code: string;
+  name: string;
+}
 
 // Everforest (dark, medium) — a woodsy palette: warm tan foreground over
 // muted forest-green backgrounds, with earthy accent hues.
@@ -512,10 +519,12 @@ const fieldClass =
 
 function AddInvoicePanel({
   providers,
+  units,
   onClose,
   onCreated,
 }: {
   providers: ProviderNode[];
+  units: Unit[];
   onClose: () => void;
   onCreated: () => void;
 }): ReactElement {
@@ -528,20 +537,94 @@ function AddInvoicePanel({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Products created inline during this session, so they show as line rows
+  // immediately (they are already persisted by createProductForProvider).
+  const [extraProducts, setExtraProducts] = useState<TreeProduct[]>([]);
+  const [showNewProduct, setShowNewProduct] = useState(false);
+  const [npName, setNpName] = useState("");
+  const [npUnitId, setNpUnitId] = useState(units[0]?.id ?? "");
+  const [npPrice, setNpPrice] = useState("");
+  const [npQty, setNpQty] = useState("1");
+  const [npError, setNpError] = useState<string | null>(null);
+  const [npSaving, setNpSaving] = useState(false);
+
   const provider = providers.find((p) => p.id === providerId) ?? null;
   const isService = provider?.type === "servicio";
-  const products = provider?.products ?? [];
+  const products =
+    provider == null
+      ? []
+      : extraProducts.length === 0
+        ? provider.products
+        : [...provider.products, ...extraProducts];
 
   function changeProvider(id: string): void {
     setProviderId(id);
     setAmount("");
     setError(null);
+    setExtraProducts([]);
+    setShowNewProduct(false);
+    setNpError(null);
     const p = providers.find((x) => x.id === id);
     const next: Record<string, { qty: string; price: string }> = {};
     if (p != null) {
       for (const prod of p.products) next[prod.productId] = { qty: "", price: prod.price };
     }
     setLineInputs(next);
+  }
+
+  async function createProduct(): Promise<void> {
+    if (provider == null) return;
+    setNpError(null);
+    const name = npName.trim();
+    if (name === "") {
+      setNpError("name required");
+      return;
+    }
+    if (npUnitId === "") {
+      setNpError("select a unit");
+      return;
+    }
+    if (num(npPrice) <= 0) {
+      setNpError("enter a price");
+      return;
+    }
+    if (num(npQty) <= 0) {
+      setNpError("enter a pack quantity");
+      return;
+    }
+    setNpSaving(true);
+    try {
+      const result = await createProductForProvider(
+        provider.id,
+        { name, description: null, unitId: npUnitId },
+        npPrice,
+        npQty
+      );
+      if (!result.ok) {
+        setNpError(result.error);
+        setNpSaving(false);
+        return;
+      }
+      const created: TreeProduct = {
+        productId: result.data.id,
+        name: result.data.name,
+        unit: result.data.unit,
+        price: npPrice,
+      };
+      setExtraProducts((prev) => [...prev, created]);
+      setLineInputs((prev) => ({
+        ...prev,
+        [created.productId]: { qty: "1", price: npPrice },
+      }));
+      setNpName("");
+      setNpPrice("");
+      setNpQty("1");
+      setShowNewProduct(false);
+      setNpSaving(false);
+    } catch {
+      setNpError("failed to create product");
+      setNpSaving(false);
+    }
   }
 
   function updateLine(productId: string, patch: Partial<{ qty: string; price: string }>): void {
@@ -807,6 +890,106 @@ function AddInvoicePanel({
                 })}
               </div>
             )}
+            {showNewProduct ? (
+              <div className="mt-2 space-y-2 rounded border p-2" style={{ borderColor: c.bg3 }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px]" style={{ color: c.aqua }}>
+                    new product
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewProduct(false);
+                      setNpError(null);
+                    }}
+                    aria-label="cancel new product"
+                    className="rounded p-0.5 hover:bg-[#3d484d]"
+                    style={{ color: c.grey }}
+                  >
+                    <XMarkIcon className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={npName}
+                  onChange={(e) => {
+                    setNpName(e.target.value);
+                  }}
+                  placeholder="name"
+                  className={fieldClass}
+                />
+                <div className="grid grid-cols-3 gap-2">
+                  <select
+                    value={npUnitId}
+                    onChange={(e) => {
+                      setNpUnitId(e.target.value);
+                    }}
+                    aria-label="unit"
+                    className={fieldClass}
+                  >
+                    {units.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={npPrice}
+                    onChange={(e) => {
+                      setNpPrice(e.target.value);
+                    }}
+                    placeholder="price"
+                    aria-label="new product price"
+                    className={fieldClass}
+                  />
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    value={npQty}
+                    onChange={(e) => {
+                      setNpQty(e.target.value);
+                    }}
+                    placeholder="pack qty"
+                    aria-label="new product pack quantity"
+                    className={fieldClass}
+                  />
+                </div>
+                {npError != null && (
+                  <div className="text-[11px]" style={{ color: c.red }}>
+                    {npError}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    void createProduct();
+                  }}
+                  disabled={npSaving}
+                  className="rounded px-2 py-1 text-[12px] font-semibold disabled:opacity-50"
+                  style={{ backgroundColor: c.aqua, color: c.bg0 }}
+                >
+                  {npSaving ? "saving…" : "create product"}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewProduct(true);
+                }}
+                className="mt-2 flex items-center gap-1 rounded px-1 py-1 text-[12px] hover:bg-[#343f44]"
+                style={{ color: c.aqua }}
+              >
+                <PlusIcon className="h-3.5 w-3.5" />
+                new product
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -847,7 +1030,13 @@ type Selection =
   | { kind: "invoice"; provider: ProviderNode; invoice: TreeInvoice }
   | { kind: "product"; provider: ProviderNode; product: TreeProduct };
 
-export function ProviderTree({ providers }: { providers: ProviderNode[] }): ReactElement {
+export function ProviderTree({
+  providers,
+  units,
+}: {
+  providers: ProviderNode[];
+  units: Unit[];
+}): ReactElement {
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Selection | null>(null);
@@ -1210,6 +1399,7 @@ export function ProviderTree({ providers }: { providers: ProviderNode[] }): Reac
         {adding ? (
           <AddInvoicePanel
             providers={providers}
+            units={units}
             onClose={() => {
               setAdding(false);
             }}
