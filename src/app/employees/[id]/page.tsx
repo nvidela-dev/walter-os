@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getEmployee, deleteEmployee } from "../actions";
-import { EmployeeForm } from "../employee-form";
+import type { ReactElement } from "react";
+
 import { DeleteButton } from "@/components/delete-button";
+
+import { deleteEmployee, getEmployee } from "../actions";
+import { EmployeeForm } from "../employee-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmployeePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EmployeePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<ReactElement> {
   const { id } = await params;
   const employee = await getEmployee(id);
   if (!employee) notFound();

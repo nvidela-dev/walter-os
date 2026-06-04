@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { check, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
 import { recetas } from "./recetas";
 
 export const menu = pgTable(

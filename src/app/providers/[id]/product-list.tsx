@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
+
 import { FormMessage } from "@/components/form-feedback";
+
 import { removeProductFromProvider } from "../actions";
 
 interface Product {
@@ -15,11 +17,17 @@ interface Product {
   descripcion: string | null;
 }
 
-export function ProductList({ products, providerId }: { products: Product[]; providerId: string }) {
+export function ProductList({
+  products,
+  providerId,
+}: {
+  products: Product[];
+  providerId: string;
+}): ReactElement {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleDelete(e: React.MouseEvent, productoId: string) {
+  async function handleDelete(e: React.MouseEvent, productoId: string): Promise<void> {
     e.preventDefault();
     e.stopPropagation();
     setDeletingId(productoId);
@@ -55,7 +63,7 @@ export function ProductList({ products, providerId }: { products: Product[]; pro
             </p>
           </div>
           <button
-            onClick={(e) => handleDelete(e, product.productoId)}
+            onClick={(e) => void handleDelete(e, product.productoId)}
             disabled={deletingId === product.productoId}
             className="rounded-full p-2 text-[#c4a77d] hover:bg-[#f5f0e8] disabled:opacity-50"
           >

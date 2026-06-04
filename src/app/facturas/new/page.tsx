@@ -1,12 +1,15 @@
-import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { getFacturaFormData } from "../actions";
+import Link from "next/link";
+import type { ReactElement } from "react";
+
 import { getUnidades } from "@/app/providers/actions";
+
+import { getFacturaFormData } from "../actions";
 import { FacturaForm } from "./factura-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function NuevaFacturaPage() {
+export default async function NuevaFacturaPage(): Promise<ReactElement> {
   const [proveedores, unidades] = await Promise.all([
     getFacturaFormData(),
     getUnidades(),

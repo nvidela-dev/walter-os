@@ -1,28 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { FormMessage } from "@/components/form-feedback";
-import { createMenuItem, updateMenuItem } from "./actions";
-import type { MenuItem } from "@/db/schema";
+import { type ReactElement, useState } from "react";
 
-export function MenuForm({ item, recipes }: { item?: MenuItem; recipes: { id: string; nombre: string }[] }) {
+import { FormMessage } from "@/components/form-feedback";
+import type { MenuItem } from "@/db/schema";
+import { getFormString } from "@/lib/form";
+
+import { createMenuItem, updateMenuItem } from "./actions";
+
+export function MenuForm({
+  item,
+  recipes,
+}: {
+  item?: MenuItem;
+  recipes: { id: string; nombre: string }[];
+}): ReactElement {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isEditing = !!item;
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
-    const recetaId = formData.get("recetaId") as string;
     const data = {
-      nombre: formData.get("nombre") as string,
-      descripcion: (formData.get("descripcion") as string) || null,
-      precioVenta: formData.get("precioVenta") as string,
-      recetaId: recetaId || null,
+      nombre: getFormString(formData, "nombre"),
+      descripcion: getFormString(formData, "descripcion") || null,
+      precioVenta: getFormString(formData, "precioVenta"),
+      recetaId: getFormString(formData, "recetaId") || null,
     };
 
     const result = isEditing ? await updateMenuItem(item.id, data) : await createMenuItem(data);
@@ -35,7 +43,7 @@ export function MenuForm({ item, recipes }: { item?: MenuItem; recipes: { id: st
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
       <div>
         <label className="mb-2 block text-sm font-medium text-[#3d3530]">Nombre del Plato</label>

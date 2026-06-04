@@ -1,12 +1,13 @@
 "use server";
 
-import { db } from "@/db";
-import { productos, recetaProductos, recetas, unidades } from "@/db/schema";
-import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
-import { optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
+import { db } from "@/db";
+import { productos, type Receta, recetaProductos, recetas, unidades } from "@/db/schema";
+import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
 
 const recipeInputSchema = z.object({
   nombre: requiredTextSchema,
@@ -15,16 +16,25 @@ const recipeInputSchema = z.object({
 
 export type RecipeInput = z.infer<typeof recipeInputSchema>;
 
-export async function getRecipes() {
+export interface RecipeIngredient {
+  productoId: string;
+  cantidad: string;
+  nombre: string;
+  unidad: string;
+}
+
+export async function getRecipes(): Promise<Receta[]> {
   return db.select().from(recetas).orderBy(recetas.nombre);
 }
 
-export async function getRecipe(id: string) {
+export async function getRecipe(id: string): Promise<Receta | null> {
   const result = await db.select().from(recetas).where(eq(recetas.id, id));
   return result[0] ?? null;
 }
 
-export async function getRecipeWithIngredients(id: string) {
+export async function getRecipeWithIngredients(
+  id: string
+): Promise<(Receta & { ingredientes: RecipeIngredient[] }) | null> {
   const recipe = await getRecipe(id);
   if (!recipe) return null;
   const ingredients = await db
@@ -47,6 +57,7 @@ export async function createRecipe(input: unknown): Promise<ActionResult<{ id: s
 
   try {
     const [created] = await db.insert(recetas).values(parsed.data).returning({ id: recetas.id });
+    if (!created) return actionError("No se pudo crear la receta.");
     revalidatePath("/recipes");
     return actionOk(created);
   } catch (error) {

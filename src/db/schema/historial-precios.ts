@@ -1,9 +1,10 @@
 import { sql } from "drizzle-orm";
 import { check, numeric, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { facturas } from "./facturas";
 import { productos } from "./productos";
 import { proveedores } from "./proveedores";
 import { unidades } from "./unidades";
-import { facturas } from "./facturas";
 
 export const historialPrecios = pgTable(
   "historial_precios",

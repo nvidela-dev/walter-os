@@ -1,11 +1,13 @@
-import Link from "next/link";
 import { ArrowLeftIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import type { ReactElement } from "react";
+
 import { getFacturas } from "./actions";
 import { FacturaList } from "./factura-list";
 
 export const dynamic = "force-dynamic";
 
-export default async function FacturasPage() {
+export default async function FacturasPage(): Promise<ReactElement> {
   const facturas = await getFacturas();
 
   return (

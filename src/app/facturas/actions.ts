@@ -1,26 +1,32 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+
+import { and, asc, count, desc, eq, gt, inArray, ne, notExists, type SQL,sql } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
 import { db } from "@/db";
 import {
   facturaLineas,
   facturas,
   historialPrecios,
-  proveedorProductos,
-  proveedores,
   productos,
-  unidades,
+  proveedores,
+  proveedorProductos,
   type ProveedorTipo,
+  unidades,
 } from "@/db/schema";
 import {
   actionError,
   actionOk,
-  expectedActionError,
   type ActionResult,
+  expectedActionError,
   unknownActionError,
 } from "@/lib/action-result";
-import { multiplyDecimalStrings, sumDecimalStrings } from "@/lib/money";
 import { getFacturaDeleteBlock } from "@/lib/delete-guards";
+import { multiplyDecimalStrings, sumDecimalStrings } from "@/lib/money";
 import {
   isoDateSchema,
   moneySchema,
@@ -28,10 +34,6 @@ import {
   quantitySchema,
   uuidSchema,
 } from "@/lib/validation";
-import { and, asc, count, desc, eq, gt, inArray, ne, notExists, sql, type SQL } from "drizzle-orm";
-import type { PgTable } from "drizzle-orm/pg-core";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 const facturaBaseSchema = z.object({
   proveedorId: uuidSchema,
@@ -62,7 +64,70 @@ const createFacturaSchema = z.union([facturaProductoSchema, facturaServicioSchem
 
 export type CreateFacturaInput = z.input<typeof createFacturaSchema>;
 
-export async function getFacturaFormData() {
+export interface FacturaFormProduct {
+  id: string;
+  nombre: string;
+  unidadId: string;
+  unidadCodigo: string;
+  precioActual: string;
+}
+
+export interface FacturaFormProveedor {
+  id: string;
+  nombre: string;
+  tipo: ProveedorTipo;
+  productos: FacturaFormProduct[];
+}
+
+export interface FacturaListRow {
+  id: string;
+  proveedorId: string;
+  proveedorNombre: string;
+  fecha: string;
+  numero: string | null;
+  total: string;
+  paid: boolean;
+}
+
+export interface FacturaLineDetail {
+  id: string;
+  productoId: string;
+  productoNombre: string;
+  unidadId: string;
+  unidad: string;
+  unidadNombre: string;
+  precioUnit: string;
+  cantidad: string;
+  total: string;
+}
+
+export interface FacturaDetail {
+  id: string;
+  proveedorId: string;
+  proveedorNombre: string;
+  fecha: string;
+  numero: string | null;
+  monto: string | null;
+  total: string;
+  paid: boolean;
+  notas: string | null;
+  createdAt: Date;
+  lineas: FacturaLineDetail[];
+}
+
+export interface PriceHistoryRow {
+  id: string;
+  proveedorId: string;
+  proveedorNombre: string;
+  precio: string;
+  unidad: string;
+  facturaId: string | null;
+  facturaNumero: string | null;
+  facturaFecha: string | null;
+  createdAt: Date;
+}
+
+export async function getFacturaFormData(): Promise<FacturaFormProveedor[]> {
   const rows = await db
     .select({
       proveedorId: proveedores.id,
@@ -80,21 +145,7 @@ export async function getFacturaFormData() {
     .leftJoin(unidades, eq(productos.unidadId, unidades.id))
     .orderBy(asc(proveedores.nombre), asc(productos.nombre));
 
-  const grouped = new Map<
-    string,
-    {
-      id: string;
-      nombre: string;
-      tipo: ProveedorTipo;
-      productos: Array<{
-        id: string;
-        nombre: string;
-        unidadId: string;
-        unidadCodigo: string;
-        precioActual: string;
-      }>;
-    }
-  >();
+  const grouped = new Map<string, FacturaFormProveedor>();
 
   for (const r of rows) {
     let entry = grouped.get(r.proveedorId);
@@ -107,7 +158,13 @@ export async function getFacturaFormData() {
       };
       grouped.set(r.proveedorId, entry);
     }
-    if (!r.productoId || !r.unidadId || !r.productoNombre || !r.unidadCodigo || r.precioActual === null) {
+    if (
+      r.productoId == null ||
+      r.unidadId == null ||
+      r.productoNombre == null ||
+      r.unidadCodigo == null ||
+      r.precioActual === null
+    ) {
       continue;
     }
     entry.productos.push({
@@ -122,7 +179,7 @@ export async function getFacturaFormData() {
   return [...grouped.values()];
 }
 
-export async function getFacturas() {
+export async function getFacturas(): Promise<FacturaListRow[]> {
   return db
     .select({
       id: facturas.id,
@@ -138,7 +195,7 @@ export async function getFacturas() {
     .orderBy(desc(facturas.fecha), desc(facturas.createdAt));
 }
 
-export async function getFactura(id: string) {
+export async function getFactura(id: string): Promise<FacturaDetail | null> {
   const [header] = await db
     .select({
       id: facturas.id,
@@ -182,9 +239,9 @@ export async function getFactura(id: string) {
 export async function getProductPriceHistory(
   productoId: string,
   opts?: { proveedorId?: string }
-) {
+): Promise<PriceHistoryRow[]> {
   const conditions = [eq(historialPrecios.productoId, productoId)];
-  if (opts?.proveedorId) {
+  if (opts?.proveedorId != null) {
     conditions.push(eq(historialPrecios.proveedorId, opts.proveedorId));
   }
 
@@ -258,16 +315,17 @@ export async function createFactura(input: unknown): Promise<ActionResult<{ id: 
       );
 
     const productById = new Map(catalogRows.map((row) => [row.productoId, row]));
-    const missingProduct = productIds.find((productId) => !productById.get(productId)?.unidadId);
-    if (missingProduct) {
-      throw expectedActionError("La factura incluye un producto que no pertenece a este proveedor.");
-    }
 
     const lineasWithTotals = parsed.data.lineas.map((linea) => {
-      const product = productById.get(linea.productoId)!;
+      const product = productById.get(linea.productoId);
+      if (product?.unidadId == null) {
+        throw expectedActionError(
+          "La factura incluye un producto que no pertenece a este proveedor."
+        );
+      }
       return {
         ...linea,
-        unidadId: product.unidadId!,
+        unidadId: product.unidadId,
         total: multiplyDecimalStrings(linea.precioUnit, linea.cantidad),
       };
     });
@@ -376,7 +434,7 @@ export async function deleteFactura(id: string): Promise<ActionResult> {
     ]);
 
     const blockMessage = getFacturaDeleteBlock({ lines: lineas, priceHistory: history });
-    if (blockMessage) return actionError(blockMessage);
+    if (blockMessage != null) return actionError(blockMessage);
 
     const [deleted] = await db
       .delete(facturas)
@@ -392,7 +450,9 @@ export async function deleteFactura(id: string): Promise<ActionResult> {
   }
 }
 
-async function getProviderForFactura(id: string) {
+async function getProviderForFactura(
+  id: string
+): Promise<{ id: string; tipo: ProveedorTipo } | null> {
   const [provider] = await db
     .select({ id: proveedores.id, tipo: proveedores.tipo })
     .from(proveedores)
@@ -400,12 +460,12 @@ async function getProviderForFactura(id: string) {
   return provider ?? null;
 }
 
-function revalidateFacturaPaths(proveedorId: string) {
+function revalidateFacturaPaths(proveedorId: string): void {
   revalidatePath("/facturas");
   revalidatePath(`/providers/${proveedorId}`);
 }
 
-async function countRows(table: PgTable, where: SQL | undefined) {
+async function countRows(table: PgTable, where: SQL | undefined): Promise<number> {
   const [row] = await db.select({ value: count() }).from(table).where(where);
   return row?.value ?? 0;
 }

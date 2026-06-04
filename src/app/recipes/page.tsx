@@ -1,9 +1,12 @@
+import type { ReactElement } from "react";
+
+import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
+
 import { getRecipes } from "./actions";
-import { ListPageShell, EmptyState, ListPageRow } from "@/components/list-page-shell";
 
 export const dynamic = "force-dynamic";
 
-export default async function RecipesPage() {
+export default async function RecipesPage(): Promise<ReactElement> {
   const recipes = await getRecipes();
 
   return (

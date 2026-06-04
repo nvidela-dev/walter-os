@@ -1,7 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import { check, numeric, pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
-import { recetas } from "./recetas";
+
 import { productos } from "./productos";
+import { recetas } from "./recetas";
 
 export const recetaProductos = pgTable(
   "receta_productos",

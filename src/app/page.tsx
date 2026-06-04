@@ -1,12 +1,13 @@
 import { UserButton } from "@clerk/nextjs";
-import Link from "next/link";
 import {
-  TruckIcon,
-  UserGroupIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
   DocumentTextIcon,
+  TruckIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import type { ReactElement } from "react";
 
 const apps = [
   {
@@ -51,7 +52,7 @@ const apps = [
   },
 ];
 
-export default function Home() {
+export default function Home(): ReactElement {
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
       {/* Header */}

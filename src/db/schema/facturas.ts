@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, date, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
 import { proveedores } from "./proveedores";
 
 export const facturas = pgTable(

@@ -1,9 +1,10 @@
 import { z } from "zod";
+
 import { isNonNegativeDecimal, isPositiveDecimal, toDecimalString } from "./money";
 
-const decimalPattern = (scale: number) => new RegExp(`^\\d+(\\.\\d{1,${scale}})?$`);
+const decimalPattern = (scale: number): RegExp => new RegExp(`^\\d+(\\.\\d{1,${scale}})?$`);
 
-export const uuidSchema = z.string().uuid("Identificador inválido.");
+export const uuidSchema = z.uuid("Identificador inválido.");
 
 export const requiredTextSchema = z
   .string()
@@ -24,7 +25,7 @@ export const isoDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe tener formato AAAA-MM-DD.");
 
-export function positiveDecimalSchema(scale = 2) {
+export function positiveDecimalSchema(scale = 2): z.ZodType<string> {
   return z
     .string()
     .trim()
@@ -33,7 +34,7 @@ export function positiveDecimalSchema(scale = 2) {
     .transform((value) => toDecimalString(value, scale));
 }
 
-export function nonNegativeDecimalSchema(scale = 2) {
+export function nonNegativeDecimalSchema(scale = 2): z.ZodType<string> {
   return z
     .string()
     .trim()

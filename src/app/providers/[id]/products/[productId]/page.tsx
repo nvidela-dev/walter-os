@@ -1,8 +1,10 @@
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProvider, getProductForProvider, getUnidades } from "../../../actions";
+import type { ReactElement } from "react";
+
+import { getProductForProvider, getProvider, getUnidades } from "../../../actions";
 import { ProductEditForm } from "./product-edit-form";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +12,9 @@ interface ProductEditPageProps {
   params: Promise<{ id: string; productId: string }>;
 }
 
-export default async function ProductEditPage({ params }: ProductEditPageProps) {
+export default async function ProductEditPage({
+  params,
+}: ProductEditPageProps): Promise<ReactElement> {
   const { id, productId } = await params;
 
   const [provider, product, unidades] = await Promise.all([

@@ -1,12 +1,13 @@
 "use server";
 
-import { db } from "@/db";
-import { menu, recetas } from "@/db/schema";
-import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
-import { moneySchema, optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
+import { db } from "@/db";
+import { menu, type MenuItem, recetas } from "@/db/schema";
+import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { moneySchema, optionalTextSchema, requiredTextSchema, uuidSchema } from "@/lib/validation";
 
 const menuItemInputSchema = z.object({
   nombre: requiredTextSchema,
@@ -21,7 +22,16 @@ const menuItemInputSchema = z.object({
 
 export type MenuItemInput = z.infer<typeof menuItemInputSchema>;
 
-export async function getMenuItems() {
+export interface MenuItemRow {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  precioVenta: string;
+  recetaId: string | null;
+  recetaNombre: string | null;
+}
+
+export async function getMenuItems(): Promise<MenuItemRow[]> {
   return db
     .select({
       id: menu.id,
@@ -36,7 +46,7 @@ export async function getMenuItems() {
     .orderBy(menu.nombre);
 }
 
-export async function getMenuItem(id: string) {
+export async function getMenuItem(id: string): Promise<MenuItem | null> {
   const result = await db.select().from(menu).where(eq(menu.id, id));
   return result[0] ?? null;
 }
@@ -47,6 +57,7 @@ export async function createMenuItem(input: unknown): Promise<ActionResult<{ id:
 
   try {
     const [created] = await db.insert(menu).values(parsed.data).returning({ id: menu.id });
+    if (!created) return actionError("No se pudo crear el plato.");
     revalidatePath("/menu");
     return actionOk(created);
   } catch (error) {
@@ -100,6 +111,6 @@ export async function deleteMenuItem(id: string): Promise<ActionResult> {
   }
 }
 
-export async function getAllRecipes() {
+export async function getAllRecipes(): Promise<{ id: string; nombre: string }[]> {
   return db.select({ id: recetas.id, nombre: recetas.nombre }).from(recetas).orderBy(recetas.nombre);
 }

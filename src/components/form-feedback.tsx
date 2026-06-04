@@ -1,11 +1,17 @@
+import type { ReactElement } from "react";
+
 interface FormMessageProps {
   message: string | null;
   tone?: "error" | "success";
   className?: string;
 }
 
-export function FormMessage({ message, tone = "error", className = "" }: FormMessageProps) {
-  if (!message) return null;
+export function FormMessage({
+  message,
+  tone = "error",
+  className = "",
+}: FormMessageProps): ReactElement | null {
+  if (message === null || message === "") return null;
 
   const classes =
     tone === "success"

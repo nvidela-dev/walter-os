@@ -8,7 +8,7 @@ config({ path: ".env" });
 
 const connectionString = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
 
-if (!connectionString) {
+if (connectionString === undefined || connectionString === "") {
   throw new Error("DATABASE_URL_UNPOOLED or DATABASE_URL must be set before running migrations.");
 }
 

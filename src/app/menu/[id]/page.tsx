@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMenuItem, deleteMenuItem, getAllRecipes } from "../actions";
-import { MenuForm } from "../menu-form";
+import type { ReactElement } from "react";
+
 import { DeleteButton } from "@/components/delete-button";
+
+import { deleteMenuItem, getAllRecipes, getMenuItem } from "../actions";
+import { MenuForm } from "../menu-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function MenuItemPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MenuItemPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<ReactElement> {
   const { id } = await params;
   const [item, recipes] = await Promise.all([getMenuItem(id), getAllRecipes()]);
   if (!item) notFound();

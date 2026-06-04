@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { type ReactElement, useMemo, useState, useTransition } from "react";
+
 import { FormMessage } from "@/components/form-feedback";
+
 import { togglePaid } from "./actions";
 
 interface FacturaRow {
@@ -17,7 +19,7 @@ interface FacturaRow {
 
 type Filter = "all" | "unpaid" | "paid";
 
-const FILTERS: Array<{ key: Filter; label: string }> = [
+const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "Todas" },
   { key: "unpaid", label: "Pendientes" },
   { key: "paid", label: "Pagadas" },
@@ -31,7 +33,7 @@ export function FacturaList({
 }: {
   facturas: FacturaRow[];
   togglePaidAction?: TogglePaidAction;
-}) {
+}): ReactElement {
   const [filter, setFilter] = useState<Filter>("all");
 
   const counts = useMemo(() => {
@@ -54,7 +56,7 @@ export function FacturaList({
             <button
               key={f.key}
               type="button"
-              onClick={() => setFilter(f.key)}
+              onClick={() => { setFilter(f.key); }}
               className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 active
                   ? "bg-[#c4a77d] text-white"
@@ -95,12 +97,12 @@ function FacturaRow({
 }: {
   factura: FacturaRow;
   togglePaidAction: TogglePaidAction;
-}) {
+}): ReactElement {
   const [isPending, startTransition] = useTransition();
   const [optimisticPaid, setOptimisticPaid] = useState(factura.paid);
   const [error, setError] = useState<string | null>(null);
 
-  function handleToggle() {
+  function handleToggle(): void {
     if (isPending) return;
     const next = !optimisticPaid;
     setOptimisticPaid(next);
@@ -150,7 +152,7 @@ function FacturaRow({
           </p>
           <p className="text-xs text-[#8b7355]">
             {factura.fecha}
-            {factura.numero && <> · #{factura.numero}</>}
+            {factura.numero != null && factura.numero !== "" && <> · #{factura.numero}</>}
           </p>
         </div>
 

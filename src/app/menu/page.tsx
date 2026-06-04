@@ -1,9 +1,12 @@
+import type { ReactElement } from "react";
+
+import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
+
 import { getMenuItems } from "./actions";
-import { ListPageShell, EmptyState, ListPageRow } from "@/components/list-page-shell";
 
 export const dynamic = "force-dynamic";
 
-export default async function MenuPage() {
+export default async function MenuPage(): Promise<ReactElement> {
   const items = await getMenuItems();
 
   return (
@@ -18,7 +21,7 @@ export default async function MenuPage() {
           href={`/menu/${item.id}`}
           emoji="☕"
           title={item.nombre}
-          subtitle={`$${item.precioVenta}${item.recetaNombre ? ` · ${item.recetaNombre}` : ""}`}
+          subtitle={`$${item.precioVenta}${item.recetaNombre != null ? ` · ${item.recetaNombre}` : ""}`}
         />
       )}
       emptyState={
