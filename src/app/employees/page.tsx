@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 
 import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
+import { t } from "@/i18n";
 
 import { getEmployees } from "./actions";
 
@@ -11,7 +12,7 @@ export default async function EmployeesPage(): Promise<ReactElement> {
 
   return (
     <ListPageShell
-      title="Equipo"
+      title={t.employees.title}
       backHref="/"
       addHref="/employees/new"
       items={employees}
@@ -20,17 +21,17 @@ export default async function EmployeesPage(): Promise<ReactElement> {
           key={emp.id}
           href={`/employees/${emp.id}`}
           emoji="🙏"
-          title={emp.nombre}
-          subtitle={`$${emp.salarioMensual}/mes`}
+          title={emp.name}
+          subtitle={t.employees.monthlyPay(emp.monthlySalary)}
         />
       )}
       emptyState={
         <EmptyState
           emoji="🙏"
-          title="Sin empleados"
-          description="Agrega a los miembros del equipo"
+          title={t.employees.emptyTitle}
+          description={t.employees.emptyDescription}
           ctaHref="/employees/new"
-          ctaText="Agregar Miembro"
+          ctaText={t.employees.addCta}
         />
       }
     />

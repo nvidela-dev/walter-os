@@ -2,17 +2,18 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactElement } from "react";
 
-import { getUnidades } from "@/app/providers/actions";
+import { getUnits } from "@/app/providers/actions";
+import { t } from "@/i18n";
 
-import { getFacturaFormData } from "../actions";
-import { FacturaForm } from "./factura-form";
+import { getInvoiceFormData } from "../actions";
+import { InvoiceForm } from "./invoice-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function NuevaFacturaPage(): Promise<ReactElement> {
-  const [proveedores, unidades] = await Promise.all([
-    getFacturaFormData(),
-    getUnidades(),
+export default async function NewInvoicePage(): Promise<ReactElement> {
+  const [providers, units] = await Promise.all([
+    getInvoiceFormData(),
+    getUnits(),
   ]);
 
   return (
@@ -24,25 +25,23 @@ export default async function NuevaFacturaPage(): Promise<ReactElement> {
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
-        <h1 className="text-xl font-light text-[#3d3530]">Nueva Factura</h1>
+        <h1 className="text-xl font-light text-[#3d3530]">{t.invoices.newTitle}</h1>
       </header>
 
       <main className="flex-1 px-6 py-4 pb-24">
-        {proveedores.length === 0 ? (
+        {providers.length === 0 ? (
           <div className="rounded-2xl bg-[#f5f0e8] p-6 text-center">
-            <p className="mb-2 text-[#3d3530]">No hay proveedores.</p>
-            <p className="text-sm text-[#8b7355]">
-              Agrega un proveedor para empezar a registrar facturas.
-            </p>
+            <p className="mb-2 text-[#3d3530]">{t.invoices.noProvidersTitle}</p>
+            <p className="text-sm text-[#8b7355]">{t.invoices.noProvidersHint}</p>
             <Link
               href="/providers"
               className="mt-4 inline-block rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white"
             >
-              Ir a Proveedores
+              {t.invoices.goToProviders}
             </Link>
           </div>
         ) : (
-          <FacturaForm proveedores={proveedores} unidades={unidades} />
+          <InvoiceForm providers={providers} units={units} />
         )}
       </main>
     </div>

@@ -3,29 +3,30 @@
 import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
+import { t } from "@/i18n";
 import { getFormString } from "@/lib/form";
 
 import { createProductForProvider } from "../actions";
 
-interface UnidadOption {
+interface UnitOption {
   id: string;
-  codigo: string;
-  nombre: string;
+  code: string;
+  name: string;
 }
 
 export function AddProductForm({
   providerId,
-  unidades,
+  units,
 }: {
   providerId: string;
-  unidades: UnidadOption[];
+  units: UnitOption[];
 }): ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const defaultUnidadId =
-    unidades.find((u) => u.codigo === "unidad")?.id ?? unidades[0]?.id ?? "";
+  const defaultUnitId =
+    units.find((u) => u.code === "unidad")?.id ?? units[0]?.id ?? "";
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
@@ -36,12 +37,12 @@ export function AddProductForm({
     const result = await createProductForProvider(
       providerId,
       {
-        nombre: getFormString(formData, "nombre"),
-        unidadId: getFormString(formData, "unidadId"),
-        descripcion: getFormString(formData, "descripcion") || null,
+        name: getFormString(formData, "name"),
+        unitId: getFormString(formData, "unitId"),
+        description: getFormString(formData, "description") || null,
       },
-      getFormString(formData, "precio"),
-      getFormString(formData, "cantidad")
+      getFormString(formData, "price"),
+      getFormString(formData, "quantity")
     );
 
     setIsSubmitting(false);
@@ -59,7 +60,7 @@ export function AddProductForm({
         onClick={() => { setIsOpen(true); }}
         className="w-full rounded-xl border-2 border-dashed border-[#c4a77d] py-4 text-sm font-medium text-[#c4a77d] hover:bg-white"
       >
-        + Agregar Producto
+        + {t.products.addCta}
       </button>
     );
   }
@@ -70,9 +71,9 @@ export function AddProductForm({
       <div>
         <input
           type="text"
-          name="nombre"
+          name="name"
           required
-          placeholder="Nombre del producto"
+          placeholder={t.products.fields.namePlaceholder}
           className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
         />
       </div>
@@ -80,23 +81,23 @@ export function AddProductForm({
         <div>
           <input
             type="number"
-            name="cantidad"
+            name="quantity"
             step="0.01"
             required
             defaultValue="1"
-            placeholder="Cant."
+            placeholder={t.products.fields.quantityPlaceholder}
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
         <div>
           <select
-            name="unidadId"
-            defaultValue={defaultUnidadId}
+            name="unitId"
+            defaultValue={defaultUnitId}
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
           >
-            {unidades.map((u) => (
+            {units.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.nombre}
+                {u.name}
               </option>
             ))}
           </select>
@@ -104,10 +105,10 @@ export function AddProductForm({
         <div>
           <input
             type="number"
-            name="precio"
+            name="price"
             step="0.01"
             required
-            placeholder="Precio"
+            placeholder={t.products.fields.pricePlaceholder}
             className="w-full rounded-lg border-2 border-[#e8e0d4] px-3 py-3 text-sm text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none"
           />
         </div>
@@ -119,14 +120,14 @@ export function AddProductForm({
           onClick={() => { setIsOpen(false); }}
           className="flex-1 rounded-lg border-2 border-[#e8e0d4] py-3 text-sm font-medium text-[#8b7355]"
         >
-          Cancelar
+          {t.common.cancel}
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="flex-1 rounded-lg bg-[#c4a77d] py-3 text-sm font-medium text-white disabled:opacity-50"
         >
-          {isSubmitting ? "Agregando..." : "Agregar"}
+          {isSubmitting ? t.products.adding : t.common.add}
         </button>
       </div>
     </form>

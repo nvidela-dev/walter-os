@@ -4,15 +4,16 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 import { type ReactElement, useMemo, useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
+import { t } from "@/i18n";
 
 import { togglePaid } from "./actions";
 
-interface FacturaRow {
+interface InvoiceRow {
   id: string;
-  proveedorId: string;
-  proveedorNombre: string;
-  fecha: string;
-  numero: string | null;
+  providerId: string;
+  providerName: string;
+  date: string;
+  number: string | null;
   total: string;
   paid: boolean;
 }
@@ -20,32 +21,32 @@ interface FacturaRow {
 type Filter = "all" | "unpaid" | "paid";
 
 const FILTERS: { key: Filter; label: string }[] = [
-  { key: "all", label: "Todas" },
-  { key: "unpaid", label: "Pendientes" },
-  { key: "paid", label: "Pagadas" },
+  { key: "all", label: t.invoices.list.filters.all },
+  { key: "unpaid", label: t.invoices.list.filters.unpaid },
+  { key: "paid", label: t.invoices.list.filters.paid },
 ];
 
 type TogglePaidAction = typeof togglePaid;
 
-export function FacturaList({
-  facturas,
+export function InvoiceList({
+  invoices,
   togglePaidAction = togglePaid,
 }: {
-  facturas: FacturaRow[];
+  invoices: InvoiceRow[];
   togglePaidAction?: TogglePaidAction;
 }): ReactElement {
   const [filter, setFilter] = useState<Filter>("all");
 
   const counts = useMemo(() => {
-    const paid = facturas.filter((f) => f.paid).length;
-    return { all: facturas.length, paid, unpaid: facturas.length - paid };
-  }, [facturas]);
+    const paid = invoices.filter((f) => f.paid).length;
+    return { all: invoices.length, paid, unpaid: invoices.length - paid };
+  }, [invoices]);
 
   const filtered = useMemo(() => {
-    if (filter === "paid") return facturas.filter((f) => f.paid);
-    if (filter === "unpaid") return facturas.filter((f) => !f.paid);
-    return facturas;
-  }, [facturas, filter]);
+    if (filter === "paid") return invoices.filter((f) => f.paid);
+    if (filter === "unpaid") return invoices.filter((f) => !f.paid);
+    return invoices;
+  }, [invoices, filter]);
 
   return (
     <div className="space-y-4">
@@ -75,15 +76,15 @@ export function FacturaList({
       {filtered.length === 0 ? (
         <p className="py-12 text-center text-sm text-[#8b7355]">
           {filter === "paid"
-            ? "No hay facturas pagadas."
+            ? t.invoices.list.emptyPaid
             : filter === "unpaid"
-              ? "No hay facturas pendientes."
-              : "Sin facturas."}
+              ? t.invoices.list.emptyUnpaid
+              : t.invoices.list.empty}
         </p>
       ) : (
         <div className="space-y-2">
-          {filtered.map((factura) => (
-            <FacturaRow key={factura.id} factura={factura} togglePaidAction={togglePaidAction} />
+          {filtered.map((invoice) => (
+            <InvoiceRow key={invoice.id} invoice={invoice} togglePaidAction={togglePaidAction} />
           ))}
         </div>
       )}
@@ -91,15 +92,15 @@ export function FacturaList({
   );
 }
 
-function FacturaRow({
-  factura,
+function InvoiceRow({
+  invoice,
   togglePaidAction,
 }: {
-  factura: FacturaRow;
+  invoice: InvoiceRow;
   togglePaidAction: TogglePaidAction;
 }): ReactElement {
   const [isPending, startTransition] = useTransition();
-  const [optimisticPaid, setOptimisticPaid] = useState(factura.paid);
+  const [optimisticPaid, setOptimisticPaid] = useState(invoice.paid);
   const [error, setError] = useState<string | null>(null);
 
   function handleToggle(): void {
@@ -109,13 +110,13 @@ function FacturaRow({
     setError(null);
     startTransition(async () => {
       try {
-        const result = await togglePaidAction(factura.id);
+        const result = await togglePaidAction(invoice.id);
         if (!result.ok) {
           setError(result.error);
           setOptimisticPaid(!next);
         }
       } catch {
-        setError("No se pudo actualizar la factura.");
+        setError(t.invoices.list.toggleFailed);
         setOptimisticPaid(!next);
       }
     });
@@ -132,7 +133,7 @@ function FacturaRow({
           type="button"
           onClick={handleToggle}
           disabled={isPending}
-          aria-label={optimisticPaid ? "Marcar como pendiente" : "Marcar como pagada"}
+          aria-label={optimisticPaid ? t.invoices.list.markUnpaid : t.invoices.list.markPaid}
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
             optimisticPaid
               ? "border-emerald-600 bg-emerald-600 text-white"
@@ -148,11 +149,11 @@ function FacturaRow({
               optimisticPaid ? "text-[#8b7355]" : "text-[#3d3530]"
             }`}
           >
-            {factura.proveedorNombre}
+            {invoice.providerName}
           </p>
           <p className="text-xs text-[#8b7355]">
-            {factura.fecha}
-            {factura.numero != null && factura.numero !== "" && <> · #{factura.numero}</>}
+            {invoice.date}
+            {invoice.number != null && invoice.number !== "" && <> · #{invoice.number}</>}
           </p>
         </div>
 
@@ -161,7 +162,7 @@ function FacturaRow({
             optimisticPaid ? "text-[#8b7355]" : "text-[#3d3530]"
           }`}
         >
-          ${factura.total}
+          ${invoice.total}
         </div>
       </div>
       <FormMessage message={error} />

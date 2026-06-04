@@ -1,27 +1,27 @@
 import { relations, sql } from "drizzle-orm";
 import { check, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-import { recetas } from "./recetas";
+import { recipes } from "./recipes";
 
 export const menu = pgTable(
   "menu",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    nombre: text("nombre").notNull(),
-    descripcion: text("descripcion"),
-    precioVenta: numeric("precio_venta", { precision: 10, scale: 2 }).notNull(),
-    recetaId: uuid("receta_id").references(() => recetas.id, { onDelete: "set null" }),
+    name: text("nombre").notNull(),
+    description: text("descripcion"),
+    sellPrice: numeric("precio_venta", { precision: 10, scale: 2 }).notNull(),
+    recipeId: uuid("receta_id").references(() => recipes.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [check("menu_precio_venta_positive", sql`${table.precioVenta} > 0`)]
+  (table) => [check("menu_precio_venta_positive", sql`${table.sellPrice} > 0`)]
 );
 
 // Relations
 export const menuRelations = relations(menu, ({ one }) => ({
-  receta: one(recetas, {
-    fields: [menu.recetaId],
-    references: [recetas.id],
+  recipe: one(recipes, {
+    fields: [menu.recipeId],
+    references: [recipes.id],
   }),
 }));
 

@@ -3,6 +3,7 @@
 import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
+import { t } from "@/i18n";
 import { getFormString } from "@/lib/form";
 
 import { updateProviderDebt } from "../actions";
@@ -25,9 +26,9 @@ export function DebtForm({
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const deuda = getFormString(formData, "deuda") || "0";
+    const debt = getFormString(formData, "debt") || "0";
 
-    const result = await updateProviderDebt(providerId, { deuda });
+    const result = await updateProviderDebt(providerId, { debt });
     setIsSubmitting(false);
     if (!result.ok) {
       setError(result.error);
@@ -43,11 +44,11 @@ export function DebtForm({
       <FormMessage message={error} />
       <div className="flex items-end gap-3">
         <div className="flex-1">
-          <label htmlFor="deuda" className="mb-2 block text-xs font-medium text-[#8b7355]">Deuda Actual ($)</label>
+          <label htmlFor="debt" className="mb-2 block text-xs font-medium text-[#8b7355]">{t.providers.fields.currentDebt}</label>
           <input
             type="number"
-            id="deuda"
-            name="deuda"
+            id="debt"
+            name="debt"
             step="0.01"
             defaultValue={currentDebt}
             className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530] focus:border-[#c4a77d] focus:outline-none"
@@ -58,7 +59,7 @@ export function DebtForm({
           disabled={isSubmitting}
           className="rounded-xl bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50"
         >
-          {isSubmitting ? "..." : saved ? "Guardado" : "Guardar"}
+          {isSubmitting ? t.common.loading : saved ? t.common.saved : t.common.save}
         </button>
       </div>
     </form>

@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export interface ProviderDeleteReferences {
   products: number;
   invoices: number;
@@ -10,7 +12,7 @@ export interface ProductDeleteReferences {
   priceHistory: number;
 }
 
-export interface FacturaDeleteReferences {
+export interface InvoiceDeleteReferences {
   lines: number;
   priceHistory: number;
 }
@@ -25,24 +27,22 @@ function hasReferences(counts: number[]): boolean {
 
 export function getProviderDeleteBlock(references: ProviderDeleteReferences): string | null {
   return hasReferences([references.products, references.invoices, references.priceHistory])
-    ? "No se puede eliminar este proveedor porque ya tiene productos, facturas o historial asociado."
+    ? t.errors.provider.deleteBlocked
     : null;
 }
 
 export function getProductDeleteBlock(references: ProductDeleteReferences): string | null {
   return hasReferences([references.invoiceLines, references.recipes, references.priceHistory])
-    ? "No se puede eliminar este producto porque ya tiene facturas, recetas o historial asociado."
+    ? t.errors.product.deleteBlocked
     : null;
 }
 
-export function getFacturaDeleteBlock(references: FacturaDeleteReferences): string | null {
+export function getInvoiceDeleteBlock(references: InvoiceDeleteReferences): string | null {
   return hasReferences([references.lines, references.priceHistory])
-    ? "No se puede eliminar esta factura porque tiene líneas o historial asociado."
+    ? t.errors.invoice.deleteBlocked
     : null;
 }
 
 export function getEmployeeDeleteBlock(references: EmployeeDeleteReferences): string | null {
-  return references.extraHours > 0
-    ? "No se puede eliminar este empleado porque tiene horas extra registradas."
-    : null;
+  return references.extraHours > 0 ? t.errors.employee.deleteBlocked : null;
 }

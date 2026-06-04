@@ -1,5 +1,7 @@
 import { flattenError, ZodError } from "zod";
 
+import { t } from "@/i18n";
+
 export type ActionResult<T = void> =
   | { ok: true; data: T }
   | { ok: false; error: string; fieldErrors?: Record<string, string[]> };
@@ -16,7 +18,7 @@ export function actionError(
 }
 
 export function validationActionError(error: ZodError): ActionResult<never> {
-  return actionError("Revisá los datos ingresados.", flattenError(error).fieldErrors);
+  return actionError(t.errors.invalidInput, flattenError(error).fieldErrors);
 }
 
 export class ExpectedActionError extends Error {}
@@ -27,7 +29,7 @@ export function expectedActionError(message: string): ExpectedActionError {
 
 export function unknownActionError(
   error: unknown,
-  fallback = "No se pudo completar la acción."
+  fallback = t.errors.generic
 ): ActionResult<never> {
   if (error instanceof ZodError) {
     return validationActionError(error);
@@ -41,7 +43,7 @@ export function unknownActionError(
 
 export function getActionError(
   result: ActionResult<unknown>,
-  fallback = "No se pudo completar la acción."
+  fallback = t.errors.generic
 ): string | null {
   return result.ok ? null : result.error || fallback;
 }

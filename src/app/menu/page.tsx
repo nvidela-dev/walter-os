@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 
 import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
+import { t } from "@/i18n";
 
 import { getMenuItems } from "./actions";
 
@@ -11,7 +12,7 @@ export default async function MenuPage(): Promise<ReactElement> {
 
   return (
     <ListPageShell
-      title="Menú"
+      title={t.menu.title}
       backHref="/"
       addHref="/menu/new"
       items={items}
@@ -20,17 +21,17 @@ export default async function MenuPage(): Promise<ReactElement> {
           key={item.id}
           href={`/menu/${item.id}`}
           emoji="☕"
-          title={item.nombre}
-          subtitle={`$${item.precioVenta}${item.recetaNombre != null ? ` · ${item.recetaNombre}` : ""}`}
+          title={item.name}
+          subtitle={`$${item.sellPrice}${item.recipeName != null ? ` · ${item.recipeName}` : ""}`}
         />
       )}
       emptyState={
         <EmptyState
           emoji="☕"
-          title="Sin platos"
-          description="Agrega los platos del menú"
+          title={t.menu.emptyTitle}
+          description={t.menu.emptyDescription}
           ctaHref="/menu/new"
-          ctaText="Agregar Plato"
+          ctaText={t.menu.addCta}
         />
       }
     />

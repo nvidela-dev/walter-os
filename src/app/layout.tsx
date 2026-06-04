@@ -5,6 +5,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactElement } from "react";
 
+import { t } from "@/i18n";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -16,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gestión",
-  description: "Gestión para tu restaurante",
+  title: t.app.name,
+  description: t.app.description,
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -29,15 +31,15 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Gestión",
+    title: t.app.name,
   },
-  applicationName: "Gestión",
-  keywords: ["restaurante", "gestión", "inventario", "recetas", "menú"],
+  applicationName: t.app.name,
+  keywords: [...t.app.keywords],
   openGraph: {
     type: "website",
-    title: "Gestión",
-    description: "Gestión para tu restaurante",
-    siteName: "Gestión",
+    title: t.app.name,
+    description: t.app.description,
+    siteName: t.app.name,
   },
 };
 
@@ -56,7 +58,7 @@ export default function RootLayout({
 }>): ReactElement {
   return (
     <ClerkProvider>
-      <html lang="es">
+      <html lang={t.app.locale}>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >

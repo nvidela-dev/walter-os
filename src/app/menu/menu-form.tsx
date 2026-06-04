@@ -5,6 +5,7 @@ import { type ReactElement, useState } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
 import type { MenuItem } from "@/db/schema";
+import { t } from "@/i18n";
 import { getFormString } from "@/lib/form";
 
 import { createMenuItem, updateMenuItem } from "./actions";
@@ -14,7 +15,7 @@ export function MenuForm({
   recipes,
 }: {
   item?: MenuItem;
-  recipes: { id: string; nombre: string }[];
+  recipes: { id: string; name: string }[];
 }): ReactElement {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,10 +28,10 @@ export function MenuForm({
     setError(null);
     const formData = new FormData(e.currentTarget);
     const data = {
-      nombre: getFormString(formData, "nombre"),
-      descripcion: getFormString(formData, "descripcion") || null,
-      precioVenta: getFormString(formData, "precioVenta"),
-      recetaId: getFormString(formData, "recetaId") || null,
+      name: getFormString(formData, "name"),
+      description: getFormString(formData, "description") || null,
+      sellPrice: getFormString(formData, "sellPrice"),
+      recipeId: getFormString(formData, "recipeId") || null,
     };
 
     const result = isEditing ? await updateMenuItem(item.id, data) : await createMenuItem(data);
@@ -46,35 +47,35 @@ export function MenuForm({
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Nombre del Plato</label>
-        <input type="text" name="nombre" required defaultValue={item?.nombre}
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.name}</label>
+        <input type="text" name="name" required defaultValue={item?.name}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Precio de Venta ($)</label>
-        <input type="number" name="precioVenta" step="0.01" required defaultValue={item?.precioVenta}
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.sellPrice}</label>
+        <input type="number" name="sellPrice" step="0.01" required defaultValue={item?.sellPrice}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Receta Asociada</label>
-        <select name="recetaId" defaultValue={item?.recetaId ?? ""}
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.recipe}</label>
+        <select name="recipeId" defaultValue={item?.recipeId ?? ""}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] focus:border-[#c4a77d] focus:outline-none">
-          <option value="">Sin receta</option>
-          {recipes.map((r) => <option key={r.id} value={r.id}>{r.nombre}</option>)}
+          <option value="">{t.menu.fields.noRecipe}</option>
+          {recipes.map((recipe) => <option key={recipe.id} value={recipe.id}>{recipe.name}</option>)}
         </select>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-[#3d3530]">Descripción</label>
-        <textarea name="descripcion" rows={3} defaultValue={item?.descripcion ?? ""} placeholder="Notas opcionales..."
+        <label className="mb-2 block text-sm font-medium text-[#3d3530]">{t.menu.fields.description}</label>
+        <textarea name="description" rows={3} defaultValue={item?.description ?? ""} placeholder={t.menu.fields.descriptionPlaceholder}
           className="w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-4 text-[#3d3530] placeholder:text-[#c4a77d] focus:border-[#c4a77d] focus:outline-none" />
       </div>
 
       <button type="submit" disabled={isSubmitting}
         className="w-full rounded-xl bg-[#c4a77d] py-4 text-base font-medium text-white shadow-sm active:scale-[0.99] disabled:opacity-50">
-        {isSubmitting ? "..." : isEditing ? "Guardar" : "Agregar Plato"}
+        {isSubmitting ? t.common.loading : isEditing ? t.common.save : t.menu.addCta}
       </button>
     </form>
   );

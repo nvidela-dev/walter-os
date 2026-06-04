@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactElement, ReactNode } from "react";
 
+import { t } from "@/i18n";
+
 interface ListPageShellProps<T> {
   title: string;
   backHref: string;
@@ -18,7 +20,7 @@ export function ListPageShell<T>({ title, backHref, addHref, items, renderItem, 
           <Link href={backHref} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-lg text-[#8b7355]">←</Link>
           <h1 className="text-xl font-light text-[#3d3530]">{title}</h1>
         </div>
-        <Link href={addHref} className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]">+ Agregar</Link>
+        <Link href={addHref} className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]">+ {t.common.add}</Link>
       </header>
       <main className="flex-1 px-6 py-4">
         {items.length === 0 ? emptyState : <div className="space-y-3">{items.map(renderItem)}</div>}

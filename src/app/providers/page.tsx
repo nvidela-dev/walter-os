@@ -2,37 +2,40 @@ import { ArrowLeftIcon, ChevronRightIcon, TruckIcon, WrenchScrewdriverIcon } fro
 import Link from "next/link";
 import type { ReactElement } from "react";
 
-import type { ProveedorTipo } from "@/db/schema";
+import type { ProviderType } from "@/db/schema";
+import { t } from "@/i18n";
 
 import { getProviders } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-const TABS: { value: ProveedorTipo; label: string }[] = [
-  { value: "producto", label: "Productos" },
-  { value: "servicio", label: "Servicios" },
+const TABS: { value: ProviderType; label: string }[] = [
+  { value: "producto", label: t.providers.types.producto },
+  { value: "servicio", label: t.providers.types.servicio },
 ];
 
-function isProveedorTipo(value: string | undefined): value is ProveedorTipo {
+function isProviderType(value: string | undefined): value is ProviderType {
   return value === "producto" || value === "servicio";
 }
 
 interface ProvidersPageProps {
-  searchParams: Promise<{ tipo?: string }>;
+  searchParams: Promise<{ type?: string }>;
 }
 
 export default async function ProvidersPage({
   searchParams,
 }: ProvidersPageProps): Promise<ReactElement> {
-  const { tipo: tipoParam } = await searchParams;
-  const activeTipo: ProveedorTipo = isProveedorTipo(tipoParam) ? tipoParam : "producto";
+  const { type: typeParam } = await searchParams;
+  const activeType: ProviderType = isProviderType(typeParam) ? typeParam : "producto";
   const allProviders = await getProviders();
-  const providers = allProviders.filter((p) => p.tipo === activeTipo);
+  const providers = allProviders.filter((p) => p.type === activeType);
 
-  const isService = activeTipo === "servicio";
+  const isService = activeType === "servicio";
   const Icon = isService ? WrenchScrewdriverIcon : TruckIcon;
-  const emptyTitle = isService ? "Sin proveedores de servicios" : "Sin proveedores";
-  const emptyDescription = isService ? "Agrega tu primer proveedor de servicios" : "Agrega tu primer proveedor";
+  const emptyTitle = isService ? t.providers.emptyTitleService : t.providers.emptyTitle;
+  const emptyDescription = isService
+    ? t.providers.emptyDescriptionService
+    : t.providers.emptyDescription;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">
@@ -41,21 +44,21 @@ export default async function ProvidersPage({
           <Link href="/" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]">
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-light text-[#3d3530]">Proveedores</h1>
+          <h1 className="text-xl font-light text-[#3d3530]">{t.providers.title}</h1>
         </div>
         <Link href="/providers/new" className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]">
-          + Agregar
+          + {t.common.add}
         </Link>
       </header>
 
       <nav className="px-6 pb-2">
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#f5f0e8] p-1">
           {TABS.map((tab) => {
-            const isActive = tab.value === activeTipo;
+            const isActive = tab.value === activeType;
             return (
               <Link
                 key={tab.value}
-                href={tab.value === "producto" ? "/providers" : `/providers?tipo=${tab.value}`}
+                href={tab.value === "producto" ? "/providers" : `/providers?type=${tab.value}`}
                 className={`rounded-xl py-2.5 text-center text-sm font-medium transition-colors ${
                   isActive ? "bg-white text-[#3d3530] shadow-sm" : "text-[#8b7355]"
                 }`}
@@ -73,7 +76,7 @@ export default async function ProvidersPage({
             <Icon className="mb-4 h-16 w-16 text-[#c4a77d]" />
             <h2 className="mb-2 text-lg font-medium text-[#3d3530]">{emptyTitle}</h2>
             <p className="mb-6 text-sm text-[#8b7355]">{emptyDescription}</p>
-            <Link href="/providers/new" className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm">Agregar Proveedor</Link>
+            <Link href="/providers/new" className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm">{t.providers.addCta}</Link>
           </div>
         ) : (
           <div className="space-y-3">
@@ -84,17 +87,17 @@ export default async function ProvidersPage({
                   <Icon className={`h-6 w-6 ${provider.productCount > 0 ? 'text-amber-600' : 'text-[#8b7355]'}`} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-[#3d3530]">{provider.nombre}</h3>
-                  {provider.descripcion != null && (
-                    <p className="text-sm text-[#8b7355]">{provider.descripcion}</p>
+                  <h3 className="font-medium text-[#3d3530]">{provider.name}</h3>
+                  {provider.description != null && (
+                    <p className="text-sm text-[#8b7355]">{provider.description}</p>
                   )}
-                  {Number(provider.deuda) > 0 && (
-                    <p className="text-sm text-[#a68b5b]">Deuda: ${provider.deuda}</p>
+                  {Number(provider.debt) > 0 && (
+                    <p className="text-sm text-[#a68b5b]">{t.providers.debtLabel(provider.debt)}</p>
                   )}
                 </div>
-                {provider.dias != null && (
+                {provider.days != null && (
                   <div className="flex gap-1">
-                    {provider.dias.split(",").map((day) => (
+                    {provider.days.split(",").map((day) => (
                       <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-medium text-amber-700">
                         {day}
                       </span>
