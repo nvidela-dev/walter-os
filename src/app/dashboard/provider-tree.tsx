@@ -499,6 +499,105 @@ function ProductPanel({
   );
 }
 
+function buildProviderBuffer(provider: ProviderNode): ReactNode[] {
+  const blank = <span>{" "}</span>;
+  const billed = provider.invoices.reduce((sum, inv) => sum + Number(inv.total), 0);
+  const debt = Number(provider.debt);
+  const lines: ReactNode[] = [];
+  lines.push(
+    <span style={{ color: c.grey0 }}>
+      # provider <span style={{ color: c.fg }}>{provider.name}</span>
+    </span>,
+    blank,
+    bufferField("type", <span style={{ color: c.aqua }}>{provider.type}</span>),
+    bufferField(
+      "debt",
+      debt > 0 ? (
+        <span style={{ color: c.red }}>${provider.debt}</span>
+      ) : (
+        <Money value={provider.debt} />
+      )
+    ),
+    bufferField("products", <span style={{ color: c.fg }}>{provider.products.length}</span>),
+    bufferField("invoices", <span style={{ color: c.fg }}>{provider.invoices.length}</span>),
+    bufferField("billed", <Money value={billed.toFixed(2)} />),
+    blank,
+    <span style={{ color: c.grey0 }}># products ({provider.products.length})</span>
+  );
+
+  if (provider.products.length === 0) {
+    lines.push(
+      <span className="italic" style={{ color: c.grey0 }}>
+        (none)
+      </span>
+    );
+  } else {
+    for (const prod of provider.products) {
+      lines.push(
+        <span className="flex flex-wrap items-center gap-x-3">
+          <span className="min-w-[9rem]" style={{ color: c.fg }}>
+            {prod.name}
+          </span>
+          <Money value={prod.price} />
+          <span style={{ color: c.grey0 }}>/{prod.unit}</span>
+        </span>
+      );
+    }
+  }
+
+  lines.push(blank, <span style={{ color: c.grey0 }}># invoices ({provider.invoices.length})</span>);
+  if (provider.invoices.length === 0) {
+    lines.push(
+      <span className="italic" style={{ color: c.grey0 }}>
+        (none)
+      </span>
+    );
+  } else {
+    for (const inv of provider.invoices) {
+      lines.push(
+        <span className="flex flex-wrap items-center gap-x-3">
+          <span style={{ color: c.orange }}>#{inv.number ?? "—"}</span>
+          <span style={{ color: c.grey }}>{inv.date}</span>
+          <Money value={inv.total} />
+          <span style={{ color: inv.paid ? c.green : c.orange }}>
+            {inv.paid ? "paid" : "unpaid"}
+          </span>
+        </span>
+      );
+    }
+  }
+  return lines;
+}
+
+function ProviderPanel({
+  provider,
+  onClose,
+}: {
+  provider: ProviderNode;
+  onClose: () => void;
+}): ReactElement {
+  return (
+    <BufferView
+      bufferName={`provider://${provider.name}`}
+      lines={buildProviderBuffer(provider)}
+      statusLabel="PROVIDER"
+      statusColor={c.green}
+      headerExtra={
+        <Link
+          href={`/providers/${provider.id}`}
+          title="open detail page"
+          aria-label="open detail page"
+          className="rounded p-1 hover:bg-[#3d484d]"
+          style={{ color: c.grey }}
+        >
+          <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+        </Link>
+      }
+      onClose={onClose}
+    />
+  );
+}
+
 // ── add invoice ("A") ───────────────────────────────────────────────────────
 
 function num(value: string): number {
@@ -1025,6 +1124,7 @@ function AddInvoicePanel({
 // ── tree ────────────────────────────────────────────────────────────────────
 
 type Selection =
+  | { kind: "provider"; provider: ProviderNode }
   | { kind: "invoice"; provider: ProviderNode; invoice: TreeInvoice }
   | { kind: "product"; provider: ProviderNode; product: TreeProduct };
 
@@ -1229,6 +1329,8 @@ export function ProviderTree({
               const productsOpen = expandedOf(`pg:${provider.id}`);
               const invoicesOpen = expandedOf(`ig:${provider.id}`);
               const debt = Number(provider.debt);
+              const providerSelected =
+                selected?.kind === "provider" && selected.provider.id === provider.id;
               return (
                 <div key={provider.id}>
                   <Row
@@ -1239,8 +1341,12 @@ export function ProviderTree({
                       toggle(`p:${provider.id}`);
                     }}
                     icon={TruckIcon}
-                    iconColor={c.green}
-                    label={<span style={{ color: c.fg }}>{provider.name}</span>}
+                    iconColor={providerSelected ? c.yellow : c.green}
+                    label={
+                      <span style={{ color: providerSelected ? c.yellow : c.fg }}>
+                        {provider.name}
+                      </span>
+                    }
                     meta={
                       <>
                         <span style={{ color: c.aqua }}>{provider.type}</span>
@@ -1255,7 +1361,9 @@ export function ProviderTree({
                         )}
                       </>
                     }
-                    href={`/providers/${provider.id}`}
+                    onOpen={() => {
+                      setSelected({ kind: "provider", provider });
+                    }}
                   />
 
                   {providerOpen && (
@@ -1407,7 +1515,14 @@ export function ProviderTree({
             }}
           />
         ) : selected != null ? (
-          selected.kind === "invoice" ? (
+          selected.kind === "provider" ? (
+            <ProviderPanel
+              provider={selected.provider}
+              onClose={() => {
+                setSelected(null);
+              }}
+            />
+          ) : selected.kind === "invoice" ? (
             <InvoicePanel
               provider={selected.provider}
               invoice={selected.invoice}
