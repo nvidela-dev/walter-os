@@ -68,7 +68,7 @@ npm run build
 npm run ci
 ```
 
-GitHub Actions runs lint, typecheck, unit/component tests, and build. There is no browser E2E suite.
+There is no browser E2E suite.
 
 ## Auth Assumption
 
