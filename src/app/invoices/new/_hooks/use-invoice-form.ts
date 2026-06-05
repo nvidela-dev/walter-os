@@ -187,7 +187,7 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
             setError(result.error);
             return;
           }
-          router.push("/");
+          router.push("/invoices");
         } catch {
           setError(t.invoices.errors.createFailed);
         }
@@ -232,7 +232,7 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
           setError(result.error);
           return;
         }
-        router.push("/");
+        router.push("/invoices");
       } catch {
         setError(t.invoices.errors.createFailed);
       }
