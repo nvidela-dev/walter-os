@@ -1,19 +1,33 @@
+import { eq } from "drizzle-orm";
+
+import { db } from "@/db";
+import { allowedEmails } from "@/db/schema";
+
 /**
  * Email allowlist — the entire access-control policy for Walter OS.
  *
- * Clerk handles authentication (proving who you are); this list handles
- * authorization (whether you're allowed in at all). Anyone who signs in with
- * an email outside this set is bounced to `/not-authorized`. There are no
- * roles or permissions beyond membership in this list.
+ * Clerk handles authentication (proving who you are); the `usuarios_autorizados`
+ * table handles authorization (whether you're allowed in at all). Anyone who
+ * signs in with an email that has no row there is bounced to `/not-authorized`.
+ * There are no roles or permissions beyond membership in the table.
  *
- * To grant or revoke access, edit this array and redeploy.
+ * To grant or revoke access, insert/delete a row (emails stored lowercased).
  */
-const ALLOWED_EMAILS = ["videla.jn@gmail.com", "edithgilda@gmail.com"] as const;
 
-const allowedSet = new Set<string>(ALLOWED_EMAILS.map((email) => email.toLowerCase()));
+/** Normalize an email for storage and comparison. */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
 
-/** True when `email` (case-insensitively) is permitted to use the app. */
-export function isAllowedEmail(email: string | null | undefined): boolean {
+/** True when `email` (case-insensitively) has a row in the allowlist table. */
+export async function isAllowedEmail(email: string | null | undefined): Promise<boolean> {
   if (email == null || email.trim() === "") return false;
-  return allowedSet.has(email.trim().toLowerCase());
+
+  const [row] = await db
+    .select({ id: allowedEmails.id })
+    .from(allowedEmails)
+    .where(eq(allowedEmails.email, normalizeEmail(email)))
+    .limit(1);
+
+  return row != null;
 }

@@ -25,7 +25,7 @@ export const proxy = clerkMiddleware(async (auth, request) => {
   const user = await (await clerkClient()).users.getUser(userId);
   const email = user.primaryEmailAddress?.emailAddress;
 
-  if (!isAllowedEmail(email)) {
+  if (!(await isAllowedEmail(email))) {
     return NextResponse.redirect(new URL("/not-authorized", request.url));
   }
 });

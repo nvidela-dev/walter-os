@@ -71,6 +71,13 @@
       "when": 1780540142376,
       "tag": "0009_jazzy_dark_phoenix",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780676257194,
+      "tag": "0010_spooky_red_ghost",
+      "breakpoints": true
     }
   ]
 }
