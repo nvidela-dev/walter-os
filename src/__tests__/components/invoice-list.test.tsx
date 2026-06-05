@@ -23,9 +23,9 @@ const baseInvoice = {
 };
 
 describe("InvoiceList", () => {
-  it("renders the list empty state", () => {
+  it("defaults to the unpaid tab and shows its empty state", () => {
     render(<InvoiceList invoices={[]} />);
-    expect(screen.getByText("Sin facturas.")).toBeInTheDocument();
+    expect(screen.getByText("No hay facturas pendientes.")).toBeInTheDocument();
   });
 
   it("filters paid and unpaid empty states", async () => {
@@ -39,20 +39,25 @@ describe("InvoiceList", () => {
     expect(screen.getByText("Proveedor Uno")).toBeInTheDocument();
   });
 
-  it("reverts optimistic paid state when the action fails", async () => {
+  it("asks for confirmation before paying, then reverts when the action fails", async () => {
     const user = userEvent.setup();
     const togglePaidAction = vi.fn(async () => actionError("No se pudo actualizar."));
 
     render(<InvoiceList invoices={[baseInvoice]} togglePaidAction={togglePaidAction} />);
 
-    await user.click(screen.getByRole("button", { name: "Marcar como pagada" }));
+    await user.click(screen.getByRole("button", { name: "Pagar" }));
+    // Confirmation screen reviews the bill details before committing: the
+    // total shows both in the row and again in the review dialog.
+    expect(screen.getByText("Confirmar pago")).toBeInTheDocument();
+    expect(screen.getAllByText("$120.00")).toHaveLength(2);
+    await user.click(screen.getByRole("button", { name: "Confirmar" }));
 
     expect(await screen.findByText("No se pudo actualizar.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Marcar como pagada" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pagar" })).toBeInTheDocument();
     expect(togglePaidAction).toHaveBeenCalledWith(baseInvoice.id);
   });
 
-  it("keeps optimistic paid state when the action succeeds", async () => {
+  it("marks the bill paid after confirming", async () => {
     const user = userEvent.setup();
     render(
       <InvoiceList
@@ -61,18 +66,37 @@ describe("InvoiceList", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Marcar como pagada" }));
+    await user.click(screen.getByRole("button", { name: "Pagar" }));
+    await user.click(screen.getByRole("button", { name: "Confirmar" }));
 
+    expect(await screen.findByText("Pagada")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Marcar como pendiente" })).toBeInTheDocument();
   });
 
-  it("shows the overdue badge only for unpaid overdue bills", () => {
+  it("does not pay when the confirmation is cancelled", async () => {
+    const user = userEvent.setup();
+    const togglePaidAction = vi.fn(async () => actionOk({ paid: true }));
+
+    render(<InvoiceList invoices={[baseInvoice]} togglePaidAction={togglePaidAction} />);
+
+    await user.click(screen.getByRole("button", { name: "Pagar" }));
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(togglePaidAction).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Pagar" })).toBeInTheDocument();
+  });
+
+  it("shows the overdue badge for unpaid overdue bills", () => {
     render(<InvoiceList invoices={[{ ...baseInvoice, overdue: true }]} />);
     expect(screen.getByText("Vencida")).toBeInTheDocument();
   });
 
-  it("hides the overdue badge once the bill is paid", () => {
+  it("hides the overdue badge once the bill is paid", async () => {
+    const user = userEvent.setup();
     render(<InvoiceList invoices={[{ ...baseInvoice, overdue: true, paid: true }]} />);
+
+    await user.click(screen.getByRole("button", { name: /Pagadas/ }));
+    expect(screen.getByText("Proveedor Uno")).toBeInTheDocument();
     expect(screen.queryByText("Vencida")).not.toBeInTheDocument();
   });
 
@@ -107,7 +131,7 @@ describe("InvoiceList", () => {
     await user.click(screen.getByRole("button", { name: "Eliminar" }));
 
     expect(deleteInvoiceAction).toHaveBeenCalledWith(baseInvoice.id);
-    expect(await screen.findByText("Sin facturas.")).toBeInTheDocument();
+    expect(await screen.findByText("No hay facturas pendientes.")).toBeInTheDocument();
   });
 
   it("keeps the row and shows the error when delete is blocked", async () => {

@@ -164,6 +164,11 @@ export const t = {
       overdueBadge: "Vencida",
       delete: "Eliminar factura",
       deleteFailed: "No se pudo eliminar la factura.",
+      pay: "Pagar",
+      paidLabel: "Pagada",
+      payConfirmTitle: "Confirmar pago",
+      payConfirmHint: "Revisá los datos antes de marcar la factura como pagada.",
+      payConfirmAction: "Confirmar",
     },
     errors: {
       selectProvider: "Selecciona un proveedor.",
