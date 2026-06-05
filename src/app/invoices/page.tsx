@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 
 import { t } from "@/i18n";
+import { isInvoiceOverdue } from "@/lib/invoices/overdue";
 import { getInvoices } from "@/lib/queries/invoices";
 
 import { InvoiceList } from "./invoice-list";
@@ -10,7 +11,11 @@ import { InvoiceList } from "./invoice-list";
 export const dynamic = "force-dynamic";
 
 export default async function InvoicesPage(): Promise<ReactElement> {
-  const invoices = await getInvoices();
+  const now = new Date();
+  const invoices = (await getInvoices()).map((invoice) => ({
+    ...invoice,
+    overdue: isInvoiceOverdue(invoice.date, invoice.paid, now),
+  }));
 
   return (
     <div className="flex min-h-screen flex-col bg-[#faf8f5]">

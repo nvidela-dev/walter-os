@@ -153,13 +153,17 @@ export const t = {
       hint: "Los cambios se guardan inmediatamente y afectan esta factura y los valores por defecto del producto.",
     },
     list: {
-      filters: { all: "Todas", unpaid: "Pendientes", paid: "Pagadas" },
+      filters: { all: "Todas", unpaid: "Pendientes", overdue: "Vencidas", paid: "Pagadas" },
       empty: "Sin facturas.",
       emptyPaid: "No hay facturas pagadas.",
       emptyUnpaid: "No hay facturas pendientes.",
+      emptyOverdue: "No hay facturas vencidas.",
       markPaid: "Marcar como pagada",
       markUnpaid: "Marcar como pendiente",
       toggleFailed: "No se pudo actualizar la factura.",
+      overdueBadge: "Vencida",
+      delete: "Eliminar factura",
+      deleteFailed: "No se pudo eliminar la factura.",
     },
     errors: {
       selectProvider: "Selecciona un proveedor.",
