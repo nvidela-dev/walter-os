@@ -1,11 +1,12 @@
 "use client";
 
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 import { type ReactElement, useMemo, useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClassName } from "@/components/ui/button";
 import { t } from "@/i18n";
 import { deleteInvoice, togglePaid } from "@/lib/actions/invoices";
 
@@ -108,7 +109,19 @@ export function InvoiceList({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#8b7355]">{EMPTY_MESSAGE[filter]}</p>
+        <div className="flex flex-col items-center gap-4 py-12 text-center">
+          <p className="text-sm text-[#8b7355]">{EMPTY_MESSAGE[filter]}</p>
+          {/* Offer to create only from Unpaid/All — not Paid/Overdue. */}
+          {(filter === "all" || filter === "unpaid") && (
+            <Link
+              href="/invoices/new"
+              className={buttonClassName({ className: "rounded-full px-6 text-sm" })}
+            >
+              <PlusIcon className="h-4 w-4" />
+              {t.invoices.list.createCta}
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="space-y-2">
           {filtered.map((invoice) => (

@@ -166,6 +166,7 @@ export const t = {
       deleteFailed: "No se pudo eliminar la factura.",
       pay: "Pagar",
       paidLabel: "Pagada",
+      createCta: "Nueva factura",
       payConfirmTitle: "Confirmar pago",
       payConfirmHint: "Revisá los datos antes de marcar la factura como pagada.",
       payConfirmAction: "Confirmar",
