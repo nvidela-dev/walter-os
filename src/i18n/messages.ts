@@ -269,6 +269,13 @@ export const t = {
     },
   },
 
+  /** Access control — shown when a signed-in email is not on the allowlist. */
+  auth: {
+    deniedTitle: "Acceso denegado",
+    deniedBody: "Tu cuenta no tiene permiso para usar esta aplicación.",
+    signOut: "Cerrar sesión",
+  },
+
   /** Zod validation messages. */
   validation: {
     invalidId: "Identificador inválido.",
