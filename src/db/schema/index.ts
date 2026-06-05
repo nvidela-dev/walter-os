@@ -36,3 +36,6 @@ export * from "./invoice-lines";
 
 // Append-only price change log (single source of truth for price evolution)
 export * from "./price-history";
+
+// Access-control allowlist (the only authorization policy)
+export * from "./allowed-emails";
