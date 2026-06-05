@@ -28,6 +28,41 @@ describe("InvoiceList", () => {
     expect(screen.getByText("No hay facturas pendientes.")).toBeInTheDocument();
   });
 
+  it("offers a create prompt on the empty Unpaid and All tabs", async () => {
+    const user = userEvent.setup();
+    render(<InvoiceList invoices={[]} />);
+
+    // Default Unpaid tab.
+    expect(screen.getByRole("link", { name: /Nueva factura/ })).toHaveAttribute(
+      "href",
+      "/invoices/new"
+    );
+
+    await user.click(screen.getByRole("button", { name: /Todas/ }));
+    expect(screen.getByRole("link", { name: /Nueva factura/ })).toBeInTheDocument();
+  });
+
+  it("shows no create prompt on the empty Paid or Overdue tabs", async () => {
+    const user = userEvent.setup();
+    render(<InvoiceList invoices={[]} />);
+
+    await user.click(screen.getByRole("button", { name: /Pagadas/ }));
+    expect(screen.queryByRole("link", { name: /Nueva factura/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Vencidas/ }));
+    expect(screen.queryByRole("link", { name: /Nueva factura/ })).not.toBeInTheDocument();
+  });
+
+  it("keeps the create prompt on Unpaid even when all bills are paid", async () => {
+    const user = userEvent.setup();
+    render(<InvoiceList invoices={[{ ...baseInvoice, paid: true }]} />);
+
+    // Default Unpaid tab is empty because the only bill is paid.
+    expect(screen.getByRole("link", { name: /Nueva factura/ })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Pagadas/ }));
+    expect(screen.getByText("Proveedor Uno")).toBeInTheDocument();
+  });
+
   it("filters paid and unpaid empty states", async () => {
     const user = userEvent.setup();
     render(<InvoiceList invoices={[baseInvoice]} />);

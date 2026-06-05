@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactElement } from "react";
 
@@ -38,21 +38,9 @@ export default async function InvoicesPage(): Promise<ReactElement> {
       </header>
 
       <main className="flex-1 px-6 py-4">
-        {invoices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <DocumentTextIcon className="mb-4 h-16 w-16 text-[#c4a77d]" />
-            <h2 className="mb-2 text-lg font-medium text-[#3d3530]">{t.invoices.emptyTitle}</h2>
-            <p className="mb-6 text-sm text-[#8b7355]">{t.invoices.emptyDescription}</p>
-            <Link
-              href="/invoices/new"
-              className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm"
-            >
-              {t.invoices.newTitle}
-            </Link>
-          </div>
-        ) : (
-          <InvoiceList invoices={invoices} />
-        )}
+        {/* Always render the tabbed list — the empty states (and their
+            create prompt) are handled per-tab inside InvoiceList. */}
+        <InvoiceList invoices={invoices} />
       </main>
     </div>
   );
