@@ -1,7 +1,10 @@
-import { ArrowLeftIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { EmptyState } from "@/components/list-page-shell";
+import { buttonClassName } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
 import { getInvoices } from "@/lib/queries/invoices";
 
@@ -13,42 +16,36 @@ export default async function InvoicesPage(): Promise<ReactElement> {
   const invoices = await getInvoices();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
-      <header className="sticky top-0 z-10 flex items-center justify-between bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
-        <div className="flex items-center gap-4">
+    <div className="ios-screen">
+      <div className="ios-page flex flex-col">
+      <PageHeader
+        backHref="/"
+        title={t.invoices.title}
+        actions={
           <Link
-            href="/"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]"
+            href="/invoices/new"
+            className={buttonClassName({ className: "rounded-full px-4 text-sm" })}
           >
-            <ArrowLeftIcon className="h-5 w-5" />
+            <PlusIcon className="h-4 w-4" />
+            {t.invoices.addShort}
           </Link>
-          <h1 className="text-xl font-light text-[#3d3530]">{t.invoices.title}</h1>
-        </div>
-        <Link
-          href="/invoices/new"
-          className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]"
-        >
-          + {t.invoices.addShort}
-        </Link>
-      </header>
+        }
+      />
 
-      <main className="flex-1 px-6 py-4">
+      <main className="flex-1 py-5">
         {invoices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <DocumentTextIcon className="mb-4 h-16 w-16 text-[#c4a77d]" />
-            <h2 className="mb-2 text-lg font-medium text-[#3d3530]">{t.invoices.emptyTitle}</h2>
-            <p className="mb-6 text-sm text-[#8b7355]">{t.invoices.emptyDescription}</p>
-            <Link
-              href="/invoices/new"
-              className="rounded-full bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white shadow-sm"
-            >
-              {t.invoices.newTitle}
-            </Link>
-          </div>
+          <EmptyState
+            icon={DocumentTextIcon}
+            title={t.invoices.emptyTitle}
+            description={t.invoices.emptyDescription}
+            ctaHref="/invoices/new"
+            ctaText={t.invoices.newTitle}
+          />
         ) : (
           <InvoiceList invoices={invoices} />
         )}
       </main>
+      </div>
     </div>
   );
 }

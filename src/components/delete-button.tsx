@@ -42,10 +42,10 @@ export function DeleteButton({ id, name, deleteAction, redirectTo }: DeleteButto
 
   if (showConfirm) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3d3530]/50 p-6">
-        <div className="w-full max-w-sm rounded-2xl bg-[#faf8f5] p-6 shadow-xl">
-          <h2 className="mb-2 text-lg font-medium text-[#3d3530]">{t.deleteDialog.title}</h2>
-          <p className="mb-6 text-sm text-[#8b7355]">{t.deleteDialog.confirm(name)}</p>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1f2d35]/38 p-6 backdrop-blur-md">
+        <div className="ios-panel-strong w-full max-w-sm p-6">
+          <h2 className="mb-2 text-lg font-semibold text-[#1f2d35]">{t.deleteDialog.title}</h2>
+          <p className="mb-6 text-sm text-[#526b74]">{t.deleteDialog.confirm(name)}</p>
           <FormMessage message={error} />
           <div className="flex gap-3">
             <Button onClick={() => { setShowConfirm(false); }} disabled={isDeleting}

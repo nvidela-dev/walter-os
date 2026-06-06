@@ -1,14 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf8f5;
-  --foreground: #3d3530;
-  --cream: #f5f0e8;
-  --cream-dark: #e8e0d4;
-  --warm: #c4a77d;
-  --warm-dark: #a68b5b;
-  --accent: #d4a574;
-  --muted: #8b7355;
+  --background: #eff5f4;
+  --foreground: #1f2d35;
+  --cream: #f8fbfa;
+  --cream-dark: #dce7e4;
+  --warm: #3d8fce;
+  --warm-dark: #2070aa;
+  --accent: #d88b62;
+  --muted: #667982;
+  --surface: rgba(255, 255, 255, 0.54);
+  --surface-strong: rgba(255, 255, 255, 0.72);
+  --surface-border: rgba(255, 255, 255, 0.68);
+  --shadow-soft: 0 18px 60px rgba(39, 67, 78, 0.16);
+  --shadow-icon: 0 12px 24px rgba(31, 45, 53, 0.18);
 }
 
 @theme inline {
@@ -25,50 +30,30 @@
 }
 
 body {
-  background: var(--background);
+  min-height: 100svh;
+  width: 100%;
+  background: transparent;
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "SF Pro Display",
+    var(--font-sans),
+    system-ui,
+    sans-serif;
 }
 
-/* Subtle mandala background pattern */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.4;
+html {
+  min-height: 100%;
+  background-color: var(--background);
   background-image:
-    /* Center lotus/mandala circles */
-    radial-gradient(circle at 50% 50%, transparent 0%, transparent 20%, rgba(196, 167, 125, 0.08) 20%, rgba(196, 167, 125, 0.08) 21%, transparent 21%),
-    radial-gradient(circle at 50% 50%, transparent 0%, transparent 35%, rgba(196, 167, 125, 0.06) 35%, rgba(196, 167, 125, 0.06) 36%, transparent 36%),
-    radial-gradient(circle at 50% 50%, transparent 0%, transparent 50%, rgba(196, 167, 125, 0.04) 50%, rgba(196, 167, 125, 0.04) 51%, transparent 51%),
-    /* Petal shapes using overlapping circles */
-    radial-gradient(ellipse 30% 50% at 50% 30%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 30% 50% at 50% 70%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 30% at 30% 50%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 30% at 70% 50%, rgba(212, 165, 116, 0.05) 0%, transparent 70%),
-    /* Diagonal petals */
-    radial-gradient(ellipse 35% 35% at 35% 35%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 35% 35% at 65% 35%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 35% 35% at 35% 65%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 35% 35% at 65% 65%, rgba(196, 167, 125, 0.04) 0%, transparent 70%),
-    /* Outer ring dots */
-    radial-gradient(circle at 50% 10%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%),
-    radial-gradient(circle at 50% 90%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%),
-    radial-gradient(circle at 10% 50%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%),
-    radial-gradient(circle at 90% 50%, rgba(196, 167, 125, 0.06) 0%, rgba(196, 167, 125, 0.06) 2%, transparent 3%);
-  background-size: 300px 300px;
-  background-position: center center;
-}
-
-/* Ensure content stays above the pattern */
-body > * {
-  position: relative;
-  z-index: 1;
+    linear-gradient(rgba(239, 245, 244, 0.16), rgba(239, 245, 244, 0.18)),
+    url("/wallpapers/calm-ios-v2.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat, no-repeat;
+  background-size: cover, cover;
 }
 
 /* Warm minimal scrollbar */
@@ -76,9 +61,142 @@ body > * {
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--cream);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--cream-dark);
+  background: rgba(102, 121, 130, 0.35);
   border-radius: 4px;
+}
+
+@layer components {
+  .ios-screen {
+    min-height: 100svh;
+    background: transparent;
+  }
+
+  .ios-page {
+    margin-inline: auto;
+    min-height: 100svh;
+    width: 100%;
+    max-width: 48rem;
+    padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 2rem;
+  }
+
+  .ios-page-wide {
+    max-width: 72rem;
+  }
+
+  .ios-glass {
+    border: 1px solid var(--surface-border);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(28px) saturate(1.25);
+    -webkit-backdrop-filter: blur(28px) saturate(1.25);
+  }
+
+  .ios-panel {
+    border-radius: 1.75rem;
+    border: 1px solid var(--surface-border);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(28px) saturate(1.25);
+    -webkit-backdrop-filter: blur(28px) saturate(1.25);
+  }
+
+  .ios-panel-strong {
+    border-radius: 1.75rem;
+    border: 1px solid var(--surface-border);
+    background: var(--surface-strong);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(32px) saturate(1.25);
+    -webkit-backdrop-filter: blur(32px) saturate(1.25);
+  }
+
+  .ios-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-inline: -0.25rem;
+    border-radius: 0 0 1.75rem 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    border-top: 0;
+    background: rgba(248, 251, 250, 0.62);
+    box-shadow: 0 14px 44px rgba(39, 67, 78, 0.1);
+    backdrop-filter: blur(28px) saturate(1.25);
+    -webkit-backdrop-filter: blur(28px) saturate(1.25);
+  }
+
+  .ios-icon {
+    border-radius: 28%;
+    box-shadow: var(--shadow-icon), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  }
+
+  .ios-icon-button {
+    border: 1px solid rgba(255, 255, 255, 0.54);
+    background: rgba(255, 255, 255, 0.52);
+    box-shadow: 0 8px 22px rgba(31, 45, 53, 0.12);
+    backdrop-filter: blur(22px) saturate(1.2);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  }
+
+  .ios-list-row {
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(39, 67, 78, 0.1);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  }
+}
+
+@layer utilities {
+  .bg-\[\#faf8f5\] {
+    background-color: transparent;
+  }
+
+  .bg-\[\#f5f0e8\] {
+    background-color: rgba(255, 255, 255, 0.52);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  }
+
+  .rounded-2xl.bg-\[\#f5f0e8\] {
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .bg-\[\#e8e0d4\] {
+    background-color: rgba(255, 255, 255, 0.44);
+  }
+
+  .bg-\[\#c4a77d\] {
+    background-color: #2388d1;
+  }
+
+  .border-\[\#e8e0d4\] {
+    border-color: rgba(255, 255, 255, 0.66);
+  }
+
+  .border-\[\#c4a77d\] {
+    border-color: #2388d1;
+  }
+
+  .text-\[\#3d3530\] {
+    color: #1f2d35;
+  }
+
+  .text-\[\#8b7355\] {
+    color: #526b74;
+  }
+
+  .text-\[\#c4a77d\] {
+    color: #2388d1;
+  }
+
+  .text-\[\#a68b5b\] {
+    color: #c56f4e;
+  }
+
+  .placeholder\:text-\[\#c4a77d\]::placeholder {
+    color: #7d9299;
+  }
 }

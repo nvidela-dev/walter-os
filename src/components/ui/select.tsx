@@ -6,8 +6,8 @@ export function Select({ className, ...props }: ComponentPropsWithRef<"select">)
   return (
     <select
       className={cn(
-        "w-full rounded-xl border-2 border-[#e8e0d4] bg-white px-4 py-3 text-sm text-[#3d3530]",
-        "focus:border-[#c4a77d] focus:outline-none disabled:bg-[#faf8f5] disabled:text-[#c4a77d]",
+        "w-full rounded-2xl border border-white/60 bg-white/58 px-4 py-3 text-sm text-[#1f2d35] shadow-inner shadow-white/20 backdrop-blur-xl",
+        "focus:border-[#2388d1]/55 focus:bg-white/75 focus:outline-none focus:ring-4 focus:ring-[#2388d1]/15 disabled:bg-white/30 disabled:text-[#8aa0a7]",
         className
       )}
       {...props}

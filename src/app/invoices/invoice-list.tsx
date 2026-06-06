@@ -49,7 +49,7 @@ export function InvoiceList({
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div className="ios-glass flex gap-1 rounded-full p-1">
         {FILTERS.map((f) => {
           const active = filter === f.key;
           return (
@@ -57,14 +57,14 @@ export function InvoiceList({
               key={f.key}
               type="button"
               onClick={() => { setFilter(f.key); }}
-              className={`flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${
                 active
-                  ? "bg-[#c4a77d] text-white"
-                  : "bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]"
+                  ? "bg-white text-[#1f2d35] shadow-sm"
+                  : "text-[#526b74] hover:bg-white/40"
               }`}
             >
               {f.label}
-              <span className={`ml-2 text-xs ${active ? "text-white/80" : "text-[#c4a77d]"}`}>
+              <span className={`ml-2 text-xs ${active ? "text-[#2388d1]" : "text-[#799099]"}`}>
                 {counts[f.key]}
               </span>
             </button>
@@ -73,7 +73,7 @@ export function InvoiceList({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-12 text-center text-sm text-[#8b7355]">
+        <p className="ios-panel py-12 text-center text-sm text-[#526b74]">
           {filter === "paid"
             ? t.invoices.list.emptyPaid
             : filter === "unpaid"
@@ -124,8 +124,8 @@ function InvoiceRow({
   return (
     <div className="space-y-2">
       <div
-        className={`flex items-center gap-4 rounded-2xl p-4 transition-colors ${
-          optimisticPaid ? "bg-[#f5f0e8]/60" : "bg-[#f5f0e8]"
+        className={`ios-list-row flex items-center gap-4 rounded-[1.4rem] p-4 transition ${
+          optimisticPaid ? "opacity-75" : ""
         }`}
       >
         <button
@@ -135,8 +135,8 @@ function InvoiceRow({
           aria-label={optimisticPaid ? t.invoices.list.markUnpaid : t.invoices.list.markPaid}
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
             optimisticPaid
-              ? "border-emerald-600 bg-emerald-600 text-white"
-              : "border-[#c4a77d] bg-white"
+              ? "border-emerald-500 bg-emerald-500 text-white"
+              : "border-[#2388d1] bg-white/70"
           } ${isPending ? "opacity-60" : ""}`}
         >
           {optimisticPaid && <CheckIcon className="h-4 w-4" />}
@@ -145,12 +145,12 @@ function InvoiceRow({
         <div className="min-w-0 flex-1">
           <p
             className={`truncate font-medium ${
-              optimisticPaid ? "text-[#8b7355]" : "text-[#3d3530]"
+              optimisticPaid ? "text-[#526b74]" : "text-[#1f2d35]"
             }`}
           >
             {invoice.providerName}
           </p>
-          <p className="text-xs text-[#8b7355]">
+          <p className="text-xs text-[#526b74]">
             {invoice.date}
             {invoice.number != null && invoice.number !== "" && <> · #{invoice.number}</>}
           </p>
