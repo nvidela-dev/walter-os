@@ -17,19 +17,19 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-10 flex items-center bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm",
+        "ios-header flex items-center px-4 py-4",
         actions != null ? "justify-between" : "gap-4"
       )}
     >
       <div className="flex items-center gap-4">
         <Link
           aria-label={t.common.back}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]"
+          className="ios-icon-button flex h-10 w-10 items-center justify-center rounded-full text-[#43636e]"
           href={backHref}
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
-        <h1 className="text-xl font-light text-[#3d3530]">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-normal text-[#1f2d35]">{title}</h1>
       </div>
       {actions}
     </header>

@@ -43,6 +43,7 @@ export const t = {
   /** Home dashboard tiles. */
   home: {
     tiles: {
+      dashboard: { name: "Panel", description: "Vista general" },
       providers: { name: "Proveedores", description: "Productos y precios" },
       invoices: { name: "Facturas", description: "Cargar y pagar" },
       employees: { name: "Equipo", description: "Personal y sueldos" },

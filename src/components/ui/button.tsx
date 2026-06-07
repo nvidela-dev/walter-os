@@ -6,10 +6,14 @@ type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "default" | "compact" | "icon";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-[#c4a77d] text-white shadow-sm active:scale-[0.99]",
-  secondary: "border-2 border-[#e8e0d4] text-[#8b7355]",
-  ghost: "bg-[#f5f0e8] text-[#8b7355] hover:bg-[#e8e0d4]",
-  danger: "bg-[#a68b5b] text-white",
+  primary:
+    "bg-[#2388d1] text-white shadow-[0_12px_28px_rgba(35,136,209,0.28)] active:scale-[0.98]",
+  secondary:
+    "ios-icon-button text-[#1f2d35] hover:bg-white/70 active:scale-[0.98]",
+  ghost:
+    "ios-icon-button text-[#43636e] hover:bg-white/70 active:scale-[0.98]",
+  danger:
+    "bg-[#d95f55] text-white shadow-[0_12px_28px_rgba(217,95,85,0.24)] active:scale-[0.98]",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -28,7 +32,7 @@ export function buttonClassName({
   className?: string;
 } = {}): string {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition disabled:opacity-50",
     variantClasses[variant],
     sizeClasses[size],
     className

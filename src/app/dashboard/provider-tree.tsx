@@ -41,30 +41,29 @@ interface Unit {
   name: string;
 }
 
-// Everforest (dark, medium) — a woodsy palette: warm tan foreground over
-// muted forest-green backgrounds, with earthy accent hues.
+// iOS v2 palette: light glass surfaces over the global calm wallpaper.
 const c = {
-  bg0: "#2d353b",
-  bg1: "#272e33",
-  bg2: "#343f44",
-  bg3: "#3d484d",
-  bg4: "#475258",
-  fg: "#d3c6aa",
-  grey: "#859289",
-  grey0: "#7a8478",
-  red: "#e67e80",
-  orange: "#e69875",
-  yellow: "#dbbc7f",
-  green: "#a7c080",
-  aqua: "#83c092",
-  blue: "#7fbbb3",
-  purple: "#d699b6",
+  bg0: "rgba(255, 255, 255, 0.48)",
+  bg1: "rgba(255, 255, 255, 0.62)",
+  bg2: "rgba(255, 255, 255, 0.5)",
+  bg3: "rgba(255, 255, 255, 0.66)",
+  bg4: "rgba(255, 255, 255, 0.74)",
+  fg: "#1f2d35",
+  grey: "#667982",
+  grey0: "#8aa0a7",
+  red: "#d95f55",
+  orange: "#d8874f",
+  yellow: "#b8842e",
+  green: "#2f8f83",
+  aqua: "#2e9fbc",
+  blue: "#2388d1",
+  purple: "#7656d9",
 } as const;
 
 type IconType = ComponentType<{ className?: string; style?: CSSProperties }>;
 
 const openAffordanceClass =
-  "shrink-0 rounded p-0.5 opacity-0 transition hover:bg-[#475258] hover:text-[#d3c6aa] group-hover:opacity-100";
+  "shrink-0 rounded-full p-0.5 opacity-0 transition hover:bg-white/60 hover:text-[#1f2d35] group-hover:opacity-100";
 
 function NoIcon(): ReactElement {
   return <span className="inline-block h-4 w-4" />;
@@ -98,7 +97,7 @@ function Row({
   const marginClass = meta != null ? "ml-2" : "ml-auto";
   return (
     <div
-      className={`group flex items-stretch hover:bg-[#343f44] ${
+      className={`group flex items-stretch hover:bg-white/35 ${
         expandable ? "cursor-pointer" : "cursor-default"
       }`}
       onClick={expandable ? onToggle : undefined}
@@ -201,7 +200,7 @@ function ToolbarButton({
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="rounded p-1 hover:bg-[#3d484d]"
+      className="rounded p-1 hover:bg-white/60"
       style={{ color: c.grey }}
     >
       <Icon className="h-4 w-4" />
@@ -311,7 +310,7 @@ function BufferView({
             onClick={onClose}
             title="close (Esc)"
             aria-label="close"
-            className="rounded p-1 hover:bg-[#3d484d]"
+            className="rounded p-1 hover:bg-white/60"
             style={{ color: c.grey }}
           >
             <XMarkIcon className="h-4 w-4" />
@@ -321,7 +320,7 @@ function BufferView({
 
       <div className="flex-1 overflow-auto py-1 text-[13px]">
         {lines.map((node, i) => (
-          <div key={i} className="flex leading-6 hover:bg-[#272e33]">
+          <div key={i} className="flex leading-6 hover:bg-white/30">
             <span
               className="w-10 shrink-0 select-none pr-3 text-right"
               style={{ color: c.grey0 }}
@@ -488,7 +487,7 @@ function ProductPanel({
           href={`/providers/${provider.id}/products/${product.productId}`}
           title="open detail page"
           aria-label="open detail page"
-          className="rounded p-1 hover:bg-[#3d484d]"
+          className="rounded p-1 hover:bg-white/60"
           style={{ color: c.grey }}
         >
           <ArrowTopRightOnSquareIcon className="h-4 w-4" />
@@ -587,7 +586,7 @@ function ProviderPanel({
           href={`/providers/${provider.id}`}
           title="open detail page"
           aria-label="open detail page"
-          className="rounded p-1 hover:bg-[#3d484d]"
+          className="rounded p-1 hover:bg-white/60"
           style={{ color: c.grey }}
         >
           <ArrowTopRightOnSquareIcon className="h-4 w-4" />
@@ -612,7 +611,7 @@ function todayLocal(): string {
 }
 
 const fieldClass =
-  "w-full rounded border border-[#3d484d] bg-[#2d353b] px-2 py-1 text-[13px] text-[#d3c6aa] outline-none focus:border-[#a7c080] placeholder:text-[#7a8478]";
+  "w-full rounded-xl border border-white/60 bg-white/58 px-2 py-1 text-[13px] text-[#1f2d35] outline-none backdrop-blur-xl placeholder:text-[#8aa0a7] focus:border-[#2388d1]/60 focus:ring-2 focus:ring-[#2388d1]/15";
 
 function AddInvoicePanel({
   providers,
@@ -816,7 +815,7 @@ function AddInvoicePanel({
           onClick={onClose}
           title="cancel (Esc)"
           aria-label="cancel"
-          className="rounded p-1 hover:bg-[#3d484d]"
+          className="rounded p-1 hover:bg-white/60"
           style={{ color: c.grey }}
         >
           <XMarkIcon className="h-4 w-4" />
@@ -1000,7 +999,7 @@ function AddInvoicePanel({
                       setNpError(null);
                     }}
                     aria-label="cancel new product"
-                    className="rounded p-0.5 hover:bg-[#3d484d]"
+                    className="rounded p-0.5 hover:bg-white/60"
                     style={{ color: c.grey }}
                   >
                     <XMarkIcon className="h-3.5 w-3.5" />
@@ -1080,7 +1079,7 @@ function AddInvoicePanel({
                 onClick={() => {
                   setShowNewProduct(true);
                 }}
-                className="mt-2 flex items-center gap-1 rounded px-1 py-1 text-[12px] hover:bg-[#343f44]"
+                className="mt-2 flex items-center gap-1 rounded px-1 py-1 text-[12px] hover:bg-white/35"
                 style={{ color: c.aqua }}
               >
                 <PlusIcon className="h-3.5 w-3.5" />
@@ -1221,19 +1220,19 @@ export function ProviderTree({
 
   return (
     <div
-      className="flex h-screen flex-col font-[family-name:var(--font-geist-mono)]"
-      style={{ backgroundColor: c.bg0, color: c.fg }}
+      className="ios-screen flex h-screen flex-col font-[family-name:var(--font-geist-mono)] backdrop-blur-[2px]"
+      style={{ color: c.fg }}
     >
       {/* winbar */}
       <header
-        className="flex items-center justify-between border-b px-3 py-1.5 text-xs"
+        className="flex items-center justify-between border-b px-3 py-1.5 text-xs backdrop-blur-2xl"
         style={{ backgroundColor: c.bg1, borderColor: c.bg3 }}
       >
         <div className="flex items-center gap-2">
           <Link
             href="/"
             aria-label="back"
-            className="flex h-6 w-6 items-center justify-center rounded hover:bg-[#3d484d]"
+            className="flex h-6 w-6 items-center justify-center rounded hover:bg-white/60"
             style={{ color: c.grey }}
           >
             <ArrowLeftIcon className="h-4 w-4" />
@@ -1253,7 +1252,7 @@ export function ProviderTree({
             }}
             title="add invoice (A)"
             aria-label="add invoice"
-            className="flex items-center gap-1 rounded px-1.5 py-1 hover:bg-[#3d484d]"
+            className="flex items-center gap-1 rounded px-1.5 py-1 hover:bg-white/60"
             style={{ color: c.green }}
           >
             <PlusIcon className="h-4 w-4" />
@@ -1292,7 +1291,7 @@ export function ProviderTree({
           }}
           placeholder="search providers, products, invoices…"
           spellCheck={false}
-          className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#7a8478]"
+          className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#8aa0a7]"
           style={{ color: c.fg }}
         />
         {searching && (
@@ -1307,7 +1306,7 @@ export function ProviderTree({
               }}
               title="clear search"
               aria-label="clear search"
-              className="rounded p-0.5 hover:bg-[#3d484d]"
+              className="rounded p-0.5 hover:bg-white/60"
               style={{ color: c.grey }}
             >
               <XMarkIcon className="h-3.5 w-3.5" />

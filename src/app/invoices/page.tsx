@@ -1,7 +1,9 @@
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { buttonClassName } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
 import { isInvoiceOverdue } from "@/lib/invoices/overdue";
 import { getInvoices } from "@/lib/queries/invoices";
@@ -18,30 +20,27 @@ export default async function InvoicesPage(): Promise<ReactElement> {
   }));
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
-      <header className="sticky top-0 z-10 flex items-center justify-between bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-          </Link>
-          <h1 className="text-xl font-light text-[#3d3530]">{t.invoices.title}</h1>
-        </div>
-        <Link
-          href="/invoices/new"
-          className="rounded-full bg-[#c4a77d] px-5 py-3 text-sm font-medium text-white shadow-sm active:scale-[0.98]"
-        >
-          + {t.invoices.addShort}
-        </Link>
-      </header>
+    <div className="ios-screen">
+      <div className="ios-page flex flex-col">
+        <PageHeader
+          backHref="/"
+          title={t.invoices.title}
+          actions={
+            <Link
+              href="/invoices/new"
+              className={buttonClassName({ className: "rounded-full px-4 text-sm" })}
+            >
+              <PlusIcon className="h-4 w-4" />
+              {t.invoices.addShort}
+            </Link>
+          }
+        />
 
-      <main className="flex-1 px-6 py-4">
-        {/* Always render the tabbed list — the empty states (and their
-            create prompt) are handled per-tab inside InvoiceList. */}
-        <InvoiceList invoices={invoices} />
-      </main>
+        <main className="flex-1 py-5">
+          {/* Always render the tabbed list because empty states are per tab. */}
+          <InvoiceList invoices={invoices} />
+        </main>
+      </div>
     </div>
   );
 }

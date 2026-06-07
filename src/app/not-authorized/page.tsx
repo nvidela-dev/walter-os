@@ -1,7 +1,8 @@
-import { SignOutButton } from "@clerk/nextjs";
 import type { ReactElement } from "react";
 
 import { t } from "@/i18n";
+
+import { SignOutActionButton } from "./sign-out-action-button";
 
 /**
  * Landing page for signed-in users whose email is not on the allowlist
@@ -10,19 +11,14 @@ import { t } from "@/i18n";
  */
 export default function NotAuthorizedPage(): ReactElement {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#faf8f5] px-6 text-center">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-[#3d3530]">{t.auth.deniedTitle}</h1>
-        <p className="text-sm text-[#8b7355]">{t.auth.deniedBody}</p>
+    <div className="ios-screen flex items-center justify-center px-5 py-8 text-center">
+      <div className="ios-panel-strong w-full max-w-sm space-y-6 p-7">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold text-[#1f2d35]">{t.auth.deniedTitle}</h1>
+          <p className="text-sm text-[#526b74]">{t.auth.deniedBody}</p>
+        </div>
+        <SignOutActionButton label={t.auth.signOut} />
       </div>
-      <SignOutButton>
-        <button
-          type="button"
-          className="rounded-2xl bg-[#c4a77d] px-6 py-3 text-sm font-medium text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
-        >
-          {t.auth.signOut}
-        </button>
-      </SignOutButton>
     </div>
   );
 }

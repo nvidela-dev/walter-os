@@ -16,26 +16,28 @@ interface ListPageShellProps<T> {
 
 export function ListPageShell<T>({ title, backHref, addHref, items, renderItem, emptyState }: ListPageShellProps<T>): ReactElement {
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
-      <header className="sticky top-0 z-10 flex items-center justify-between bg-[#faf8f5]/90 px-6 py-5 backdrop-blur-sm">
+    <div className="ios-screen">
+      <div className="ios-page flex flex-col">
+      <header className="ios-header flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-4">
           <Link
             href={backHref}
             aria-label={t.common.back}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f0e8] text-[#8b7355]"
+            className="ios-icon-button flex h-10 w-10 items-center justify-center rounded-full text-[#43636e]"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-light text-[#3d3530]">{title}</h1>
+          <h1 className="text-xl font-semibold text-[#1f2d35]">{title}</h1>
         </div>
         <Link href={addHref} className={buttonClassName({ className: "rounded-full text-sm" })}>
           <PlusIcon className="h-4 w-4" />
           {t.common.add}
         </Link>
       </header>
-      <main className="flex-1 px-6 py-4">
+      <main className="flex-1 py-5">
         {items.length === 0 ? emptyState : <div className="space-y-3">{items.map(renderItem)}</div>}
       </main>
+      </div>
     </div>
   );
 }
@@ -50,10 +52,12 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, ctaHref, ctaText }: EmptyStateProps): ReactElement {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <Icon className="mb-4 h-16 w-16 text-[#c4a77d]" />
-      <h2 className="mb-2 text-lg font-medium text-[#3d3530]">{title}</h2>
-      <p className="mb-6 text-sm text-[#8b7355]">{description}</p>
+    <div className="ios-panel flex flex-col items-center justify-center px-6 py-16 text-center">
+      <div className="ios-icon mb-5 flex h-16 w-16 items-center justify-center bg-[#2388d1] text-white">
+        <Icon className="h-8 w-8" />
+      </div>
+      <h2 className="mb-2 text-lg font-semibold text-[#1f2d35]">{title}</h2>
+      <p className="mb-6 text-sm text-[#526b74]">{description}</p>
       <Link href={ctaHref} className={buttonClassName({ className: "rounded-full px-6 text-sm" })}>
         {ctaText}
       </Link>
@@ -70,15 +74,15 @@ interface ListPageRowProps {
 
 export function ListPageRow({ href, icon: Icon, title, subtitle }: ListPageRowProps): ReactElement {
   return (
-    <Link href={href} className="flex items-center gap-4 rounded-2xl bg-[#f5f0e8] p-5 transition-colors hover:bg-[#e8e0d4] active:scale-[0.99]">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8e0d4]">
-        <Icon className="h-6 w-6 text-[#8b7355]" />
+    <Link href={href} className="ios-list-row flex items-center gap-4 rounded-[1.4rem] p-4 transition hover:bg-white/65 active:scale-[0.99]">
+      <div className="ios-icon flex h-12 w-12 items-center justify-center bg-[#5aa6dd] text-white">
+        <Icon className="h-6 w-6" />
       </div>
       <div className="flex-1">
-        <h3 className="font-medium text-[#3d3530]">{title}</h3>
-        {subtitle != null && <p className="text-sm text-[#8b7355] line-clamp-1">{subtitle}</p>}
+        <h3 className="font-semibold text-[#1f2d35]">{title}</h3>
+        {subtitle != null && <p className="line-clamp-1 text-sm text-[#526b74]">{subtitle}</p>}
       </div>
-      <ChevronRightIcon className="h-5 w-5 text-[#c4a77d]" />
+      <ChevronRightIcon className="h-5 w-5 text-[#799099]" />
     </Link>
   );
 }
