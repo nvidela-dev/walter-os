@@ -78,6 +78,13 @@
       "when": 1780676257194,
       "tag": "0010_spooky_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780854720154,
+      "tag": "0011_hourly_employee_rates",
+      "breakpoints": true
     }
   ]
 }
