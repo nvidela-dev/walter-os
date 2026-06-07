@@ -1,5 +1,6 @@
 import { UserButton } from "@clerk/nextjs";
 import {
+  ClockIcon,
   DocumentTextIcon,
   TruckIcon,
   UserGroupIcon,
@@ -9,26 +10,75 @@ import type { ReactElement } from "react";
 
 import { t } from "@/i18n";
 
-const apps = [
+interface HomeApp {
+  bg: string;
+  description: string;
+  href: string;
+  icon: typeof TruckIcon;
+  name: string;
+}
+
+const sections: {
+  groups: { apps: HomeApp[]; title: string }[];
+  title: string;
+}[] = [
   {
-    ...t.home.tiles.providers,
-    href: "/providers",
-    icon: TruckIcon,
-    bg: "bg-[linear-gradient(145deg,#f6b05f,#d86e42)]",
-  },
-  {
-    ...t.home.tiles.invoices,
-    href: "/invoices",
-    icon: DocumentTextIcon,
-    bg: "bg-[linear-gradient(145deg,#8a96a8,#44556a)]",
-  },
-  {
-    ...t.home.tiles.employees,
-    href: "/employees",
-    icon: UserGroupIcon,
-    bg: "bg-[linear-gradient(145deg,#e990a9,#c84d7b)]",
+    title: t.home.sections.expenses.title,
+    groups: [
+      {
+        title: t.home.sections.expenses.rawMaterials,
+        apps: [
+          {
+            ...t.home.tiles.providers,
+            href: "/providers",
+            icon: TruckIcon,
+            bg: "bg-[linear-gradient(145deg,#f6b05f,#d86e42)]",
+          },
+          {
+            ...t.home.tiles.invoices,
+            href: "/invoices",
+            icon: DocumentTextIcon,
+            bg: "bg-[linear-gradient(145deg,#8a96a8,#44556a)]",
+          },
+        ],
+      },
+      {
+        title: t.home.sections.expenses.people,
+        apps: [
+          {
+            ...t.home.tiles.employees,
+            href: "/employees",
+            icon: UserGroupIcon,
+            bg: "bg-[linear-gradient(145deg,#e990a9,#c84d7b)]",
+          },
+          {
+            ...t.home.tiles.hours,
+            href: "#",
+            icon: ClockIcon,
+            bg: "bg-[linear-gradient(145deg,#b9c0c5,#707b84)]",
+          },
+        ],
+      },
+    ],
   },
 ];
+
+function HomeTile({ app }: { app: HomeApp }): ReactElement {
+  return (
+    <Link
+      href={app.href}
+      className="group flex min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
+    >
+      <div className={`ios-icon flex h-[4.25rem] w-[4.25rem] items-center justify-center text-white transition group-hover:scale-[1.03] ${app.bg}`}>
+        <app.icon className="h-8 w-8" />
+      </div>
+      <span className="max-w-full truncate text-[13px] font-semibold text-[#1f2d35] drop-shadow-[0_1px_8px_rgba(255,255,255,0.72)]">
+        {app.name}
+      </span>
+      <span className="sr-only">{app.description}</span>
+    </Link>
+  );
+}
 
 export default function Home(): ReactElement {
   return (
@@ -48,21 +98,28 @@ export default function Home(): ReactElement {
           />
         </header>
 
-        <div className="grid grid-cols-3 gap-x-4 gap-y-7">
-          {apps.map((app) => (
-            <Link
-              key={app.href}
-              href={app.href}
-              className="group flex min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
-            >
-              <div className={`ios-icon flex h-[4.25rem] w-[4.25rem] items-center justify-center text-white transition group-hover:scale-[1.03] ${app.bg}`}>
-                <app.icon className="h-8 w-8" />
+        <div className="space-y-8">
+          {sections.map((section) => (
+            <section key={section.title} className="space-y-6">
+              <h1 className="px-1 text-[1.75rem] font-bold leading-none text-[#1f2d35] drop-shadow-[0_1px_10px_rgba(255,255,255,0.75)]">
+                {section.title}
+              </h1>
+
+              <div className="space-y-7">
+                {section.groups.map((group) => (
+                  <div key={group.title} className="space-y-4">
+                    <h2 className="px-1 text-[15px] font-semibold text-[#53656d] drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">
+                      {group.title}
+                    </h2>
+                    <div className="grid grid-cols-2 gap-x-9 gap-y-7 sm:grid-cols-4">
+                      {group.apps.map((app) => (
+                        <HomeTile key={`${group.title}-${app.name}`} app={app} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <span className="max-w-full truncate text-[13px] font-semibold text-[#1f2d35] drop-shadow-[0_1px_8px_rgba(255,255,255,0.72)]">
-                {app.name}
-              </span>
-              <span className="sr-only">{app.description}</span>
-            </Link>
+            </section>
           ))}
         </div>
       </main>

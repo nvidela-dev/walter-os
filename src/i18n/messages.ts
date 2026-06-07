@@ -42,11 +42,19 @@ export const t = {
 
   /** Home dashboard tiles. */
   home: {
+    sections: {
+      expenses: {
+        title: "Gastos",
+        rawMaterials: "Materia Prima",
+        people: "Personal",
+      },
+    },
     tiles: {
       dashboard: { name: "Panel", description: "Vista general" },
       providers: { name: "Proveedores", description: "Productos y precios" },
       invoices: { name: "Facturas", description: "Cargar y pagar" },
       employees: { name: "Equipo", description: "Personal y horas" },
+      hours: { name: "Horas", description: "Registro de horas" },
       recipes: { name: "Recetas", description: "Tus recetas" },
       menu: { name: "Menú", description: "Platos y precios" },
     },
