@@ -10,7 +10,8 @@ import { parseUuidOrNull } from "@/lib/validation";
 const employeeSelection = {
   id: employees.id,
   name: employees.name,
-  monthlySalary: employees.monthlySalary,
+  hourlyRate: employees.hourlyRate,
+  extraHourRate: employees.extraHourRate,
   fixedWeeklyHours: employees.fixedWeeklyHours,
 };
 

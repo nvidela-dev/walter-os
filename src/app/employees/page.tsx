@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 
 import { EmptyState, ListPageRow, ListPageShell } from "@/components/list-page-shell";
 import { t } from "@/i18n";
+import { estimateMonthlyBasePay } from "@/lib/employees/pay";
 import { getEmployees } from "@/lib/queries/employees";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,17 @@ export default async function EmployeesPage(): Promise<ReactElement> {
           href={`/employees/${emp.id}`}
           icon={UserGroupIcon}
           title={emp.name}
-          subtitle={t.employees.monthlyPay(emp.monthlySalary)}
+          subtitle={
+            <>
+              <span className="block">{t.employees.rateSummary(emp.hourlyRate, emp.extraHourRate)}</span>
+              <span className="block">
+                {t.employees.monthlyEstimate(
+                  estimateMonthlyBasePay(emp.hourlyRate, emp.fixedWeeklyHours)
+                )}
+              </span>
+            </>
+          }
+          subtitleClassName="space-y-0.5"
         />
       )}
       emptyState={

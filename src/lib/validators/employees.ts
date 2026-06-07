@@ -5,7 +5,8 @@ import { isoDateSchema, moneySchema, requiredTextSchema, uuidSchema } from "@/li
 
 export const employeeInputSchema = z.object({
   name: requiredTextSchema,
-  monthlySalary: moneySchema,
+  hourlyRate: moneySchema,
+  extraHourRate: moneySchema,
   fixedWeeklyHours: z.coerce
     .number()
     .int(t.validation.weeklyHoursInteger)
@@ -19,7 +20,6 @@ export const extraHoursInputSchema = z.object({
     .number()
     .int(t.validation.extraHoursInteger)
     .positive(t.validation.extraHoursPositive),
-  amountPaid: moneySchema,
 });
 
 export type EmployeeInput = z.infer<typeof employeeInputSchema>;

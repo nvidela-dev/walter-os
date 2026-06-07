@@ -9,6 +9,7 @@ import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { countRows } from "@/lib/db/count-rows";
 import { getEmployeeDeleteBlock } from "@/lib/delete-guards";
+import { multiplyDecimalStrings } from "@/lib/money";
 import { uuidSchema } from "@/lib/validation";
 import { employeeInputSchema, extraHoursInputSchema } from "@/lib/validators/employees";
 
@@ -84,7 +85,16 @@ export async function addExtraHours(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
-    await db.insert(extraHours).values(parsed.data);
+    const [employee] = await db
+      .select({ extraHourRate: employees.extraHourRate })
+      .from(employees)
+      .where(eq(employees.id, parsed.data.employeeId));
+    if (!employee) return actionError(t.errors.employee.notFound);
+
+    await db.insert(extraHours).values({
+      ...parsed.data,
+      amountPaid: multiplyDecimalStrings(employee.extraHourRate, String(parsed.data.hours)),
+    });
     revalidatePath(`/employees/${parsed.data.employeeId}`);
     return actionOk(undefined);
   } catch (error) {

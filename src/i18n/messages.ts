@@ -46,7 +46,7 @@ export const t = {
       dashboard: { name: "Panel", description: "Vista general" },
       providers: { name: "Proveedores", description: "Productos y precios" },
       invoices: { name: "Facturas", description: "Cargar y pagar" },
-      employees: { name: "Equipo", description: "Personal y sueldos" },
+      employees: { name: "Equipo", description: "Personal y horas" },
       recipes: { name: "Recetas", description: "Tus recetas" },
       menu: { name: "Menú", description: "Platos y precios" },
     },
@@ -194,11 +194,14 @@ export const t = {
     addCta: "Agregar Miembro",
     emptyTitle: "Sin empleados",
     emptyDescription: "Agrega a los miembros del equipo",
-    monthlyPay: (amount: string) => `$${amount}/mes`,
+    rateSummary: (hourlyRate: string, extraHourRate: string) =>
+      `Normal $${hourlyRate}/h · extra $${extraHourRate}/h`,
+    monthlyEstimate: (amount: string) => `Est. $${amount}/mes`,
     fields: {
       name: "Nombre",
-      monthlySalary: "Salario Mensual ($)",
-      weeklyHours: "Horas Semanales",
+      hourlyRate: "Tarifa por hora ($)",
+      extraHourRate: "Tarifa hora extra ($)",
+      weeklyHours: "Horas fijas semanales",
     },
   },
 

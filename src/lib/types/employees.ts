@@ -1,7 +1,8 @@
 export interface EmployeeView {
   id: string;
   name: string;
-  monthlySalary: string;
+  hourlyRate: string;
+  extraHourRate: string;
   fixedWeeklyHours: number;
 }
 

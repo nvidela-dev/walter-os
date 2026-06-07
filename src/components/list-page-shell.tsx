@@ -4,6 +4,7 @@ import type { ComponentType, ReactElement, ReactNode } from "react";
 
 import { buttonClassName } from "@/components/ui/button";
 import { t } from "@/i18n";
+import { cn } from "@/lib/cn";
 
 interface ListPageShellProps<T> {
   title: string;
@@ -70,9 +71,16 @@ interface ListPageRowProps {
   icon: ComponentType<{ className?: string }>;
   title: string;
   subtitle?: ReactNode;
+  subtitleClassName?: string;
 }
 
-export function ListPageRow({ href, icon: Icon, title, subtitle }: ListPageRowProps): ReactElement {
+export function ListPageRow({
+  href,
+  icon: Icon,
+  title,
+  subtitle,
+  subtitleClassName,
+}: ListPageRowProps): ReactElement {
   return (
     <Link href={href} className="ios-list-row flex items-center gap-4 rounded-[1.4rem] p-4 transition hover:bg-white/65 active:scale-[0.99]">
       <div className="ios-icon flex h-12 w-12 items-center justify-center bg-[#5aa6dd] text-white">
@@ -80,7 +88,11 @@ export function ListPageRow({ href, icon: Icon, title, subtitle }: ListPageRowPr
       </div>
       <div className="flex-1">
         <h3 className="font-semibold text-[#1f2d35]">{title}</h3>
-        {subtitle != null && <p className="line-clamp-1 text-sm text-[#526b74]">{subtitle}</p>}
+        {subtitle != null && (
+          <p className={cn("text-sm text-[#526b74]", subtitleClassName ?? "line-clamp-1")}>
+            {subtitle}
+          </p>
+        )}
       </div>
       <ChevronRightIcon className="h-5 w-5 text-[#799099]" />
     </Link>

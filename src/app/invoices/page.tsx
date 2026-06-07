@@ -20,8 +20,8 @@ export default async function InvoicesPage(): Promise<ReactElement> {
   }));
 
   return (
-    <div className="ios-screen">
-      <div className="ios-page flex flex-col">
+    <div className="ios-screen overflow-x-hidden">
+      <div className="ios-page flex min-w-0 flex-col">
         <PageHeader
           backHref="/"
           title={t.invoices.title}
@@ -36,7 +36,7 @@ export default async function InvoicesPage(): Promise<ReactElement> {
           }
         />
 
-        <main className="flex-1 py-5">
+        <main className="min-w-0 flex-1 py-5">
           {/* Always render the tabbed list because empty states are per tab. */}
           <InvoiceList invoices={invoices} />
         </main>

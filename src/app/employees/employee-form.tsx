@@ -23,7 +23,8 @@ export function EmployeeForm({ employee }: { employee?: EmployeeView }): ReactEl
     const formData = new FormData(e.currentTarget);
     const data = {
       name: getFormString(formData, "name"),
-      monthlySalary: getFormString(formData, "monthlySalary"),
+      hourlyRate: getFormString(formData, "hourlyRate"),
+      extraHourRate: getFormString(formData, "extraHourRate"),
       fixedWeeklyHours: parseInt(getFormString(formData, "fixedWeeklyHours"), 10),
     };
     const result = await runAction(() =>
@@ -39,14 +40,24 @@ export function EmployeeForm({ employee }: { employee?: EmployeeView }): ReactEl
       <FormField htmlFor="employee-name" label={t.employees.fields.name}>
         <Input id="employee-name" name="name" required defaultValue={employee?.name} />
       </FormField>
-      <FormField htmlFor="employee-salary" label={t.employees.fields.monthlySalary}>
+      <FormField htmlFor="employee-hourly-rate" label={t.employees.fields.hourlyRate}>
         <Input
-          id="employee-salary"
-          name="monthlySalary"
+          id="employee-hourly-rate"
+          name="hourlyRate"
           type="number"
           step="0.01"
           required
-          defaultValue={employee?.monthlySalary}
+          defaultValue={employee?.hourlyRate}
+        />
+      </FormField>
+      <FormField htmlFor="employee-extra-hour-rate" label={t.employees.fields.extraHourRate}>
+        <Input
+          id="employee-extra-hour-rate"
+          name="extraHourRate"
+          type="number"
+          step="0.01"
+          required
+          defaultValue={employee?.extraHourRate}
         />
       </FormField>
       <FormField htmlFor="employee-hours" label={t.employees.fields.weeklyHours}>
