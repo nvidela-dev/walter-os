@@ -196,7 +196,9 @@ export const t = {
     emptyDescription: "Agrega a los miembros del equipo",
     rateSummary: (hourlyRate: string, extraHourRate: string) =>
       `Normal $${hourlyRate}/h · extra $${extraHourRate}/h`,
+    weeklyEstimate: (amount: string) => `Semanal: $${amount}`,
     monthlyEstimate: (amount: string) => `Est. $${amount}/mes`,
+    extraHoursEstimate: (hours: number, amount: string) => `${hours} h extra: $${amount}`,
     fields: {
       name: "Nombre",
       hourlyRate: "Tarifa por hora ($)",
