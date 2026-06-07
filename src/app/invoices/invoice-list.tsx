@@ -77,7 +77,7 @@ export function InvoiceList({
 
   return (
     <div className="space-y-4">
-      <div className="ios-glass flex gap-1 rounded-full p-1">
+      <div className="ios-glass flex gap-0.5 overflow-x-auto rounded-full p-1 [scrollbar-width:none] sm:gap-1 [&::-webkit-scrollbar]:hidden">
         {FILTERS.map((f) => {
           const active = filter === f.key;
           return (
@@ -85,14 +85,14 @@ export function InvoiceList({
               key={f.key}
               type="button"
               onClick={() => { setFilter(f.key); }}
-              className={`flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${
+              className={`shrink-0 rounded-full px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${
                 active
                   ? "bg-white text-[#1f2d35] shadow-sm"
                   : "text-[#526b74] hover:bg-white/40"
               }`}
             >
               {f.label}
-              <span className={`ml-1.5 text-xs ${active ? "text-[#2388d1]" : "text-[#799099]"}`}>
+              <span className={`ml-1 text-xs ${active ? "text-[#2388d1]" : "text-[#799099]"}`}>
                 {counts[f.key]}
               </span>
             </button>
@@ -197,7 +197,7 @@ function InvoiceRowItem({
   return (
     <div className="space-y-2">
       <div
-        className={`ios-list-row rounded-[1.4rem] p-4 transition ${
+        className={`ios-list-row rounded-[1.4rem] p-5 transition ${
           optimisticPaid ? "opacity-75" : ""
         }`}
       >
@@ -252,7 +252,7 @@ function InvoiceRowItem({
             <Button
               onClick={() => { setShowPayConfirm(true); }}
               disabled={isPending}
-              className="bg-emerald-600 px-5 py-2 text-sm"
+              className="bg-emerald-600 px-7 py-3 text-base"
             >
               {t.invoices.list.pay}
             </Button>
@@ -263,7 +263,7 @@ function InvoiceRowItem({
             aria-label={t.invoices.list.delete}
             variant="ghost"
             size="icon"
-            className="ml-auto h-9 w-9 shrink-0 rounded-full bg-transparent text-[#526b74] hover:bg-white/60"
+            className="ml-auto h-12 w-12 shrink-0 rounded-full bg-white/45 text-[#526b74] hover:bg-white/60"
           >
             <TrashIcon className="h-5 w-5" />
           </Button>
