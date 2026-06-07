@@ -67,12 +67,12 @@ function HomeTile({ app }: { app: HomeApp }): ReactElement {
   return (
     <Link
       href={app.href}
-      className="group flex w-[5.75rem] min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
+      className="group flex w-[7.25rem] min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
     >
       <div className={`ios-icon flex h-[4.25rem] w-[4.25rem] items-center justify-center text-white transition group-hover:scale-[1.03] ${app.bg}`}>
         <app.icon className="h-8 w-8" />
       </div>
-      <span className="max-w-full truncate text-[13px] font-semibold text-[#1f2d35] drop-shadow-[0_1px_8px_rgba(255,255,255,0.72)]">
+      <span className="w-full text-center text-[13px] font-semibold leading-tight text-[#1f2d35] drop-shadow-[0_1px_8px_rgba(255,255,255,0.72)]">
         {app.name}
       </span>
       <span className="sr-only">{app.description}</span>
@@ -107,7 +107,10 @@ export default function Home(): ReactElement {
 
               <div className="space-y-7">
                 {section.groups.map((group) => (
-                  <div key={group.title} className="ios-glass rounded-[2rem] px-5 py-5">
+                  <div
+                    key={group.title}
+                    className="ios-glass rounded-[2rem] border-white/[0.34] bg-white/[0.18] px-5 py-5 shadow-[0_16px_44px_rgba(31,45,53,0.07)]"
+                  >
                     <h2 className="mb-5 px-1 text-[15px] font-semibold text-[#53656d] drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">
                       {group.title}
                     </h2>
