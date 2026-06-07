@@ -3,7 +3,6 @@ import {
   BookOpenIcon,
   ClipboardDocumentListIcon,
   DocumentTextIcon,
-  Squares2X2Icon,
   TruckIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
@@ -13,12 +12,6 @@ import type { ReactElement } from "react";
 import { t } from "@/i18n";
 
 const apps = [
-  {
-    ...t.home.tiles.dashboard,
-    href: "/dashboard",
-    icon: Squares2X2Icon,
-    bg: "bg-[linear-gradient(145deg,#51a7e8,#1f75ca)]",
-  },
   {
     ...t.home.tiles.providers,
     href: "/providers",
