@@ -1,7 +1,5 @@
 import { UserButton } from "@clerk/nextjs";
 import {
-  BookOpenIcon,
-  ClipboardDocumentListIcon,
   DocumentTextIcon,
   TruckIcon,
   UserGroupIcon,
@@ -29,18 +27,6 @@ const apps = [
     href: "/employees",
     icon: UserGroupIcon,
     bg: "bg-[linear-gradient(145deg,#e990a9,#c84d7b)]",
-  },
-  {
-    ...t.home.tiles.recipes,
-    href: "/recipes",
-    icon: BookOpenIcon,
-    bg: "bg-[linear-gradient(145deg,#5bc5af,#2f8f83)]",
-  },
-  {
-    ...t.home.tiles.menu,
-    href: "/menu",
-    icon: ClipboardDocumentListIcon,
-    bg: "bg-[linear-gradient(145deg,#a891ee,#7656d9)]",
   },
 ];
 
