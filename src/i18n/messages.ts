@@ -48,6 +48,14 @@ export const t = {
         rawMaterials: "Materia Prima",
         people: "Personal",
       },
+      kitchen: {
+        title: "Cocina",
+        kitchen: "Cocina",
+      },
+      outputs: {
+        title: "Salidas",
+        outputs: "Salidas",
+      },
     },
     tiles: {
       dashboard: { name: "Panel", description: "Vista general" },
@@ -56,7 +64,9 @@ export const t = {
       employees: { name: "Equipo", description: "Personal y horas" },
       hours: { name: "Horas", description: "Registro de horas" },
       recipes: { name: "Recetas", description: "Tus recetas" },
+      inventory: { name: "Inventario", description: "Control de stock" },
       menu: { name: "Menú", description: "Platos y precios" },
+      cashOutputs: { name: "Salidas Caja", description: "Movimientos de caja" },
     },
   },
 

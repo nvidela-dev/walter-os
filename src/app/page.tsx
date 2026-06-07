@@ -1,5 +1,9 @@
 import { UserButton } from "@clerk/nextjs";
 import {
+  ArchiveBoxIcon,
+  BanknotesIcon,
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
   ClockIcon,
   DocumentTextIcon,
   TruckIcon,
@@ -56,6 +60,50 @@ const sections: {
             href: "#",
             icon: ClockIcon,
             bg: "bg-[linear-gradient(145deg,#b9c0c5,#707b84)]",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: t.home.sections.kitchen.title,
+    groups: [
+      {
+        title: t.home.sections.kitchen.kitchen,
+        apps: [
+          {
+            ...t.home.tiles.recipes,
+            href: "/recipes",
+            icon: BookOpenIcon,
+            bg: "bg-[linear-gradient(145deg,#5bd0c6,#2c9b91)]",
+          },
+          {
+            ...t.home.tiles.inventory,
+            href: "#",
+            icon: ArchiveBoxIcon,
+            bg: "bg-[linear-gradient(145deg,#a8b3bd,#6f7b86)]",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: t.home.sections.outputs.title,
+    groups: [
+      {
+        title: t.home.sections.outputs.outputs,
+        apps: [
+          {
+            ...t.home.tiles.menu,
+            href: "/menu",
+            icon: ClipboardDocumentListIcon,
+            bg: "bg-[linear-gradient(145deg,#9f7aea,#6b4bd6)]",
+          },
+          {
+            ...t.home.tiles.cashOutputs,
+            href: "#",
+            icon: BanknotesIcon,
+            bg: "bg-[linear-gradient(145deg,#b8c0c5,#727d86)]",
           },
         ],
       },
