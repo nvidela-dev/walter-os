@@ -26,6 +26,35 @@ function calculateEstimate(calculate: () => string): string | null {
   }
 }
 
+function InfoCard({
+  items,
+}: {
+  items: { label: string; value: string; detail?: string }[];
+}): ReactElement {
+  return (
+    <div className="grid grid-cols-2 overflow-hidden rounded-3xl border border-white/65 bg-white/58 shadow-[0_12px_34px_rgba(31,45,53,0.08)] backdrop-blur-xl">
+      {items.map((item, index) => (
+        <div
+          key={item.label}
+          className={`min-w-0 px-4 py-5 text-center ${
+            index > 0 ? "border-l border-white/70" : ""
+          }`}
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#7d8b91]">
+            {item.label}
+          </p>
+          <p className="mt-1 truncate text-2xl font-semibold text-[#2f3c42]">
+            {item.value}
+          </p>
+          {item.detail != null && (
+            <p className="mt-1 text-xs font-medium text-[#879399]">{item.detail}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function EmployeeForm({ employee }: { employee?: EmployeeView }): ReactElement {
   const router = useRouter();
   const { error, isSubmitting, runAction } = useActionForm();
@@ -115,10 +144,18 @@ export function EmployeeForm({ employee }: { employee?: EmployeeView }): ReactEl
           />
         </FormField>
       </div>
-      <div className="rounded-2xl border border-white/60 bg-white/50 px-4 py-3 text-sm text-[#526b74]">
-        <p>{t.employees.weeklyEstimate(weeklyEstimate ?? "-")}</p>
-        <p>{t.employees.monthlyEstimate(monthlyEstimate ?? "-")}</p>
-      </div>
+      <InfoCard
+        items={[
+          {
+            label: t.employees.estimateLabels.weekly,
+            value: weeklyEstimate != null ? `$${weeklyEstimate}` : "-",
+          },
+          {
+            label: t.employees.estimateLabels.monthly,
+            value: monthlyEstimate != null ? `$${monthlyEstimate}` : "-",
+          },
+        ]}
+      />
       <FormField htmlFor="employee-extra-hour-rate" label={t.employees.fields.extraHourRate}>
         <Input
           id="employee-extra-hour-rate"
@@ -132,10 +169,20 @@ export function EmployeeForm({ employee }: { employee?: EmployeeView }): ReactEl
           }}
         />
       </FormField>
-      <div className="rounded-2xl border border-white/60 bg-white/50 px-4 py-3 text-sm text-[#526b74]">
-        <p>{t.employees.extraHoursEstimate(4, fourExtraHoursEstimate ?? "-")}</p>
-        <p>{t.employees.extraHoursEstimate(8, eightExtraHoursEstimate ?? "-")}</p>
-      </div>
+      <InfoCard
+        items={[
+          {
+            label: t.employees.estimateLabels.fourHours,
+            value: fourExtraHoursEstimate != null ? `$${fourExtraHoursEstimate}` : "-",
+            detail: t.employees.estimateLabels.extra,
+          },
+          {
+            label: t.employees.estimateLabels.eightHours,
+            value: eightExtraHoursEstimate != null ? `$${eightExtraHoursEstimate}` : "-",
+            detail: t.employees.estimateLabels.extra,
+          },
+        ]}
+      />
       <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
         {isSubmitting ? t.common.loading : isEditing ? t.common.save : t.common.add}
       </Button>
