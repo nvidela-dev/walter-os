@@ -121,5 +121,7 @@ export default defineConfig([
     "next-env.d.ts",
     ".claude/**",
     "coverage/**",
+    "public/sw.js",
+    "public/workbox-*.js",
   ]),
 ]);
