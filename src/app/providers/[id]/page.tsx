@@ -4,12 +4,14 @@ import type { ReactElement } from "react";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { deleteProvider } from "@/lib/actions/providers";
+import { getUnlinkedProducts } from "@/lib/queries/products";
 import { getProviderWithProducts } from "@/lib/queries/providers";
 import { getUnits } from "@/lib/queries/units";
 
 import { ProviderForm } from "../provider-form";
 import { AddProductForm } from "./add-product-form";
 import { DebtForm } from "./debt-form";
+import { LinkProductForm } from "./link-product-form";
 import { ProductList } from "./product-list";
 
 export const dynamic = "force-dynamic";
@@ -22,9 +24,10 @@ export default async function ProviderPage({
   params,
 }: ProviderPageProps): Promise<ReactElement> {
   const { id } = await params;
-  const [provider, units] = await Promise.all([
+  const [provider, units, unlinkedProducts] = await Promise.all([
     getProviderWithProducts(id),
     getUnits(),
+    getUnlinkedProducts(id),
   ]);
 
   if (!provider) {
@@ -49,6 +52,7 @@ export default async function ProviderPage({
             <ProductList products={provider.products} providerId={provider.id} />
             <div className="mt-4 border-t border-[#e8e0d4] pt-4">
               <AddProductForm providerId={provider.id} units={units} />
+              <LinkProductForm providerId={provider.id} products={unlinkedProducts} />
             </div>
           </section>
         )}

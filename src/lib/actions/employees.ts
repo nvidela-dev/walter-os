@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { employees, extraHours } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { requireAccess } from "@/lib/auth/access";
 import { countRows } from "@/lib/db/count-rows";
 import { getEmployeeDeleteBlock } from "@/lib/delete-guards";
 import { multiplyDecimalStrings } from "@/lib/money";
@@ -14,6 +15,7 @@ import { uuidSchema } from "@/lib/validation";
 import { employeeInputSchema, extraHoursInputSchema } from "@/lib/validators/employees";
 
 export async function createEmployee(input: unknown): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsed = employeeInputSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -34,6 +36,7 @@ export async function updateEmployee(
   id: string,
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -58,6 +61,7 @@ export async function updateEmployee(
 }
 
 export async function deleteEmployee(id: string): Promise<ActionResult> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -81,6 +85,7 @@ export async function deleteEmployee(id: string): Promise<ActionResult> {
 }
 
 export async function addExtraHours(input: unknown): Promise<ActionResult> {
+  await requireAccess("main");
   const parsed = extraHoursInputSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 

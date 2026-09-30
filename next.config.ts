@@ -6,6 +6,10 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  // Authenticated pages must never survive sign-out in a shared device cache.
+  cacheStartUrl: false,
+  dynamicStartUrl: false,
+  runtimeCaching: [{ urlPattern: /.*/, handler: "NetworkOnly" }],
 });
 
 const nextConfig: NextConfig = {

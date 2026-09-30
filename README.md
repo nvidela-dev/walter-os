@@ -94,6 +94,12 @@ npm run ci
 
 There is no browser E2E suite.
 
-## Auth Assumption
+## Access control
 
-Clerk protects the application. This app intentionally has no admin email allowlist and no authorization matrix; any signed-in production user is allowed to use it.
+Clerk authenticates users. Verified primary emails must belong to the appropriate
+allowlist: `usuarios_autorizados` for the main app, `usuarios_inventario` for
+inventory. Memberships are independent. Middleware protects routes and each
+Server Action checks its own permission, including main actions invoked from an
+inventory URL. Inventory access never implicitly grants administrative access.
+
+See [Inventory](docs/inventory.md) for setup, migration safety, and PWA behavior.

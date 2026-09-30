@@ -7,12 +7,14 @@ import { db } from "@/db";
 import { invoices, priceHistory, providerProducts, providers } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { requireAccess } from "@/lib/auth/access";
 import { countRows } from "@/lib/db/count-rows";
 import { getProviderDeleteBlock } from "@/lib/delete-guards";
 import { uuidSchema } from "@/lib/validation";
 import { providerDebtInputSchema, providerInputSchema } from "@/lib/validators/providers";
 
 export async function createProvider(input: unknown): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsed = providerInputSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -30,6 +32,7 @@ export async function updateProvider(
   id: string,
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -57,6 +60,7 @@ export async function updateProviderDebt(
   id: string,
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -81,6 +85,7 @@ export async function updateProviderDebt(
 }
 
 export async function deleteProvider(id: string): Promise<ActionResult> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 

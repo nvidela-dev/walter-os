@@ -24,9 +24,15 @@
 
 5. Deploy the application.
 
-## Auth Assumption
+## Access control
 
-Clerk authentication remains the only access control layer. Walter OS intentionally has no app-level admin email allowlist and no role or permission matrix. Any signed-in production user is treated as an admin user.
+Clerk authenticates users. Verified primary emails must belong to the appropriate
+allowlist: `usuarios_autorizados` for the main app, `usuarios_inventario` for
+inventory. Memberships are independent. Middleware protects routes and each
+Server Action checks its own permission, including main actions invoked from an
+inventory URL. Inventory access never implicitly grants administrative access.
+
+See [Inventory](docs/inventory.md) for setup, migration safety, and PWA behavior.
 
 ## Database Safety
 

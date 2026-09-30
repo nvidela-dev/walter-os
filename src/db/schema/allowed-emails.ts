@@ -1,9 +1,9 @@
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
- * Access-control allowlist. A signed-in user may use the app only if their
+ * Main-app allowlist. A signed-in user may use the main app only if their
  * email has a row here (see `src/lib/auth/allowlist.ts`). This is the entire
- * authorization policy — there are no roles or permissions beyond membership.
+ * main-app policy; inventory has an independent membership table.
  *
  * Emails are stored normalized (trimmed, lowercased); the unique constraint
  * keeps the list deduplicated.

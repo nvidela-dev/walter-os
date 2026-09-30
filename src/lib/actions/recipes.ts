@@ -7,10 +7,12 @@ import { db } from "@/db";
 import { recipes } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { requireAccess } from "@/lib/auth/access";
 import { uuidSchema } from "@/lib/validation";
 import { recipeInputSchema } from "@/lib/validators/recipes";
 
 export async function createRecipe(input: unknown): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsed = recipeInputSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -28,6 +30,7 @@ export async function updateRecipe(
   id: string,
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -52,6 +55,7 @@ export async function updateRecipe(
 }
 
 export async function deleteRecipe(id: string): Promise<ActionResult> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 

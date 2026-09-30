@@ -1,0 +1,135 @@
+import { randomUUID } from "node:crypto";
+import { readdirSync,readFileSync } from "node:fs";
+
+import { PGlite } from "@electric-sql/pglite";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/auth/access", () => ({ requireAccess: vi.fn(() => Promise.resolve("user_inventory")) }));
+vi.mock("@/db", async () => {
+  const { drizzle } = await import("drizzle-orm/pglite");
+  const client = new PGlite();
+  const db = drizzle(client);
+  // PGlite has interactive transactions; Neon HTTP exposes atomic batch instead.
+  return { db: Object.assign(db, { batch: async (queries: PromiseLike<unknown>[]) => {
+    await client.exec("BEGIN");
+    try {
+      for (const query of queries) await query;
+      await client.exec("COMMIT");
+    } catch (error) { await client.exec("ROLLBACK"); throw error; }
+  } }), testClient: client };
+});
+
+import { db } from "@/db";
+import { expectedActionError } from "@/lib/action-result";
+import { addFridgeProduct, createFridge, createInventoryProduct, saveInventory } from "@/lib/actions/inventory";
+import { linkExistingProduct } from "@/lib/actions/products";
+import { requireAccess } from "@/lib/auth/access";
+import { getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
+
+const fixture = { fridge: randomUUID(), secondFridge: randomUUID(), product: randomUUID(), unlinked: randomUUID(), provider: randomUUID() };
+let client: PGlite;
+let unitId: string;
+
+beforeAll(async () => {
+  const mocked = await import("@/db");
+  // Test-only export; the production database module remains untouched.
+  const clientValue: unknown = Reflect.get(mocked, "testClient");
+  if (!(clientValue instanceof PGlite)) throw new Error("Missing isolated database");
+  client = clientValue;
+  const migrations = readdirSync("drizzle").filter((name) => name.endsWith(".sql")).sort();
+  for (const migration of migrations.filter((name) => !name.startsWith("0012"))) {
+    await client.exec(readFileSync(`drizzle/${migration}`, "utf8"));
+  }
+  const units = await client.query<{ id: string }>("SELECT id FROM unidades WHERE codigo = 'unidad'");
+  unitId = units.rows[0]?.id ?? "";
+  await client.query("INSERT INTO productos (id, nombre, unidad_id) VALUES ($1, 'Cola', $3), ($2, 'Water', $3)", [fixture.product, fixture.unlinked, unitId]);
+  await client.query("INSERT INTO proveedores (id, nombre) VALUES ($1, 'Provider')", [fixture.provider]);
+  await client.query("INSERT INTO proveedor_productos (proveedor_id, producto_id, precio) VALUES ($1, $2, 50)", [fixture.provider, fixture.product]);
+  const before = await client.query("SELECT * FROM productos ORDER BY id");
+  await client.exec(readFileSync("drizzle/0012_inventory.sql", "utf8"));
+  expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows);
+  await client.query("INSERT INTO heladeras (id, numero) VALUES ($1, 1), ($2, 2)", [fixture.fridge, fixture.secondFridge]);
+}, 30000);
+afterAll(async () => { await client.close(); });
+
+describe("inventory vertical slice on isolated PostgreSQL", () => {
+  it("adds canonical products with and without provider and keeps a unique catalogue", async () => {
+    for (const productId of [fixture.product, fixture.unlinked, fixture.product]) {
+      expect(await addFridgeProduct({ fridgeId: fixture.fridge, productId })).toEqual({ ok: true, data: undefined });
+    }
+    const rows = await getFridgeInventory(fixture.fridge);
+    expect(rows).toHaveLength(2);
+    expect(rows.find((row) => row.id === fixture.product)?.providers).toEqual(["Provider"]);
+    expect(rows.find((row) => row.id === fixture.unlinked)?.providers).toEqual([]);
+    expect(rows.every((row) => row.current === null && row.difference === null)).toBe(true);
+  });
+  it("creates a provider-less canonical product and immediately tracks it", async () => {
+    expect((await createInventoryProduct({ fridgeId: fixture.fridge, name: "Juice", unitId })).ok).toBe(true);
+    const [product] = await searchInventoryProducts("Juice");
+    expect(product).toBeDefined();
+    const rows = await getFridgeInventory(fixture.fridge);
+    expect(rows.find((row) => row.id === product?.id)?.providers).toEqual([]);
+    expect((await client.query("SELECT * FROM proveedor_productos WHERE producto_id=$1", [product?.id])).rows).toHaveLength(0);
+    expect((await linkExistingProduct({ providerId: fixture.provider, productId: product?.id, price: "30", quantity: "1" })).ok).toBe(true);
+    expect((await getFridgeInventory(fixture.fridge)).find((row) => row.id === product?.id)?.providers).toEqual(["Provider"]);
+  });
+  it("retains 12 then 8, records actor, and does not treat no baseline as zero", async () => {
+    for (const quantity of ["12", "8"]) expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId: fixture.product, quantity }] })).ok).toBe(true);
+    const history = await client.query<{ cantidad: string; registrado_por: string }>("SELECT cantidad, registrado_por FROM observaciones_inventario WHERE producto_id=$1 ORDER BY id", [fixture.product]);
+    expect(history.rows.map((row) => row.cantidad)).toEqual(["12.00", "8.00"]);
+    expect(history.rows.every((row) => row.registrado_por === "user_inventory")).toBe(true);
+    const row = (await getFridgeInventory(fixture.fridge)).find((row) => row.id === fixture.product);
+    expect(row?.current?.quantity).toBe("8.00");
+    expect(row?.previous).toBeNull();
+    expect(row?.difference).toBeNull();
+  });
+  it("uses the latest observation at or before 168 hours earlier, with deterministic ties", async () => {
+    const productId = fixture.unlinked;
+    for (const [date, quantity] of [["2026-09-22T12:00:00Z", "30"], ["2026-09-23T12:00:00Z", "18"], ["2026-09-23T12:00:00Z", "17"], ["2026-09-24T12:00:00Z", "20"], ["2026-09-30T12:00:00Z", "12"]]) {
+      await client.query("INSERT INTO observaciones_inventario (heladera_id, producto_id, cantidad, unidad, registrado_at, registrado_por) VALUES ($1,$2,$3,'unidad',$4,'fixture')", [fixture.fridge, productId, quantity, date]);
+    }
+    const row = (await getFridgeInventory(fixture.fridge)).find((row) => row.id === productId);
+    expect(row?.current?.quantity).toBe("12.00");
+    expect(row?.previous?.quantity).toBe("17.00");
+    expect(row?.difference).toBe("-5");
+    expect(row?.previous?.recordedAt).toBe("2026-09-23T12:00:00.000Z");
+    await addFridgeProduct({ fridgeId: fixture.secondFridge, productId });
+    expect((await getFridgeInventory(fixture.secondFridge))[0]?.current).toBeNull();
+  });
+  it("rejects edits, deletes, negative counts, and removal of tracked products", async () => {
+    await expect(client.exec("UPDATE observaciones_inventario SET cantidad=0")).rejects.toThrow("append-only");
+    await expect(client.exec("DELETE FROM observaciones_inventario")).rejects.toThrow("append-only");
+    await expect(client.query("DELETE FROM productos WHERE id=$1", [fixture.product])).rejects.toThrow();
+    await expect(client.query("INSERT INTO observaciones_inventario (heladera_id,producto_id,cantidad,unidad,registrado_por) VALUES ($1,$2,-1,'unidad','fixture')", [fixture.fridge, fixture.product])).rejects.toThrow();
+  });
+  it("accepts zero and rejects invalid, duplicate, untracked, or inactive counts without partial saves", async () => {
+    expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId: fixture.product, quantity: "0" }] })).ok).toBe(true);
+    for (const quantity of ["", "-1", "1.234", "NaN", "10000000000"]) {
+      expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId: fixture.product, quantity }] })).ok).toBe(false);
+    }
+    const countBefore = (await client.query("SELECT count(*) FROM observaciones_inventario")).rows;
+    expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId: fixture.product, quantity: "9" }, { productId: randomUUID(), quantity: "8" }] })).ok).toBe(false);
+    expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId: fixture.product, quantity: "9" }, { productId: fixture.product, quantity: "8" }] })).ok).toBe(false);
+    await client.query("UPDATE heladeras SET activa=false WHERE id=$1", [fixture.secondFridge]);
+    expect((await saveInventory({ fridgeId: fixture.secondFridge, counts: [{ productId: fixture.unlinked, quantity: "2" }] })).ok).toBe(false);
+    expect((await client.query("SELECT count(*) FROM observaciones_inventario")).rows).toEqual(countBefore);
+  });
+  it("rolls back product creation if the second batch statement fails", async () => {
+    const id = randomUUID();
+    const { products, fridgeProducts } = await import("@/db/schema");
+    await expect(db.batch([
+      db.insert(products).values({ id, name: "Should roll back" }),
+      db.insert(fridgeProducts).values({ fridgeId: randomUUID(), productId: id }),
+    ])).rejects.toThrow();
+    expect((await client.query("SELECT * FROM productos WHERE id=$1", [id])).rows).toHaveLength(0);
+  });
+  it("requires access before performing writes or queries", async () => {
+    vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("denied"));
+    expect((await createFridge({ number: 500, name: "" })).ok).toBe(false);
+    expect((await client.query("SELECT * FROM heladeras WHERE numero=500")).rows).toHaveLength(0);
+    vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("denied"));
+    await expect(getFridgeInventory(fixture.fridge)).rejects.toThrow("denied");
+  });
+});

@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { invoiceLines, invoices, priceHistory } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { requireAccess } from "@/lib/auth/access";
 import { countRows } from "@/lib/db/count-rows";
 import { getInvoiceDeleteBlock } from "@/lib/delete-guards";
 import { invoiceCreationRepository } from "@/lib/repositories/invoices";
@@ -17,6 +18,7 @@ import { uuidSchema } from "@/lib/validation";
 import { createInvoiceSchema } from "@/lib/validators/invoices";
 
 export async function createInvoice(input: unknown): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsed = createInvoiceSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -33,6 +35,7 @@ export async function createInvoice(input: unknown): Promise<ActionResult<{ id: 
 }
 
 export async function togglePaid(id: string): Promise<ActionResult<{ paid: boolean }>> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -54,6 +57,7 @@ export async function togglePaid(id: string): Promise<ActionResult<{ paid: boole
 }
 
 export async function deleteInvoice(id: string): Promise<ActionResult> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 

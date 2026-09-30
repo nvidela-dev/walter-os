@@ -7,10 +7,12 @@ import { db } from "@/db";
 import { menu } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
+import { requireAccess } from "@/lib/auth/access";
 import { uuidSchema } from "@/lib/validation";
 import { menuItemInputSchema } from "@/lib/validators/menu";
 
 export async function createMenuItem(input: unknown): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsed = menuItemInputSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -28,6 +30,7 @@ export async function updateMenuItem(
   id: string,
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -52,6 +55,7 @@ export async function updateMenuItem(
 }
 
 export async function deleteMenuItem(id: string): Promise<ActionResult> {
+  await requireAccess("main");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 

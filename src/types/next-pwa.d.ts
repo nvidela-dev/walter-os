@@ -6,6 +6,8 @@ declare module "next-pwa" {
     disable?: boolean;
     register?: boolean;
     skipWaiting?: boolean;
+    cacheStartUrl?: boolean;
+    dynamicStartUrl?: boolean;
     scope?: string;
     sw?: string;
     runtimeCaching?: unknown[];

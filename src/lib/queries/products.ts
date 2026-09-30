@@ -1,9 +1,10 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, notExists } from "drizzle-orm";
 
 import { db } from "@/db";
 import { products, providerProducts, units } from "@/db/schema";
+import { requireAccess } from "@/lib/auth/access";
 import type { ProductForProvider } from "@/lib/types/providers";
 import { parseUuidOrNull } from "@/lib/validation";
 
@@ -36,4 +37,14 @@ export async function getProductForProvider(
     );
 
   return product ?? null;
+}
+
+export async function getUnlinkedProducts(providerId: string): Promise<{ id: string; name: string; unit: string }[]> {
+  await requireAccess("main");
+  const parsedProviderId = parseUuidOrNull(providerId);
+  if (parsedProviderId === null) return [];
+  return db.select({ id: products.id, name: products.name, unit: products.unit }).from(products)
+    .where(notExists(db.select().from(providerProducts).where(and(
+      eq(providerProducts.providerId, parsedProviderId), eq(providerProducts.productId, products.id),
+    )))).orderBy(products.name);
 }

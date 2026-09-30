@@ -55,3 +55,8 @@ export type ProviderInput = z.infer<typeof providerInputSchema>;
 export type ProviderDebtInput = z.infer<typeof providerDebtInputSchema>;
 export type CreateProductForProviderInput = z.infer<typeof createProductForProviderInputSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductInputSchema>;
+
+export const linkExistingProductSchema = productProviderInputSchema.extend({
+  price: moneySchema,
+  quantity: quantitySchema,
+});

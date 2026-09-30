@@ -4,12 +4,12 @@ import { db } from "@/db";
 import { allowedEmails } from "@/db/schema";
 
 /**
- * Email allowlist — the entire access-control policy for Walter OS.
+ * Email allowlist for the main Walter OS application.
  *
  * Clerk handles authentication (proving who you are); the `usuarios_autorizados`
- * table handles authorization (whether you're allowed in at all). Anyone who
+ * table handles main-app authorization. Anyone who
  * signs in with an email that has no row there is bounced to `/not-authorized`.
- * There are no roles or permissions beyond membership in the table.
+ * Inventory membership is checked separately in access.ts.
  *
  * To grant or revoke access, insert/delete a row (emails stored lowercased).
  */

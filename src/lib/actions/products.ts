@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
 import {
+  fridgeProducts,
   invoiceLines,
   priceHistory,
   products,
@@ -22,11 +23,13 @@ import {
   expectedActionError,
   unknownActionError,
 } from "@/lib/action-result";
+import { requireAccess } from "@/lib/auth/access";
 import { countRows } from "@/lib/db/count-rows";
 import { getProductDeleteBlock } from "@/lib/delete-guards";
 import { getProvider } from "@/lib/queries/providers";
 import {
   createProductForProviderInputSchema,
+  linkExistingProductSchema,
   productProviderInputSchema,
   updateProductInputSchema,
   updateProductPriceInputSchema,
@@ -38,6 +41,7 @@ export async function createProductForProvider(
   price: string,
   quantity: string
 ): Promise<ActionResult<{ id: string; name: string; unitId: string; unit: string }>> {
+  await requireAccess("main");
   const parsed = createProductForProviderInputSchema.safeParse({
     providerId,
     productData,
@@ -96,6 +100,7 @@ export async function updateProductPrice(
   productId: string,
   price: string
 ): Promise<ActionResult> {
+  await requireAccess("main");
   const parsed = updateProductPriceInputSchema.safeParse({ providerId, productId, price });
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -139,6 +144,7 @@ export async function updateProduct(
   productId: string,
   data: unknown
 ): Promise<ActionResult> {
+  await requireAccess("main");
   const parsed = updateProductInputSchema.safeParse({ providerId, productId, data });
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -196,10 +202,13 @@ export async function removeProductFromProvider(
   providerId: string,
   productId: string
 ): Promise<ActionResult> {
+  await requireAccess("main");
   const parsed = productProviderInputSchema.safeParse({ providerId, productId });
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
+    const inventoryUses = await countRows(fridgeProducts, eq(fridgeProducts.productId, parsed.data.productId));
+    if (inventoryUses > 0) return actionError(t.inventory.productTracked);
     const [invoiceLineCount, priceHistoryCount, recipeUses] = await Promise.all([
       countRows(invoiceLines, eq(invoiceLines.productId, parsed.data.productId)),
       countRows(priceHistory, eq(priceHistory.productId, parsed.data.productId)),
@@ -249,4 +258,26 @@ async function recordPriceChange(args: {
   invoiceId?: string;
 }): Promise<void> {
   await db.insert(priceHistory).values(args);
+}
+
+export async function linkExistingProduct(input: unknown): Promise<ActionResult> {
+  await requireAccess("main");
+  try {
+    const data = linkExistingProductSchema.parse(input);
+    const provider = await getProvider(data.providerId);
+    if (provider?.type !== "producto") return actionError(t.errors.provider.onlyProductProviders);
+    const [product] = await db.select().from(products).where(eq(products.id, data.productId));
+    if (product?.unitId == null) return actionError(t.errors.product.selectValidUnit);
+    const [existing] = await db.select().from(providerProducts).where(and(
+      eq(providerProducts.providerId, data.providerId), eq(providerProducts.productId, data.productId),
+    ));
+    if (existing) return actionError(t.inventory.alreadyLinked);
+    await db.batch([
+      db.insert(providerProducts).values(data),
+      db.insert(priceHistory).values({ productId: data.productId, providerId: data.providerId, price: data.price, unitId: product.unitId }),
+    ]);
+    revalidatePath(`/providers/${data.providerId}`);
+    revalidatePath("/inventory", "layout");
+    return actionOk(undefined);
+  } catch (error) { return unknownActionError(error); }
 }

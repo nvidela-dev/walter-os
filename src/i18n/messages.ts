@@ -9,6 +9,26 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const t = {
+  inventory: {
+    productTracked: "Este producto está registrado en inventario y no se puede eliminar.",
+    alreadyLinked: "El producto ya está asociado a este proveedor.",
+    title: "Inventario", fridges: "Heladeras", fridge: (number: number): string => `Heladera ${number}`,
+    description: "Contá lo que hay ahora", number: "Número", name: "Nombre (opcional)",
+    createFridge: "Agregar heladera", empty: "Todavía no hay heladeras.",
+    search: "Buscar productos", searchAction: "Buscar", add: "Agregar", create: "Crear producto y agregar",
+    productName: "Nombre del producto", unit: "Unidad", noProvider: "Proveedor no asignado",
+    current: "Último conteo", now: "¿Cuánto hay ahora?", save: "Guardar inventario", saving: "Guardando…",
+    saved: "Inventario guardado", noCount: "Sin conteos", noPrevious: "Sin inventario anterior",
+    change: "Cambio vs. semana anterior", unchanged: "Sin cambios vs. semana anterior",
+    hint: "Completá solo lo que contaste. Dejá vacío lo que no revisaste. Cero significa que no queda nada.",
+    online: "Se necesita conexión para consultar y guardar.", noItems: "Agregá productos para empezar a contar.",
+    noMatches: "No se encontraron productos.", missing: "¿No existe en el catálogo?",
+    denied: "No tenés acceso a esta sección.", invalidFridge: "La heladera no existe o está inactiva.",
+    invalidItems: "Revisá los productos y las cantidades.", duplicateFridge: "Ese número de heladera ya existe.",
+    unitChanged: "La unidad cambió: no se puede comparar.", comparedAt: "Comparado con",
+    linkProduct: "Asociar producto existente", chooseProduct: "Seleccionar producto", linked: "Producto asociado",
+    signOut: "Salir", tooMany: "Guardá hasta 200 productos por vez.",
+  },
   /** App-level metadata (next/metadata, manifest). */
   app: {
     name: "Gestión",

@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAccess } from "@/lib/auth/access";
 import { getProductPriceHistory } from "@/lib/queries/invoices";
 import type { PriceHistoryRow } from "@/lib/types/invoices";
 
@@ -11,5 +12,6 @@ export async function fetchProductPriceHistory(
   productId: string,
   providerId: string
 ): Promise<PriceHistoryRow[]> {
+  await requireAccess("main");
   return getProductPriceHistory(productId, { providerId });
 }
