@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 
 /** Only the reviewed inventory migration; never replay the legacy migration ledger. */
 export function inventoryBootstrapSql(): string {
-  const migration = readFileSync(new URL("../drizzle/0012_inventory.sql", import.meta.url), "utf8");
+  const migration = readFileSync("drizzle/0012_inventory.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
