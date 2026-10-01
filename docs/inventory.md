@@ -182,3 +182,21 @@ signed-in production behavior remain unverified.
 - `src/i18n/messages.ts`: Spanish inventory copy.
 - Inventory unit/database/component tests under `src/__tests__/`; dev-only
   `@electric-sql/pglite` dependency for isolated PostgreSQL verification.
+
+## Vercel owner-access setup
+
+`vercel.json` now runs the production build followed by `db:prepare-inventory`.
+The latter runs only when `VERCEL=1` and uses that deployment's `DATABASE_URL`.
+It atomically applies only 0012 when all four inventory tables are absent, checks
+existing installations, and ensures `videla.jn@gmail.com` has inventory membership.
+This explicitly requested owner membership is restored on each deployment; remove
+that bootstrap grant before permanently revoking this particular account. Other
+inventory memberships remain managed independently, with no main-access fallback.
+An advisory transaction lock serializes concurrent deployment setup. Partial
+installations fail closed without modifying existing data.
+
+The configured legacy database has schema changes newer than its Drizzle ledger.
+The deployment setup deliberately neither replays older migrations nor fabricates
+ledger entries for them. Reconcile that pre-existing ledger drift before using the
+full `db:migrate` workflow. The feature-only setup is safe to repeat and does not
+run during local `npm run build` or `npm run ci`.
