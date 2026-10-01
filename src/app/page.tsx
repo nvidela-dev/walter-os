@@ -10,9 +10,12 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { ReactElement } from "react";
 
 import { t } from "@/i18n";
+import { getCurrentGroup } from "@/lib/auth/access";
+import { landingPath } from "@/lib/auth/policy";
 
 interface HomeApp {
   bg: string;
@@ -79,7 +82,7 @@ const sections: {
           },
           {
             ...t.home.tiles.inventory,
-            href: "#",
+            href: "/inventory",
             icon: ArchiveBoxIcon,
             bg: "bg-[linear-gradient(145deg,#a8b3bd,#6f7b86)]",
           },
@@ -128,7 +131,11 @@ function HomeTile({ app }: { app: HomeApp }): ReactElement {
   );
 }
 
-export default function Home(): ReactElement {
+export const dynamic = "force-dynamic";
+
+export default async function Home(): Promise<ReactElement> {
+  const group = await getCurrentGroup();
+  if (group !== "admin") redirect(landingPath(group));
   return (
     <div className="ios-screen">
       <main className="ios-page flex flex-col">
@@ -146,6 +153,7 @@ export default function Home(): ReactElement {
           />
         </header>
 
+        <Link href="/access" className="ios-glass mb-6 rounded-2xl px-5 py-3 font-semibold">{t.access.title}</Link>
         <div className="space-y-8">
           {sections.map((section) => (
             <section key={section.title} className="space-y-6">

@@ -76,16 +76,31 @@ This is stock change, not usage, consumption, or restocking inference.
 
 ## Access and provider handling
 
-Grant inventory access by inserting a lowercase, trimmed verified primary Clerk
-email in `usuarios_inventario`, using the same controlled administrative database
-process as the existing allowlist. Revoke by removing that membership. Do not add
-inventory-only users to `usuarios_autorizados`. To use both areas, grant both.
-There is intentionally no permissions-management UI or new authentication stack.
+The application now has two groups backed by the existing membership tables:
 
-Inventory actions and reads require inventory membership. Main actions explicitly
-require main membership, including the dashboard's lazy price-history action.
-Route middleware independently enforces the appropriate membership. Database
-lookup failures deny access. Main users are not automatically inventory users.
+- **Admin** (`usuarios_autorizados`): main app and inventory, landing at `/`.
+- **Kitchen / Cocina** (`usuarios_inventario`, without Admin membership): inventory
+  only, landing at `/inventory`.
+- Neither table: no application access. Spanish “Solicitá acceso” guidance asks the
+  user to contact an administrator using their login email.
+
+Admin takes precedence for existing dual memberships. No migration, copying, or
+replacement of existing membership IDs is required. Sign-in and PWA installation
+do not assign a group. Clerk's verified primary email is required in both cases.
+
+Admins use **Accesos** (`/access`) to assign a normalized email to Administrador,
+Cocina, or Sin acceso. Group changes atomically remove conflicting membership;
+revocation removes both. An admin cannot demote or revoke their own account.
+Kitchen users cannot read the member list or invoke group-management actions.
+This screen assigns permissions only; it does not send invitations or emails.
+
+Kitchen requests to administrative pages redirect to inventory; forbidden POSTs
+and API requests receive 403 instead of being forwarded. All action boundaries
+independently authorize their own feature, including main actions posted to an
+inventory URL. Main home rendering also checks the group before returning admin
+navigation. Admin sees an active inventory tile and a return-to-home inventory
+link; Kitchen never receives the main navigation. Reopening `/` or retrying from
+the request-access page resolves the current group without signing in again.
 
 Provider information lists all linked provider names (the actual relationship is
 many-to-many). With none, the UI says “Proveedor no asignado”. On an existing
@@ -183,20 +198,30 @@ signed-in production behavior remain unverified.
 - Inventory unit/database/component tests under `src/__tests__/`; dev-only
   `@electric-sql/pglite` dependency for isolated PostgreSQL verification.
 
-## Vercel owner-access setup
+## Vercel inventory setup
 
-`vercel.json` now runs the production build followed by `db:prepare-inventory`.
+`vercel.json` runs the production build followed by `db:prepare-inventory`.
 The latter runs only when `VERCEL=1` and uses that deployment's `DATABASE_URL`.
-It atomically applies only 0012 when all four inventory tables are absent, checks
-existing installations, and ensures `videla.jn@gmail.com` has inventory membership.
-This explicitly requested owner membership is restored on each deployment; remove
-that bootstrap grant before permanently revoking this particular account. Other
-inventory memberships remain managed independently, with no main-access fallback.
-An advisory transaction lock serializes concurrent deployment setup. Partial
-installations fail closed without modifying existing data.
+It atomically applies only 0012 when all four inventory tables are absent and
+checks existing installations. An advisory transaction lock serializes concurrent
+setup. Partial installations fail closed without modifying existing data.
+
+**Deployments no longer grant or restore access to any email.** Existing
+memberships remain valid; new users need an explicit group assignment by an
+Admin. This also ensures revoked access stays revoked after another deployment.
 
 The configured legacy database has schema changes newer than its Drizzle ledger.
 The deployment setup deliberately neither replays older migrations nor fabricates
 ledger entries for them. Reconcile that pre-existing ledger drift before using the
-full `db:migrate` workflow. The feature-only setup is safe to repeat and does not
-run during local `npm run build` or `npm run ci`.
+full `db:migrate` workflow. Setup does not run during local builds or tests.
+
+`/inventario` and its subpaths redirect to the established English `/inventory`
+routes, preserving existing installed PWA identity, scope, and bookmarked links.
+Installing either entry point does not grant access.
+
+Group-access verification (2026-10-01): full `npm run ci` passed with 87 tests
+across 20 files. PostgreSQL tests exercise group assignment, promotion, demotion,
+revocation, no-group denial, Kitchen self-promotion denial, and Admin precedence.
+Component tests verify Admin navigation, Kitchen redirects, and Spanish access
+requests. Production-mode HTTP checks confirm `/inventario` aliases, signed-out
+protection on `/`, `/inventory`, and `/access`, and the public PWA manifest.

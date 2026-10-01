@@ -9,6 +9,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const t = {
+  access: {
+    title: "Accesos", mainApp: "Inicio", email: "Correo electrónico", group: "Grupo",
+    admin: "Administrador", kitchen: "Cocina", none: "Sin acceso", save: "Guardar acceso",
+    saved: "Acceso actualizado", selfProtection: "No podés quitarte tu propio acceso de administrador.",
+    description: "Administradores: acceso a toda la aplicación. Cocina: solo inventario. Sin grupo: sin acceso.",
+    hint: "Ingresá el correo que la persona usa para iniciar sesión. No se envían invitaciones automáticamente.",
+    empty: "No hay usuarios con acceso.", checkAgain: "Ya solicité acceso · Volver a intentar",
+  },
   inventory: {
     productTracked: "Este producto está registrado en inventario y no se puede eliminar.",
     alreadyLinked: "El producto ya está asociado a este proveedor.",
@@ -332,8 +340,8 @@ export const t = {
 
   /** Access control — shown when a signed-in email is not on the allowlist. */
   auth: {
-    deniedTitle: "Acceso denegado",
-    deniedBody: "Tu cuenta no tiene permiso para usar esta aplicación.",
+    deniedTitle: "Solicitá acceso",
+    deniedBody: "Tu cuenta todavía no tiene un grupo asignado. Pedile a un administrador que te agregue a Administrador o Cocina usando el correo con el que iniciás sesión.",
     signOut: "Cerrar sesión",
   },
 

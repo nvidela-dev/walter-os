@@ -4,12 +4,12 @@ import { db } from "@/db";
 import { allowedEmails } from "@/db/schema";
 
 /**
- * Email allowlist for the main Walter OS application.
+ * Admin membership, stored in the existing main-app allowlist.
  *
  * Clerk handles authentication (proving who you are); the `usuarios_autorizados`
  * table handles main-app authorization. Anyone who
  * signs in with an email that has no row there is bounced to `/not-authorized`.
- * Inventory membership is checked separately in access.ts.
+ * access.ts resolves Admin first, then Kitchen (inventory-only) membership.
  *
  * To grant or revoke access, insert/delete a row (emails stored lowercased).
  */

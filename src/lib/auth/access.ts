@@ -8,6 +8,7 @@ import { inventoryEmails } from "@/db/schema";
 import { t } from "@/i18n";
 import { expectedActionError } from "@/lib/action-result";
 import { isAllowedEmail, normalizeEmail } from "@/lib/auth/allowlist";
+import { type AccessArea, type AccessGroup,canAccess } from "@/lib/auth/policy";
 
 export async function isInventoryEmail(email: string | null | undefined): Promise<boolean> {
   if (email == null || email.trim() === "") return false;
@@ -20,15 +21,25 @@ export async function isInventoryEmail(email: string | null | undefined): Promis
   }
 }
 
-export async function requireAccess(area: "main" | "inventory"): Promise<string> {
-  const { userId } = await auth();
-  if (userId == null) throw expectedActionError(t.inventory.denied);
+/** Existing main membership is Admin; inventory-only membership is Kitchen. */
+export async function getAccessGroup(email: string | null | undefined): Promise<AccessGroup> {
+  if (email == null || email.trim() === "") return null;
+  if (await isAllowedEmail(email)) return "admin";
+  if (await isInventoryEmail(email)) return "kitchen";
+  return null;
+}
+
+export async function getCurrentGroup(): Promise<AccessGroup> {
   const user = await currentUser();
   const email = user?.primaryEmailAddress;
-  if (email?.verification?.status !== "verified") throw expectedActionError(t.inventory.denied);
-  const allowed = area === "main"
-    ? await isAllowedEmail(email.emailAddress)
-    : await isInventoryEmail(email.emailAddress);
-  if (!allowed) throw expectedActionError(t.inventory.denied);
+  if (email?.verification?.status !== "verified") return null;
+  return getAccessGroup(email.emailAddress);
+}
+
+export async function requireAccess(area: AccessArea): Promise<string> {
+  const { userId } = await auth();
+  if (userId == null || !canAccess(await getCurrentGroup(), area)) {
+    throw expectedActionError(t.inventory.denied);
+  }
   return userId;
 }

@@ -1,8 +1,8 @@
 import { clerkClient, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { isInventoryEmail } from "@/lib/auth/access";
-import { isAllowedEmail } from "@/lib/auth/allowlist";
+import { getAccessGroup } from "@/lib/auth/access";
+import { routeDecision } from "@/lib/auth/policy";
 
 /**
  * Routes reachable without passing the allowlist:
@@ -23,13 +23,15 @@ export const proxy = clerkMiddleware(async (auth, request) => {
   if (userId == null) return;
 
   const user = await (await clerkClient()).users.getUser(userId);
-  const email = user.primaryEmailAddress?.emailAddress;
-
-  const inventoryRoute = request.nextUrl.pathname === "/inventory" || request.nextUrl.pathname.startsWith("/inventory/");
-  const allowed = user.primaryEmailAddress?.verification?.status === "verified" &&
-    (inventoryRoute ? await isInventoryEmail(email) : await isAllowedEmail(email));
-  if (!allowed) {
-    return NextResponse.redirect(new URL("/not-authorized", request.url));
+  const email = user.primaryEmailAddress;
+  const group = email?.verification?.status === "verified"
+    ? await getAccessGroup(email.emailAddress)
+    : null;
+  const decision = routeDecision(group, request.nextUrl.pathname, request.method);
+  if (decision === "forbidden") return new NextResponse(null, { status: 403 });
+  if (decision !== "allow") {
+    const destination = decision === "inventory" ? "/inventory" : "/not-authorized";
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 });
 

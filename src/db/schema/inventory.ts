@@ -3,6 +3,7 @@ import { bigint, boolean, check, foreignKey, index, integer, numeric, pgTable, p
 
 import { products } from "./products";
 
+// Kitchen membership. Admin access is inherited from usuarios_autorizados.
 export const inventoryEmails = pgTable("usuarios_inventario", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),

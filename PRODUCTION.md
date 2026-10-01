@@ -26,11 +26,12 @@
 
 ## Access control
 
-Clerk authenticates users. Verified primary emails must belong to the appropriate
-allowlist: `usuarios_autorizados` for the main app, `usuarios_inventario` for
-inventory. Memberships are independent. Middleware protects routes and each
-Server Action checks its own permission, including main actions invoked from an
-inventory URL. Inventory access never implicitly grants administrative access.
+Clerk authenticates users. Verified primary emails resolve to two groups:
+`usuarios_autorizados` grants **Admin** (everything), and inventory-only membership
+in `usuarios_inventario` grants **Kitchen** (inventory only). Admin takes
+precedence. No membership means no access and a Spanish request-access page.
+Admins manage assignments at `/access`. Middleware protects routes and each
+Server Action checks its own permission; hiding navigation is not access control.
 
 See [Inventory](docs/inventory.md) for setup, migration safety, and PWA behavior.
 

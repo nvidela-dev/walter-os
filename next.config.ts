@@ -15,6 +15,9 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   // Empty turbopack config to silence warning (next-pwa uses webpack)
   turbopack: {},
+  redirects: () => Promise.resolve([
+    { source: "/inventario/:path*", destination: "/inventory/:path*", permanent: false },
+  ]),
 };
 
 export default withPWA(nextConfig);

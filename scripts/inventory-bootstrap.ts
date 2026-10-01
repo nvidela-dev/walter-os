@@ -29,8 +29,7 @@ BEGIN
     RAISE EXCEPTION 'Inventory append-only trigger is missing or disabled';
   END IF;
 
-  INSERT INTO public.usuarios_inventario (email) VALUES ('videla.jn@gmail.com')
-    ON CONFLICT (email) DO NOTHING;
+  -- Access is assigned explicitly by an Admin, never by deployment.
 END;
 $inventory_bootstrap$;`;
 }

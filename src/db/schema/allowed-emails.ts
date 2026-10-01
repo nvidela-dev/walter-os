@@ -1,12 +1,9 @@
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
- * Main-app allowlist. A signed-in user may use the main app only if their
- * email has a row here (see `src/lib/auth/allowlist.ts`). This is the entire
- * main-app policy; inventory has an independent membership table.
- *
- * Emails are stored normalized (trimmed, lowercased); the unique constraint
- * keeps the list deduplicated.
+ * Admin group membership, using the existing physical allowlist table.
+ * Admin has main-app and inventory access. Inventory-only membership is Kitchen.
+ * Emails are normalized (trimmed/lowercased); no row means no Admin permission.
  */
 export const allowedEmails = pgTable("usuarios_autorizados", {
   id: uuid("id").primaryKey().defaultRandom(),

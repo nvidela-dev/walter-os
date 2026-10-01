@@ -14,7 +14,7 @@ async function main(): Promise<void> {
   // Use the deployment's own database, not a direct URL for another environment.
   const sql = neon(connection);
   await sql.query(inventoryBootstrapSql());
-  console.log("Inventory schema verified and requested owner access provisioned.");
+  console.log("Inventory schema verified. Access memberships were not modified.");
 }
 
 void main().catch((error: unknown) => {

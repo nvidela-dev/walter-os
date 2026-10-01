@@ -25,11 +25,11 @@ describe("separate inventory access", () => {
     await expect(requireAccess("inventory")).resolves.toBe("user_inventory");
     await expect(requireAccess("main")).rejects.toThrow();
   });
-  it("does not implicitly give a main user inventory membership", async () => {
+  it("lets Admin access both areas without a separate Kitchen membership", async () => {
     mocks.main.mockResolvedValue(true);
     mocks.query.mockResolvedValue([]);
     await expect(requireAccess("main")).resolves.toBe("user_inventory");
-    await expect(requireAccess("inventory")).rejects.toThrow();
+    await expect(requireAccess("inventory")).resolves.toBe("user_inventory");
   });
   it("rejects unauthenticated and unverified identities", async () => {
     mocks.auth.mockResolvedValueOnce({ userId: null });
@@ -50,7 +50,7 @@ describe("separate inventory access", () => {
       import("@/lib/actions/products"), import("@/lib/actions/providers"),
       import("@/lib/actions/employees"), import("@/lib/actions/invoices"),
       import("@/lib/actions/menu"), import("@/lib/actions/recipes"),
-      import("@/app/dashboard/actions"),
+      import("@/app/dashboard/actions"), import("@/lib/actions/access"),
     ]);
     for (const actions of modules) {
       for (const action of Object.values(actions)) {
