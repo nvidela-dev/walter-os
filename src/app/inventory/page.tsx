@@ -17,6 +17,7 @@ export default async function InventoryPage(): Promise<ReactElement> {
       <span className="block text-xl font-semibold">{t.inventory.fridge(fridge.number)}</span>
       {fridge.name !== null && <span className="mt-2 block text-sm text-muted">{fridge.name}</span>}
     </Link>)}</div>
+    <Link href="/inventory/review" className="ios-glass block rounded-2xl p-5"><span className="block text-lg font-semibold">Inventario en papel · sin catalogar</span><span className="block text-sm text-muted">Revisar las dos páginas del 29/9/26 y agregar productos por lote.</span></Link>
     <FridgeForm />
   </main>;
 }

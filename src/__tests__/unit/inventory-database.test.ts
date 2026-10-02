@@ -24,6 +24,7 @@ vi.mock("@/db", async () => {
 import { db } from "@/db";
 import { expectedActionError } from "@/lib/action-result";
 import { addFridgeProduct, createFridge, createInventoryProduct, saveInventory } from "@/lib/actions/inventory";
+import { addManualCatalogue } from "@/lib/actions/manual-catalogue";
 import { linkExistingProduct } from "@/lib/actions/products";
 import { requireAccess } from "@/lib/auth/access";
 import { getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
@@ -131,5 +132,27 @@ describe("inventory vertical slice on isolated PostgreSQL", () => {
     expect((await client.query("SELECT * FROM heladeras WHERE numero=500")).rows).toHaveLength(0);
     vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("denied"));
     await expect(getFridgeInventory(fixture.fridge)).rejects.toThrow("denied");
+  });
+});
+
+
+describe("one-time manual catalogue", () => {
+  it("creates one canonical product across two fridges and safely repeats without stock counts", async () => {
+    await client.query("UPDATE heladeras SET activa=true WHERE id=$1", [fixture.secondFridge]);
+    const rows = [fixture.fridge, fixture.secondFridge].map((fridgeId) => ({ fridgeId, name: "Manual pasta", unitId, productId: null }));
+    expect((await addManualCatalogue(rows)).ok).toBe(true);
+    expect((await addManualCatalogue(rows)).ok).toBe(true);
+    const result = await client.query<{ id: string }>("SELECT id FROM productos WHERE nombre='Manual pasta'");
+    expect(result.rows).toHaveLength(1);
+    expect((await client.query("SELECT * FROM heladera_productos WHERE producto_id=$1", [result.rows[0]?.id])).rows).toHaveLength(2);
+    expect((await client.query("SELECT * FROM observaciones_inventario WHERE producto_id=$1", [result.rows[0]?.id])).rows).toHaveLength(0);
+  });
+  it("rejects invalid fridge assignments before creating products", async () => {
+    expect((await addManualCatalogue([{ name: "Must not create", fridgeId: randomUUID(), unitId, productId: null }])).ok).toBe(false);
+    expect((await client.query("SELECT * FROM productos WHERE nombre='Must not create'")).rows).toHaveLength(0);
+  });
+  it("requires inventory access", async () => {
+    vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+    expect((await addManualCatalogue([{ name: "Denied candidate", fridgeId: fixture.fridge, unitId, productId: null }])).ok).toBe(false);
   });
 });

@@ -225,3 +225,25 @@ revocation, no-group denial, Kitchen self-promotion denial, and Admin precedence
 Component tests verify Admin navigation, Kitchen redirects, and Spanish access
 requests. Production-mode HTTP checks confirm `/inventario` aliases, signed-out
 protection on `/`, `/inventory`, and `/access`, and the public PWA manifest.
+
+## One-time handwritten catalogue review
+
+`/inventory/review` contains the two user-supplied handwritten pages dated
+29/9/26 and 72 manually transcribed candidate lines. This is a fixed review,
+not a general photo-upload or OCR service; it needs no AI API key or new schema.
+Photos live outside `public` and are included in the deployment's server file
+trace. The authorized inventory page returns them as inline images.
+
+Each candidate shows its page, section, original transcription, clarification,
+editable canonical name, existing-product selector, fridge and unit. Reviewing
+an entry only changes a browser-local draft scoped by Clerk user ID. The final
+batch button creates canonical products and fridge memberships atomically.
+Existing exact-name products with matching units are reused on retries; ambiguous
+existing names or conflicting units require correction. Cross-device simultaneous
+creation is not protected by a unique product-name constraint in the legacy
+schema. No stock observations are written, and HAY/fractions/circled symbols
+remain source references. Browser progress does not sync across devices.
+
+Candidate names are tentative readings, especially abbreviations, bastones,
+canadiense and handwriting marked by a clarification. Sections are not assigned
+as fridges automatically. The user must confirm actual storage and units.
