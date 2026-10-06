@@ -4,24 +4,20 @@ import type { ReactElement } from "react";
 
 import { t } from "@/i18n";
 import { getFridges } from "@/lib/queries/inventory";
-import { getLatestInventoryRun } from "@/lib/queries/inventory-runs";
 
 import { FridgeDetails } from "./fridge-details";
 import { FridgeForm } from "./fridge-form";
-import { RunControls } from "./run-controls";
 
 export const dynamic = "force-dynamic";
 
 export default async function InventoryPage(): Promise<ReactElement> {
-  const [fridges, run] = await Promise.all([getFridges(), getLatestInventoryRun()]);
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Montevideo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const fridges = await getFridges();
   return <main className="space-y-5">
     <div><h1 className="text-3xl font-semibold">{t.inventory.fridges}</h1><p className="mt-2 text-muted">{t.inventory.description}</p></div>
     <nav aria-label="Inventarios" className="flex items-center gap-3">
       <Link href="/inventory/list" className="ios-glass flex flex-1 items-center gap-3 rounded-2xl p-4 font-medium"><ClipboardDocumentListIcon className="h-6 w-6 shrink-0" aria-hidden="true" />Último inventario</Link>
       <Link href="/inventory/history" aria-label="Historial completo de inventarios" title="Historial completo" className="ios-glass flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"><ClockIcon className="h-6 w-6" aria-hidden="true" /></Link>
     </nav>
-    <RunControls day={run?.day ?? null} today={today} />
     {fridges.length === 0 && <p>{t.inventory.empty}</p>}
     <div className="grid grid-cols-2 gap-3">{fridges.map((fridge) => <div key={fridge.id} className="ios-glass space-y-3 rounded-2xl p-5"><Link href={`/inventory/${fridge.id}`} className="block">
       <span className="block text-xl font-semibold">{t.inventory.fridge(fridge.number)}</span>

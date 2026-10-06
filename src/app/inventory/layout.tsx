@@ -19,6 +19,7 @@ export default async function InventoryLayout({ children }: { children: ReactNod
     <header className="mb-6 flex items-center justify-between">
       <Link href="/inventory" className="text-lg font-semibold">{t.inventory.title}</Link>
       <div className="flex items-center gap-4">
+        <Link href="/inventory/new" className="text-sm font-medium underline">Nuevo inventario</Link>
         {group === "admin" && <Link href="/" className="text-sm text-warm-dark">{t.access.mainApp}</Link>}
         <UserButton />
       </div>

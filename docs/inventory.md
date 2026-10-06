@@ -327,3 +327,19 @@ shows one collapsed date card per run with fridge cards inside. Current pages
 show stored +X/-X/Sin cambios against the previous run; initial-run comparisons
 are suppressed. Kitchen and Admin share run access. No production database is
 modified by local tests; deployment applies migration 0016 through the bootstrap.
+
+## Separate inventory wizard
+
+`/inventory/new` is reached through “Nuevo inventario” in the inventory header.
+Creation controls are removed from fridge home and the latest-inventory list.
+Clicking a fridge opens the same shared compact InventoryList/FridgeGroup UI;
+item and fridge edits remain available, with catalogue search in a collapsed
+section. Quantity edits require today's run to exist; otherwise the action asks
+the user to open the wizard, so browsing an old run does not start a new one.
+
+The wizard has an introduction, one count step per fridge and a result screen.
+It starts today's shared run explicitly and only preloads counts when continuing
+that same date. Each fridge save preserves blank/zero semantics and fails without
+advancing or clearing inputs. Empty steps are skipped without fabricated counts;
+the result reports any unreviewed products. Saved steps survive navigation through
+server persistence; an unsaved field is only held in the active wizard page.

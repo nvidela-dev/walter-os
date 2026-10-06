@@ -100,6 +100,10 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
   try {
     const userId = await requireAccess("inventory");
     const data = inventoryEntrySchema.parse(input);
+    if (data.quantity !== null) {
+      const [todayRun] = await db.select({ id: inventoryRuns.id }).from(inventoryRuns).where(eq(inventoryRuns.day, sql`(now() AT TIME ZONE 'America/Montevideo')::date`));
+      if (todayRun == null) return actionError("Para registrar cantidades de un nuevo inventario, abrí Nuevo inventario.");
+    }
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     const condition = and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.productId, data.productId), eq(fridgeProducts.active, true));
     const [product] = await db.select({ unit: products.unit }).from(fridgeProducts).innerJoin(products, eq(products.id, fridgeProducts.productId)).where(condition);
