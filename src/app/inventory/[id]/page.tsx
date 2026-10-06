@@ -8,6 +8,7 @@ import { t } from "@/i18n";
 import { getFridge, getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
 import { getUnits } from "@/lib/queries/units";
 
+import { FridgeDetails } from "../fridge-details";
 import { CatalogueForm } from "./catalogue-form";
 import { CountForm } from "./count-form";
 
@@ -27,6 +28,7 @@ export default async function FridgePage({ params, searchParams }: {
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm text-warm-dark">← {t.inventory.fridges}</Link>
     <div><h1 className="mt-3 text-3xl font-semibold">{t.inventory.fridge(fridge.number)}</h1><p className="text-muted">{fridge.name}</p></div>
+    <FridgeDetails fridge={fridge} />
     <details className="ios-glass rounded-2xl p-4" open={q.length > 0}>
       <summary className="cursor-pointer font-medium">{t.inventory.search}</summary>
       <form action={`/inventory/${id}`} className="my-4 flex gap-2">

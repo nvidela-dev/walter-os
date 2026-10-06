@@ -1,0 +1,1 @@
+ALTER TABLE "heladeras" ADD COLUMN "comentario" text;

@@ -11,7 +11,9 @@ import { editInventoryEntry, removeInventoryEntry } from "@/lib/actions/inventor
 import { inventoryDate } from "@/lib/inventory/comparison";
 import type { InventoryRow } from "@/lib/queries/inventory";
 
-export function InventoryList({ groups }: { groups: { id: string; number: number; name: string | null; rows: InventoryRow[] }[] }): ReactElement {
+import { FridgeDetails } from "../fridge-details";
+
+export function InventoryList({ groups }: { groups: { id: string; number: number; name: string | null; commentary: string | null; rows: InventoryRow[] }[] }): ReactElement {
   const router = useRouter();
   const { error, isSubmitting, runAction } = useActionForm();
   const [editing, setEditing] = useState<string | null>(null);
@@ -33,6 +35,7 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
     {groups.length === 0 && <p>No hay heladeras.</p>}
     {groups.map((fridge) => <section key={fridge.id} className="space-y-2">
       <h2 className="text-lg font-semibold">Heladera {fridge.number}{fridge.name === null ? "" : ` · ${fridge.name}`}</h2>
+      <FridgeDetails fridge={fridge} />
       {fridge.rows.length === 0 && <p className="text-sm text-muted">Sin productos.</p>}
       <ul className="divide-y divide-cream-dark">
         {fridge.rows.map((row) => {

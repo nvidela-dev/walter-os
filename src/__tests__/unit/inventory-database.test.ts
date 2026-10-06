@@ -23,11 +23,11 @@ vi.mock("@/db", async () => {
 
 import { db } from "@/db";
 import { expectedActionError } from "@/lib/action-result";
-import { addFridgeProduct, createFridge, createInventoryProduct, editInventoryEntry, removeInventoryEntry, saveInventory } from "@/lib/actions/inventory";
+import { addFridgeProduct, createFridge, createInventoryProduct, editInventoryEntry, removeInventoryEntry, saveInventory, updateFridgeDetails } from "@/lib/actions/inventory";
 import { addManualCatalogue } from "@/lib/actions/manual-catalogue";
 import { linkExistingProduct } from "@/lib/actions/products";
 import { requireAccess } from "@/lib/auth/access";
-import { getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
+import { getFridge, getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
 
 const fixture = { fridge: randomUUID(), secondFridge: randomUUID(), product: randomUUID(), unlinked: randomUUID(), provider: randomUUID() };
 let client: PGlite;
@@ -40,7 +40,7 @@ beforeAll(async () => {
   if (!(clientValue instanceof PGlite)) throw new Error("Missing isolated database");
   client = clientValue;
   const migrations = readdirSync("drizzle").filter((name) => name.endsWith(".sql")).sort();
-  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013") && !name.startsWith("0014"))) {
+  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013") && !name.startsWith("0014") && !name.startsWith("0015"))) {
     await client.exec(readFileSync(`drizzle/${migration}`, "utf8"));
   }
   const units = await client.query<{ id: string }>("SELECT id FROM unidades WHERE codigo = 'unidad'");
@@ -52,6 +52,7 @@ beforeAll(async () => {
   await client.exec(readFileSync("drizzle/0012_inventory.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8"));
+  await client.exec(readFileSync("drizzle/0015_bored_mandroid.sql", "utf8"));
   expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows);
   await client.query("INSERT INTO heladeras (id, numero) VALUES ($1, 1), ($2, 2)", [fixture.fridge, fixture.secondFridge]);
 }, 30000);
@@ -210,4 +211,20 @@ it("shares fridge-specific notes without creating counts, and allows clearing", 
   expect(row?.current?.quantity).toBe("7.00");
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
   expect((await editInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product, quantity: null, note: "Denied" })).ok).toBe(false);
+});
+
+it("allows Kitchen to edit shared fridge details while preserving its number and contents", async () => {
+  const before = (await client.query("SELECT * FROM heladera_productos WHERE heladera_id=$1", [fixture.fridge])).rows;
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_a");
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "  Cocina  ", commentary: "  Revisar puerta  " })).ok).toBe(true);
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_b");
+  const fridge = await getFridge(fixture.fridge);
+  expect(fridge?.name).toBe("Cocina");
+  expect(fridge?.commentary).toBe("Revisar puerta");
+  expect(fridge?.number).toBe(1);
+  expect((await client.query("SELECT * FROM heladera_productos WHERE heladera_id=$1", [fixture.fridge])).rows).toEqual(before);
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "", commentary: "" })).ok).toBe(true);
+  expect((await getFridge(fixture.fridge))?.commentary).toBeNull();
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "Denied", commentary: "" })).ok).toBe(false);
 });

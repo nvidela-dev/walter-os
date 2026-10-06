@@ -20,3 +20,9 @@ export const inventoryEntrySchema = fridgeProductInputSchema.extend({
   note: z.string().trim().max(1000).transform((value) => value === "" ? null : value),
   quantity: nonNegativeDecimalSchema(2).refine((value) => Number(value) < 10000000000).nullable(),
 });
+
+export const fridgeDetailsSchema = z.object({
+  fridgeId: uuidSchema,
+  name: z.string().trim().max(200).transform((value) => value === "" ? null : value),
+  commentary: z.string().trim().max(1000).transform((value) => value === "" ? null : value),
+});

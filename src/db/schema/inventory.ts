@@ -14,6 +14,7 @@ export const fridges = pgTable("heladeras", {
   id: uuid("id").primaryKey().defaultRandom(),
   number: integer("numero").notNull().unique(),
   name: text("nombre"),
+  commentary: text("comentario"),
   active: boolean("activa").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

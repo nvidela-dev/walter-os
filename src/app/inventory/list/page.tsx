@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function InventoryListPage(): Promise<ReactElement> {
   const fridges = await getFridges();
   const groups = await Promise.all(fridges.map(async (fridge) => ({
-    id: fridge.id, number: fridge.number, name: fridge.name, rows: await getFridgeInventory(fridge.id),
+    id: fridge.id, number: fridge.number, name: fridge.name, commentary: fridge.commentary, rows: await getFridgeInventory(fridge.id),
   })));
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm underline">← Heladeras</Link>

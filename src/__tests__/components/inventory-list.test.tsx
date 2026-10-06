@@ -7,7 +7,7 @@ vi.mock("@/lib/actions/inventory", () => ({ editInventoryEntry: vi.fn(), removeI
 import { InventoryList } from "@/app/inventory/list/list";
 import { editInventoryEntry,removeInventoryEntry } from "@/lib/actions/inventory";
 
-const groups = [{ id: "fridge", number: 1, name: "Cocina", rows: [{ id: "product", name: "Arroz", unit: "kg", note: null, providers: [], current: { quantity: "2", unit: "kg", recordedAt: "2026-10-06T12:00:00Z" }, previous: null, difference: null }] }];
+const groups = [{ id: "fridge", number: 1, name: "Cocina", commentary: null, rows: [{ id: "product", name: "Arroz", unit: "kg", note: null, providers: [], current: { quantity: "2", unit: "kg", recordedAt: "2026-10-06T12:00:00Z" }, previous: null, difference: null }] }];
 beforeEach(() => { vi.clearAllMocks(); });
 it("shows a plain grouped list and saves a corrected quantity", async () => {
   vi.mocked(editInventoryEntry).mockResolvedValue({ ok: true, data: undefined });

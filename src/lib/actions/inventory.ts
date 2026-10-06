@@ -10,7 +10,7 @@ import { fridgeProducts, fridges, inventoryObservations, products, units } from 
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
-import { fridgeInputSchema, fridgeProductInputSchema, inventoryCountSchema, inventoryEntrySchema, inventoryProductInputSchema } from "@/lib/validators/inventory";
+import { fridgeDetailsSchema, fridgeInputSchema, fridgeProductInputSchema, inventoryCountSchema, inventoryEntrySchema, inventoryProductInputSchema } from "@/lib/validators/inventory";
 
 async function activeFridge(id: string): Promise<boolean> {
   const [row] = await db.select({ id: fridges.id }).from(fridges).where(and(eq(fridges.id, id), eq(fridges.active, true)));
@@ -105,6 +105,17 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
     else await db.batch([update, db.insert(inventoryObservations).values({ fridgeId: data.fridgeId, productId: data.productId, quantity: data.quantity, unit: product.unit, recordedBy: userId })]);
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
+    return actionOk(undefined);
+  } catch (error) { return unknownActionError(error); }
+}
+
+export async function updateFridgeDetails(input: unknown): Promise<ActionResult> {
+  try {
+    await requireAccess("inventory");
+    const { fridgeId, name, commentary } = fridgeDetailsSchema.parse(input);
+    const rows = await db.update(fridges).set({ name, commentary, updatedAt: new Date() }).where(and(eq(fridges.id, fridgeId), eq(fridges.active, true))).returning({ id: fridges.id });
+    if (rows.length === 0) return actionError(t.inventory.invalidFridge);
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
