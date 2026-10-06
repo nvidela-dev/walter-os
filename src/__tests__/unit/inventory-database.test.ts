@@ -28,6 +28,7 @@ import { addManualCatalogue } from "@/lib/actions/manual-catalogue";
 import { linkExistingProduct } from "@/lib/actions/products";
 import { requireAccess } from "@/lib/auth/access";
 import { getFridge, getFridgeInventory, getInventoryHistory, searchInventoryProducts } from "@/lib/queries/inventory";
+import { getInventoryItemDetail, getInventoryItemSuggestions } from "@/lib/queries/inventory-items";
 
 const fixture = { fridge: randomUUID(), secondFridge: randomUUID(), product: randomUUID(), unlinked: randomUUID(), provider: randomUUID() };
 let client: PGlite;
@@ -260,4 +261,20 @@ it("renumbers a fridge without changing its identity and rejects duplicate or in
     expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number, name: "Cocina", commentary: "" })).ok).toBe(false);
   }
   expect((await getFridge(fixture.fridge))?.number).toBe(10);
+});
+
+it("searches active inventory items and returns all fridge locations and providers", async () => {
+  const suggestions = await getInventoryItemSuggestions();
+  expect(suggestions.some((item) => item.id === fixture.product)).toBe(true);
+  const detail = await getInventoryItemDetail(fixture.product);
+  expect(detail?.providers).toEqual(["Provider"]);
+  expect(detail?.locations).toHaveLength(2);
+  expect(detail?.locations.map((location) => location.id)).toEqual(expect.arrayContaining([fixture.fridge, fixture.secondFridge]));
+  expect(await getInventoryItemDetail("invalid")).toBeNull();
+  await removeInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product });
+  await removeInventoryEntry({ fridgeId: fixture.secondFridge, productId: fixture.product });
+  expect(await getInventoryItemDetail(fixture.product)).toBeNull();
+  expect((await getInventoryItemSuggestions()).some((item) => item.id === fixture.product)).toBe(false);
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  await expect(getInventoryItemDetail(fixture.product)).rejects.toThrow("Denied");
 });

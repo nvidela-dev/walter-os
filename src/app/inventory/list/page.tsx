@@ -2,13 +2,15 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 
 import { getFridgeRunInventory, getFridges } from "@/lib/queries/inventory";
+import { getInventoryItemSuggestions } from "@/lib/queries/inventory-items";
 
+import { ItemSearch } from "../item-search";
 import { InventoryList } from "./list";
 
 export const dynamic = "force-dynamic";
 
 export default async function InventoryListPage(): Promise<ReactElement> {
-  const fridges = await getFridges();
+  const [fridges, items] = await Promise.all([getFridges(), getInventoryItemSuggestions()]);
   const groups = await Promise.all(fridges.map(async (fridge) => ({
     id: fridge.id, number: fridge.number, name: fridge.name, commentary: fridge.commentary, rows: await getFridgeRunInventory(fridge.id),
   })));
@@ -16,6 +18,7 @@ export default async function InventoryListPage(): Promise<ReactElement> {
     <Link href="/inventory" className="text-sm underline">← Heladeras</Link>
     <h1 className="text-3xl font-semibold">Último inventario</h1>
     <p className="text-sm text-muted">Cantidades del último inventario, agrupadas por heladera. Los cambios comparan con el inventario anterior.</p>
+    <ItemSearch items={items} />
     <InventoryList groups={groups} />
   </main>;
 }

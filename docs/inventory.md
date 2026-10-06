@@ -343,3 +343,17 @@ that same date. Each fridge save preserves blank/zero semantics and fails withou
 advancing or clearing inputs. Empty steps are skipped without fabricated counts;
 the result reports any unreviewed products. Saved steps survive navigation through
 server persistence; an unsaved field is only held in the active wizard page.
+
+## Item search and detail
+
+Fridge home and latest inventory include “Buscar producto” autocomplete over
+active inventory products. Suggestions show names only, ignore accents/case and
+support arrows, Enter, Escape and pointer selection. Selecting one opens
+`/inventory/items/[id]`. That screen alone adds the combined stock/provider
+summary: latest-run quantities, stored previous-run change, all current fridge
+locations and existing many-to-many provider links. It totals only compatible
+units, labels partially counted stock, never assumes missing counts are zero,
+and suppresses baseline changes. Provider associations are catalogue links,
+not evidence of which supplier delivered the current stock. Both suggestion
+and detail queries require Kitchen/Admin inventory access; hidden items are
+excluded and invalid/non-inventory IDs return not found. No schema change.
