@@ -40,7 +40,7 @@ beforeAll(async () => {
   if (!(clientValue instanceof PGlite)) throw new Error("Missing isolated database");
   client = clientValue;
   const migrations = readdirSync("drizzle").filter((name) => name.endsWith(".sql")).sort();
-  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013") && !name.startsWith("0014") && !name.startsWith("0015"))) {
+  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013") && !name.startsWith("0014") && !name.startsWith("0015") && !name.startsWith("0016"))) {
     await client.exec(readFileSync(`drizzle/${migration}`, "utf8"));
   }
   const units = await client.query<{ id: string }>("SELECT id FROM unidades WHERE codigo = 'unidad'");
@@ -53,6 +53,7 @@ beforeAll(async () => {
   await client.exec(readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0015_bored_mandroid.sql", "utf8"));
+  await client.exec(readFileSync("drizzle/0016_zippy_leper_queen.sql", "utf8"));
   expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows);
   await client.query("INSERT INTO heladeras (id, numero) VALUES ($1, 1), ($2, 2)", [fixture.fridge, fixture.secondFridge]);
 }, 30000);

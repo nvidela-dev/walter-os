@@ -37,10 +37,10 @@ export function CountForm({ fridgeId, rows }: { fridgeId: string; rows: Inventor
             <p className="text-2xl font-semibold">{row.current === null ? "—" : `${row.current.quantity} ${row.current.unit}`}</p>
             <p className="text-xs text-muted">{row.current === null ? t.inventory.noCount : inventoryDate(row.current.recordedAt)}</p>
           </div>
-          <div className="max-w-[55%] text-right text-sm">
+          {row.runInitial !== true && <div className="max-w-[55%] text-right text-sm">
             <p>{row.difference === null ? (row.previous === null ? t.inventory.noPrevious : t.inventory.unitChanged) : row.difference === "0" ? t.inventory.unchanged : `${Number(row.difference) > 0 ? "+" : ""}${row.difference} · ${t.inventory.change}`}</p>
             {row.previous !== null && <p className="mt-1 text-xs text-muted">{t.inventory.comparedAt}: {inventoryDate(row.previous.recordedAt)} · {row.previous.quantity} {row.previous.unit}</p>}
-          </div>
+          </div>}
         </div>
         <label className="block text-sm" htmlFor={`count-${row.id}`}>{t.inventory.now} ({row.unit})</label>
         <Input id={`count-${row.id}`} name={row.id} type="number" inputMode="decimal" min="0" max="9999999999.99" step="0.01" placeholder="—" className="mt-1 text-lg" />

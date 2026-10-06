@@ -6,6 +6,7 @@ export function inventoryBootstrapSql(): string {
   const visibilityMigration = readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8");
   const noteMigration = readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8");
   const fridgeMigration = readFileSync("drizzle/0015_bored_mandroid.sql", "utf8");
+  const runMigration = readFileSync("drizzle/0016_zippy_leper_queen.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -49,6 +50,18 @@ BEGIN
     ${fridgeMigration}
   END IF;
   PERFORM comentario FROM public.heladeras LIMIT 0;
+
+  IF to_regclass('public.inventarios') IS NULL AND to_regclass('public.inventario_items') IS NULL THEN
+    ${runMigration}
+  ELSIF to_regclass('public.inventarios') IS NULL OR to_regclass('public.inventario_items') IS NULL THEN
+    RAISE EXCEPTION 'Partial inventory run schema: refusing automatic repair';
+  END IF;
+  PERFORM id, fecha FROM public.inventarios LIMIT 0;
+  PERFORM inventario_id, heladera_id, producto_id, cantidad, unidad, cambio, observacion_id FROM public.inventario_items LIMIT 0;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_inventario'::regclass
+    AND tgname='observaciones_inventario_run' AND tgenabled='O') THEN
+    RAISE EXCEPTION 'Inventory run trigger is missing or disabled';
+  END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
 END;

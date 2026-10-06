@@ -2,11 +2,11 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { fridgeProducts, fridges, inventoryObservations, products, units } from "@/db/schema";
+import { fridgeProducts, fridges, inventoryObservations, inventoryRuns, products, units } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
@@ -36,6 +36,7 @@ export async function addFridgeProduct(input: unknown): Promise<ActionResult> {
     await db.insert(fridgeProducts).values(data).onConflictDoUpdate({ target: [fridgeProducts.fridgeId, fridgeProducts.productId], set: { active: true } });
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
+    revalidatePath("/inventory/history");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -54,6 +55,7 @@ export async function createInventoryProduct(input: unknown): Promise<ActionResu
     ]);
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
+    revalidatePath("/inventory/history");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -75,6 +77,7 @@ export async function saveInventory(input: unknown): Promise<ActionResult> {
     await db.insert(inventoryObservations).values(observations);
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
+    revalidatePath("/inventory/history");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -88,6 +91,7 @@ export async function removeInventoryEntry(input: unknown): Promise<ActionResult
     if (result.length === 0) return actionError(t.inventory.invalidItems);
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
+    revalidatePath("/inventory/history");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -105,6 +109,7 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
     else await db.batch([update, db.insert(inventoryObservations).values({ fridgeId: data.fridgeId, productId: data.productId, quantity: data.quantity, unit: product.unit, recordedBy: userId })]);
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
+    revalidatePath("/inventory/history");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -126,4 +131,13 @@ export async function updateFridgeDetails(input: unknown): Promise<ActionResult>
       (typeof cause === "object" && cause !== null && "code" in cause && cause.code === "23505")) return actionError(t.inventory.duplicateFridge);
     return unknownActionError(error);
   }
+}
+
+export async function startInventoryRun(): Promise<ActionResult> {
+  try {
+    await requireAccess("inventory");
+    await db.insert(inventoryRuns).values({ day: sql`(now() AT TIME ZONE 'America/Montevideo')::date` }).onConflictDoNothing();
+    revalidatePath("/inventory", "layout");
+    return actionOk(undefined);
+  } catch (error) { return unknownActionError(error); }
 }

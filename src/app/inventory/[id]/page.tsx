@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { t } from "@/i18n";
-import { getFridge, getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
+import { getFridge, getFridgeRunInventory, searchInventoryProducts } from "@/lib/queries/inventory";
 import { getUnits } from "@/lib/queries/units";
 
 import { FridgeDetails } from "../fridge-details";
@@ -23,7 +23,7 @@ export default async function FridgePage({ params, searchParams }: {
   if (fridge === null) notFound();
   const { q: searchTerm } = await searchParams;
   const q = typeof searchTerm === "string" ? searchTerm : "";
-  const [rows, matches, units] = await Promise.all([getFridgeInventory(id), searchInventoryProducts(q), getUnits()]);
+  const [rows, matches, units] = await Promise.all([getFridgeRunInventory(id), searchInventoryProducts(q), getUnits()]);
   const available = matches.filter((product) => !rows.some((row) => row.id === product.id));
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm text-warm-dark">← {t.inventory.fridges}</Link>

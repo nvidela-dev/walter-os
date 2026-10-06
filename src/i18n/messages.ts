@@ -27,7 +27,7 @@ export const t = {
     productName: "Nombre del producto", unit: "Unidad", noProvider: "Proveedor no asignado",
     current: "Último conteo", now: "¿Cuánto hay ahora?", save: "Guardar inventario", saving: "Guardando…",
     saved: "Inventario guardado", noCount: "Sin conteos", noPrevious: "Sin inventario anterior",
-    change: "Cambio vs. semana anterior", unchanged: "Sin cambios vs. semana anterior",
+    change: "Cambio vs. inventario anterior", unchanged: "Sin cambios",
     hint: "Completá solo lo que contaste. Dejá vacío lo que no revisaste. Cero significa que no queda nada.",
     online: "Se necesita conexión para consultar y guardar.", noItems: "Agregá productos para empezar a contar.",
     noMatches: "No se encontraron productos.", missing: "¿No existe en el catálogo?",

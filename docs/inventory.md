@@ -48,9 +48,8 @@ New tables:
 - `usuarios_inventario`: separate normalized email membership, following the
   existing main-app allowlist pattern. No users are seeded automatically.
 
-No session or current-state table. One save inserts all submitted observations
-atomically with a common database timestamp. History already answers date-based
-questions; adding a session entity has insufficient immediate value.
+Inventory runs are now persisted separately; see “Daily inventory runs” below.
+Individual count saves still append immutable observations atomically.
 
 Quantities allow two decimal places (for existing weight/volume units), including
 zero, up to 9,999,999,999.99. Empty fields are omitted rather than treated as zero.
@@ -299,3 +298,32 @@ integers within the existing PostgreSQL integer range and unique across all
 fridges. Duplicate numbers return the existing Spanish error and preserve the
 form for correction. Renumbering retains the UUID, catalogue, notes and history;
 no database migration is needed. Kitchen and Admin have the same edit access.
+
+## Daily inventory runs (supersedes observation-based history and 168-hour comparison)
+
+One shared run per America/Montevideo calendar date is persisted in `inventarios`.
+`inventario_items` holds the latest count for each run/fridge/product, its name,
+fridge number/name, unit, note and stored decimal difference from the immediately
+previous run. The initial run has NULL differences and shows quantities only.
+A missing item in the preceding run or a changed unit has no comparable delta;
+zero is never invented. Same-day corrections replace that day's summary, while
+original `observaciones_inventario` audit entries remain append-only.
+
+Migration 0016 adds these tables, an AFTER INSERT trigger and chronological
+backfill. Existing observations become one run per local date with the latest
+count per item (timestamp, then observation-ID tie-breaking). All existing live
+counts were verified to be on 2026-10-06, so they consolidate into one baseline.
+The bootstrap installs the reviewed migration atomically only when both tables
+are absent; partial installations or missing triggers fail closed. A transaction
+advisory lock serializes simultaneous Kitchen saves. Every save and its run
+summary are in the same transaction; HTTP actions need no interactive transaction.
+
+“Comenzar inventario de hoy” creates an empty daily run once; the first count can
+also create it automatically. Latest-inventory and counting pages read only that
+run's quantities. Uncounted products stay unknown until counted; they do not
+inherit previous values. Starting a new date preserves the earlier summary.
+History paginates whole runs (10 per page), never individual observations, and
+shows one collapsed date card per run with fridge cards inside. Current pages
+show stored +X/-X/Sin cambios against the previous run; initial-run comparisons
+are suppressed. Kitchen and Admin share run access. No production database is
+modified by local tests; deployment applies migration 0016 through the bootstrap.

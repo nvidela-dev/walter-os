@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { fridgeProducts, fridges, inventoryObservations, products } from "@/db/schema";
 import { requireAccess } from "@/lib/auth/access";
 import { type CountSnapshot,inventoryDifference } from "@/lib/inventory/comparison";
+import { getLatestInventoryRun, getPreviousRunEntries } from "@/lib/queries/inventory-runs";
 import { uuidSchema } from "@/lib/validation";
 
 export interface InventoryRow {
@@ -18,6 +19,7 @@ export interface InventoryRow {
   current: CountSnapshot | null;
   previous: CountSnapshot | null;
   difference: string | null;
+  runInitial?: boolean;
 }
 
 export async function getFridges(): Promise<(typeof fridges.$inferSelect)[]> {
@@ -107,4 +109,19 @@ export async function getInventoryHistory(page: number, fridgeId?: string, throu
     .where(and(lte(inventoryObservations.id, boundary), fridgeId === undefined ? undefined : eq(fridges.id, fridgeId)))
     .orderBy(desc(inventoryObservations.recordedAt), desc(inventoryObservations.id)).limit(101).offset((page - 1) * 100);
   return { rows: rows.slice(0, 100).map((row) => ({ ...row, recordedAt: row.recordedAt.toISOString() })), hasNext: rows.length > 100, throughId: boundary };
+}
+
+export async function getFridgeRunInventory(fridgeId: string): Promise<InventoryRow[]> {
+  const [rows, run] = await Promise.all([getFridgeInventory(fridgeId), getLatestInventoryRun()]);
+  if (run === null) return rows.map((row) => ({ ...row, current: null, previous: null, difference: null, runInitial: true }));
+  const previous = await getPreviousRunEntries(run.day);
+  return rows.map((row) => {
+    const entry = run.entries.find((item) => item.fridgeId === fridgeId && item.productId === row.id);
+    const prior = previous.find((item) => item.fridgeId === fridgeId && item.productId === row.id);
+    return { ...row,
+      current: entry == null ? null : { quantity: entry.quantity, unit: entry.unit, recordedAt: entry.recordedAt.toISOString() },
+      previous: prior == null ? null : { quantity: prior.quantity, unit: prior.unit, recordedAt: prior.recordedAt.toISOString() },
+      difference: entry?.difference ?? null, runInitial: run.initial,
+    };
+  });
 }

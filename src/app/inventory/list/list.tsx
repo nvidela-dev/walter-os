@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { editInventoryEntry, removeInventoryEntry } from "@/lib/actions/inventory";
 import { inventoryDate } from "@/lib/inventory/comparison";
+import { runChange } from "@/lib/inventory/run-display";
 import type { InventoryRow } from "@/lib/queries/inventory";
 
 import { FridgeDetails } from "../fridge-details";
@@ -45,6 +46,7 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
               <span>{row.name} — {row.current === null ? "Sin conteo" : `${row.current.quantity} ${row.current.unit}`}</span>
               <div className="flex gap-3"><button type="button" className="text-sm underline" disabled={isSubmitting} onClick={() => { setEditing(key); setQuantity(row.current?.quantity ?? ""); setNote(row.note ?? ""); }}>Editar</button><button type="button" className="text-sm underline" disabled={isSubmitting} onClick={() => { setRemoving(key); }}>Quitar</button></div>
             </div>
+            {row.runInitial === false && row.current !== null && <p className="text-sm text-muted">{runChange(row.difference)}</p>}
             <p className="whitespace-pre-wrap text-sm text-muted">Nota: {row.note ?? "—"}</p>
             {row.current !== null && <p className="text-xs text-muted">{inventoryDate(row.current.recordedAt)}</p>}
             {removing === key && <div className="mt-2 space-y-2"><p className="text-sm">¿Quitar {row.name} de esta heladera? Su historial se conserva.</p><div className="flex gap-2"><Button disabled={isSubmitting} onClick={() => { void remove(fridge.id, row.id); }}>Confirmar quitar</Button><Button variant="secondary" disabled={isSubmitting} onClick={() => { setRemoving(null); }}>Cancelar</Button></div></div>}
