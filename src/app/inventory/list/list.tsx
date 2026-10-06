@@ -12,6 +12,7 @@ import { inventoryDate } from "@/lib/inventory/comparison";
 import type { InventoryRow } from "@/lib/queries/inventory";
 
 import { FridgeDetails } from "../fridge-details";
+import { FridgeGroup } from "../fridge-group";
 
 export function InventoryList({ groups }: { groups: { id: string; number: number; name: string | null; commentary: string | null; rows: InventoryRow[] }[] }): ReactElement {
   const router = useRouter();
@@ -33,8 +34,7 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
   return <div className="space-y-6">
     <FormMessage message={error} />
     {groups.length === 0 && <p>No hay heladeras.</p>}
-    {groups.map((fridge) => <section key={fridge.id} className="space-y-2">
-      <h2 className="text-lg font-semibold">Heladera {fridge.number}{fridge.name === null ? "" : ` · ${fridge.name}`}</h2>
+    {groups.map((fridge) => <FridgeGroup key={fridge.id} number={fridge.number} name={fridge.name}>
       <FridgeDetails fridge={fridge} />
       {fridge.rows.length === 0 && <p className="text-sm text-muted">Sin productos.</p>}
       <ul className="divide-y divide-cream-dark">
@@ -56,6 +56,6 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
           </li>;
         })}
       </ul>
-    </section>)}
+    </FridgeGroup>)}
   </div>;
 }

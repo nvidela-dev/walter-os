@@ -5,6 +5,8 @@ import type { ReactElement } from "react";
 import { inventoryDate } from "@/lib/inventory/comparison";
 import { getInventoryHistory, type InventoryHistoryRow } from "@/lib/queries/inventory";
 
+import { FridgeGroup } from "../fridge-group";
+
 export const dynamic = "force-dynamic";
 
 export default async function HistoryPage({ searchParams }: { searchParams: Promise<{ page?: string; through?: string }> }): Promise<ReactElement> {
@@ -24,10 +26,9 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
     <h1 className="text-3xl font-semibold">Historial de inventarios</h1>
     <p className="text-sm text-muted">Todos los conteos guardados, incluidos los anteriores a una corrección y los productos quitados. Más recientes primero dentro de cada heladera.</p>
     {rows.length === 0 && <p>No hay conteos guardados en esta página.</p>}
-    {[...groups.entries()].sort(([, a], [, b]) => a.number - b.number).map(([id, group]) => <section key={id} className="space-y-2">
-      <h2 className="text-lg font-semibold">Heladera {group.number}{group.name === null ? "" : ` · ${group.name}`}</h2>
+    {[...groups.entries()].sort(([, a], [, b]) => a.number - b.number).map(([id, group]) => <FridgeGroup key={id} number={group.number} name={group.name}>
       <ul className="divide-y divide-cream-dark">{group.rows.map((row) => <li key={row.id} className="py-3"><p>{row.name} — {row.quantity} {row.unit}</p><p className="text-xs text-muted">{inventoryDate(row.recordedAt)}</p></li>)}</ul>
-    </section>)}
+    </FridgeGroup>)}
     <nav aria-label="Páginas del historial" className="flex items-center justify-between gap-3 text-sm">
       {page > 1 ? <Link className="underline" href={href(page - 1)}>← Más recientes</Link> : <span />}
       <span>Página {page}</span>
