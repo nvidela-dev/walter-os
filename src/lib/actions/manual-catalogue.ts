@@ -57,7 +57,7 @@ export async function addManualCatalogue(input: unknown): Promise<ActionResult> 
       }
       links.set(`${row.fridgeId}:${productId}`, { fridgeId: row.fridgeId, productId });
     }
-    const memberships = db.insert(fridgeProducts).values([...links.values()]).onConflictDoNothing();
+    const memberships = db.insert(fridgeProducts).values([...links.values()]).onConflictDoUpdate({ target: [fridgeProducts.fridgeId, fridgeProducts.productId], set: { active: true } });
     if (created.size > 0) await db.batch([db.insert(products).values([...created.values()]), memberships]);
     else await db.batch([memberships]);
     revalidatePath("/inventory", "layout");

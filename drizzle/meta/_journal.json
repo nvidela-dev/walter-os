@@ -92,6 +92,13 @@
       "when": 1790806167910,
       "tag": "0012_inventory",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791309863451,
+      "tag": "0013_soft_valkyrie",
+      "breakpoints": true
     }
   ]
 }

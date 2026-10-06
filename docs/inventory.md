@@ -247,3 +247,20 @@ remain source references. Browser progress does not sync across devices.
 Candidate names are tentative readings, especially abbreviations, bastones,
 canadiense and handwriting marked by a clarification. Sections are not assigned
 as fridges automatically. The user must confirm actual storage and units.
+
+## Simple inventory list
+
+`/inventory/list`, linked from the inventory home as “Ver último inventario”,
+shows a plain text list grouped by active fridge. It uses each product's latest
+saved observation, including its date, rather than implying a shared count
+session that the schema does not store. Products without counts say “Sin conteo”.
+Editing a quantity appends a new observation using the existing count action.
+Removing an entry requires inline confirmation and sets the fridge membership's
+`activo` flag to false; canonical products and observation history are preserved.
+Re-adding through catalogue search or the paper review restores that membership.
+Removed entries cannot receive new counts until restored.
+
+Migration `0013_soft_valkyrie.sql` adds only the membership flag, defaulting all
+existing rows to active. The deployment bootstrap applies that reviewed addition
+only when the column is absent, without replaying legacy migrations. Tests use
+isolated PostgreSQL; no production schema or inventory data is modified locally.

@@ -1,0 +1,1 @@
+ALTER TABLE "heladera_productos" ADD COLUMN "activo" boolean DEFAULT true NOT NULL;

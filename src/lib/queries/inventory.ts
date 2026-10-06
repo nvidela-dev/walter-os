@@ -58,7 +58,7 @@ function buildInventoryQuery(fridgeId: string) {
     providers: sql<string[]>`ARRAY(SELECT p.nombre FROM proveedor_productos pp JOIN proveedores p ON p.id = pp.proveedor_id WHERE pp.producto_id = ${products.id} ORDER BY p.nombre)`,
   }).from(fridgeProducts).innerJoin(products, eq(products.id, fridgeProducts.productId))
     .leftJoinLateral(latest, sql`true`).leftJoinLateral(previous, sql`true`)
-    .where(eq(fridgeProducts.fridgeId, fridgeId)).orderBy(asc(products.name), asc(products.id));
+    .where(and(eq(fridgeProducts.fridgeId, fridgeId), eq(fridgeProducts.active, true))).orderBy(asc(products.name), asc(products.id));
 }
 
 export async function getFridgeInventory(fridgeId: string): Promise<InventoryRow[]> {

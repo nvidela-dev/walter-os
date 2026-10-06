@@ -23,7 +23,7 @@ vi.mock("@/db", async () => {
 
 import { db } from "@/db";
 import { expectedActionError } from "@/lib/action-result";
-import { addFridgeProduct, createFridge, createInventoryProduct, saveInventory } from "@/lib/actions/inventory";
+import { addFridgeProduct, createFridge, createInventoryProduct, removeInventoryEntry, saveInventory } from "@/lib/actions/inventory";
 import { addManualCatalogue } from "@/lib/actions/manual-catalogue";
 import { linkExistingProduct } from "@/lib/actions/products";
 import { requireAccess } from "@/lib/auth/access";
@@ -40,7 +40,7 @@ beforeAll(async () => {
   if (!(clientValue instanceof PGlite)) throw new Error("Missing isolated database");
   client = clientValue;
   const migrations = readdirSync("drizzle").filter((name) => name.endsWith(".sql")).sort();
-  for (const migration of migrations.filter((name) => !name.startsWith("0012"))) {
+  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013"))) {
     await client.exec(readFileSync(`drizzle/${migration}`, "utf8"));
   }
   const units = await client.query<{ id: string }>("SELECT id FROM unidades WHERE codigo = 'unidad'");
@@ -50,6 +50,7 @@ beforeAll(async () => {
   await client.query("INSERT INTO proveedor_productos (proveedor_id, producto_id, precio) VALUES ($1, $2, 50)", [fixture.provider, fixture.product]);
   const before = await client.query("SELECT * FROM productos ORDER BY id");
   await client.exec(readFileSync("drizzle/0012_inventory.sql", "utf8"));
+  await client.exec(readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8"));
   expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows);
   await client.query("INSERT INTO heladeras (id, numero) VALUES ($1, 1), ($2, 2)", [fixture.fridge, fixture.secondFridge]);
 }, 30000);
@@ -155,4 +156,42 @@ describe("one-time manual catalogue", () => {
     vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
     expect((await addManualCatalogue([{ name: "Denied candidate", fridgeId: fixture.fridge, unitId, productId: null }])).ok).toBe(false);
   });
+});
+
+
+describe("inventory entry removal", () => {
+  it("hides only one fridge membership, retains history, and allows restoration", async () => {
+    await client.query("UPDATE heladeras SET activa=true WHERE id=$1", [fixture.secondFridge]);
+    await addFridgeProduct({ fridgeId: fixture.secondFridge, productId: fixture.product });
+    const history = (await client.query("SELECT * FROM observaciones_inventario WHERE producto_id=$1", [fixture.product])).rows;
+    expect((await removeInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product })).ok).toBe(true);
+    expect((await getFridgeInventory(fixture.fridge)).some((row) => row.id === fixture.product)).toBe(false);
+    expect((await getFridgeInventory(fixture.secondFridge)).some((row) => row.id === fixture.product)).toBe(true);
+    expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId: fixture.product, quantity: "8" }] })).ok).toBe(false);
+    expect((await client.query("SELECT * FROM observaciones_inventario WHERE producto_id=$1", [fixture.product])).rows).toEqual(history);
+    await addFridgeProduct({ fridgeId: fixture.fridge, productId: fixture.product });
+    expect((await getFridgeInventory(fixture.fridge)).some((row) => row.id === fixture.product)).toBe(true);
+  });
+  it("denies removal without access", async () => {
+    vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+    expect((await removeInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product })).ok).toBe(false);
+    expect((await getFridgeInventory(fixture.fridge)).some((row) => row.id === fixture.product)).toBe(true);
+  });
+});
+
+it("shares inventory corrections between different Kitchen users", async () => {
+  const productId = randomUUID();
+  await client.query("INSERT INTO productos(id,nombre,unidad,unidad_id) VALUES ($1,'Shared kitchen item','unidad',$2)", [productId, unitId]);
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_a");
+  expect((await addFridgeProduct({ fridgeId: fixture.fridge, productId })).ok).toBe(true);
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_a");
+  expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId, quantity: "5" }] })).ok).toBe(true);
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_b");
+  expect((await getFridgeInventory(fixture.fridge)).find((row) => row.id === productId)?.current?.quantity).toBe("5.00");
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_b");
+  expect((await saveInventory({ fridgeId: fixture.fridge, counts: [{ productId, quantity: "3" }] })).ok).toBe(true);
+  vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_a");
+  expect((await getFridgeInventory(fixture.fridge)).find((row) => row.id === productId)?.current?.quantity).toBe("3.00");
+  const history = await client.query<{ registrado_por: string }>("SELECT registrado_por FROM observaciones_inventario WHERE producto_id=$1 ORDER BY id", [productId]);
+  expect(history.rows.map((row) => row.registrado_por)).toEqual(["kitchen_a", "kitchen_b"]);
 });

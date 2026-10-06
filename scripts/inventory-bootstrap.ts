@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 /** Only the reviewed inventory migration; never replay the legacy migration ledger. */
 export function inventoryBootstrapSql(): string {
   const migration = readFileSync("drizzle/0012_inventory.sql", "utf8");
+  const visibilityMigration = readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -28,6 +29,12 @@ BEGIN
     AND tgname = 'observaciones_inmutables' AND tgenabled = 'O') THEN
     RAISE EXCEPTION 'Inventory append-only trigger is missing or disabled';
   END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'heladera_productos' AND column_name = 'activo') THEN
+    ${visibilityMigration}
+  END IF;
+  PERFORM activo FROM public.heladera_productos LIMIT 0;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
 END;

@@ -12,7 +12,11 @@ describe("Vercel inventory setup", () => {
       const ledger = (await db.query("SELECT * FROM drizzle.__drizzle_migrations")).rows;
       await db.exec(inventoryBootstrapSql());
       await db.exec("INSERT INTO heladeras(numero) VALUES (3)");
+      await db.exec("INSERT INTO heladera_productos(heladera_id, producto_id) SELECT id, '00000000-0000-4000-8000-000000000001' FROM heladeras");
+      expect((await db.query("SELECT activo FROM heladera_productos")).rows).toEqual([{ activo: true }]);
+      await db.exec("UPDATE heladera_productos SET activo=false");
       await db.exec(inventoryBootstrapSql());
+      expect((await db.query("SELECT activo FROM heladera_productos")).rows).toEqual([{ activo: false }]);
       expect((await db.query("SELECT email FROM usuarios_inventario")).rows).toEqual([]);
       expect((await db.query("SELECT numero FROM heladeras")).rows).toEqual([{ numero: 3 }]);
       expect((await db.query("SELECT * FROM productos")).rows).toEqual(before);

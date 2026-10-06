@@ -12,6 +12,7 @@ export default async function InventoryPage(): Promise<ReactElement> {
   const fridges = await getFridges();
   return <main className="space-y-5">
     <div><h1 className="text-3xl font-semibold">{t.inventory.fridges}</h1><p className="mt-2 text-muted">{t.inventory.description}</p></div>
+    <Link href="/inventory/list" className="block text-lg font-medium underline">Ver último inventario · lista simple</Link>
     {fridges.length === 0 && <p>{t.inventory.empty}</p>}
     <div className="grid grid-cols-2 gap-3">{fridges.map((fridge) => <Link key={fridge.id} href={`/inventory/${fridge.id}`} className="ios-glass rounded-2xl p-5">
       <span className="block text-xl font-semibold">{t.inventory.fridge(fridge.number)}</span>

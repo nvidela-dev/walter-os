@@ -33,8 +33,9 @@ export async function addFridgeProduct(input: unknown): Promise<ActionResult> {
     await requireAccess("inventory");
     const data = fridgeProductInputSchema.parse(input);
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
-    await db.insert(fridgeProducts).values(data).onConflictDoNothing();
+    await db.insert(fridgeProducts).values(data).onConflictDoUpdate({ target: [fridgeProducts.fridgeId, fridgeProducts.productId], set: { active: true } });
     revalidatePath(`/inventory/${data.fridgeId}`);
+    revalidatePath("/inventory/list");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -52,6 +53,7 @@ export async function createInventoryProduct(input: unknown): Promise<ActionResu
       db.insert(fridgeProducts).values({ fridgeId: data.fridgeId, productId }),
     ]);
     revalidatePath(`/inventory/${data.fridgeId}`);
+    revalidatePath("/inventory/list");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -63,7 +65,7 @@ export async function saveInventory(input: unknown): Promise<ActionResult> {
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     const tracked = await db.select({ id: products.id, unit: products.unit }).from(fridgeProducts)
       .innerJoin(products, eq(products.id, fridgeProducts.productId))
-      .where(and(eq(fridgeProducts.fridgeId, data.fridgeId), inArray(products.id, data.counts.map((count) => count.productId))));
+      .where(and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.active, true), inArray(products.id, data.counts.map((count) => count.productId))));
     if (tracked.length !== data.counts.length) return actionError(t.inventory.invalidItems);
     const observations = data.counts.map((count) => ({
       fridgeId: data.fridgeId, productId: count.productId, quantity: count.quantity,
@@ -72,6 +74,20 @@ export async function saveInventory(input: unknown): Promise<ActionResult> {
     // One INSERT is atomic; the database supplies a common timestamp for this save.
     await db.insert(inventoryObservations).values(observations);
     revalidatePath(`/inventory/${data.fridgeId}`);
+    revalidatePath("/inventory/list");
+    return actionOk(undefined);
+  } catch (error) { return unknownActionError(error); }
+}
+
+export async function removeInventoryEntry(input: unknown): Promise<ActionResult> {
+  try {
+    await requireAccess("inventory");
+    const data = fridgeProductInputSchema.parse(input);
+    if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
+    const result = await db.update(fridgeProducts).set({ active: false }).where(and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.productId, data.productId))).returning({ id: fridgeProducts.productId });
+    if (result.length === 0) return actionError(t.inventory.invalidItems);
+    revalidatePath(`/inventory/${data.fridgeId}`);
+    revalidatePath("/inventory/list");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }

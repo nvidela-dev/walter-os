@@ -20,6 +20,7 @@ export const fridges = pgTable("heladeras", {
 }, (table) => [check("heladeras_numero_positive", sql`${table.number} > 0`)]);
 
 export const fridgeProducts = pgTable("heladera_productos", {
+  active: boolean("activo").notNull().default(true),
   fridgeId: uuid("heladera_id").notNull().references(() => fridges.id, { onDelete: "restrict" }),
   productId: uuid("producto_id").notNull().references(() => products.id, { onDelete: "restrict" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
