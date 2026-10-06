@@ -27,7 +27,7 @@ import { addFridgeProduct, createFridge, createInventoryProduct, editInventoryEn
 import { addManualCatalogue } from "@/lib/actions/manual-catalogue";
 import { linkExistingProduct } from "@/lib/actions/products";
 import { requireAccess } from "@/lib/auth/access";
-import { getFridge, getFridgeInventory, searchInventoryProducts } from "@/lib/queries/inventory";
+import { getFridge, getFridgeInventory, getInventoryHistory, searchInventoryProducts } from "@/lib/queries/inventory";
 
 const fixture = { fridge: randomUUID(), secondFridge: randomUUID(), product: randomUUID(), unlinked: randomUUID(), provider: randomUUID() };
 let client: PGlite;
@@ -227,4 +227,24 @@ it("allows Kitchen to edit shared fridge details while preserving its number and
   expect((await getFridge(fixture.fridge))?.commentary).toBeNull();
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
   expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "Denied", commentary: "" })).ok).toBe(false);
+});
+
+it("keeps full historical counts for hidden products and pages without losing old records", async () => {
+  const productId = randomUUID();
+  await client.query("INSERT INTO productos(id,nombre,unidad,unidad_id) VALUES ($1,'History item','unidad',$2)", [productId, unitId]);
+  await addFridgeProduct({ fridgeId: fixture.fridge, productId });
+  await client.query("INSERT INTO observaciones_inventario(heladera_id,producto_id,cantidad,unidad,registrado_por) SELECT $1,$2,n,'unidad','kitchen' FROM generate_series(1,105) n", [fixture.fridge, productId]);
+  await removeInventoryEntry({ fridgeId: fixture.fridge, productId });
+  const first = await getInventoryHistory(1, fixture.fridge);
+  expect(first.rows).toHaveLength(100);
+  expect(first.hasNext).toBe(true);
+  expect(first.rows[0]?.quantity).toBe("105.00");
+  await client.query("INSERT INTO observaciones_inventario(heladera_id,producto_id,cantidad,unidad,registrado_por) VALUES ($1,$2,106,'unidad','kitchen')", [fixture.fridge, productId]);
+  const second = await getInventoryHistory(2, fixture.fridge, first.throughId ?? undefined);
+  const historical = [...first.rows, ...second.rows].filter((row) => row.name === "History item");
+  expect(historical).toHaveLength(105);
+  expect(new Set(historical.map((row) => row.id)).size).toBe(105);
+  expect(historical.some((row) => row.quantity === "106.00")).toBe(false);
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  await expect(getInventoryHistory(1)).rejects.toThrow("Denied");
 });

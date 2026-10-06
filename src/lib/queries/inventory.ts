@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/db";
@@ -83,4 +83,28 @@ export async function searchInventoryProducts(query: string): Promise<{ id: stri
   if (term.length === 0) return [];
   return db.select({ id: products.id, name: products.name, unit: products.unit }).from(products)
     .where(ilike(products.name, `%${term}%`)).orderBy(products.name, products.id).limit(30);
+}
+
+export interface InventoryHistoryRow {
+  id: number; fridgeId: string; fridgeNumber: number; fridgeName: string | null;
+  name: string; quantity: string; unit: string; recordedAt: string;
+}
+
+export async function getInventoryHistory(page: number, fridgeId?: string, throughId?: number): Promise<{ rows: InventoryHistoryRow[]; hasNext: boolean; throughId: number | null }> {
+  await requireAccess("inventory");
+  if (!Number.isSafeInteger(page) || page < 1 || page > 1000000) throw new Error("Invalid history page");
+  if (fridgeId !== undefined) uuidSchema.parse(fridgeId);
+  if (throughId !== undefined && (!Number.isSafeInteger(throughId) || throughId < 1)) throw new Error("Invalid history boundary");
+  const [latest] = throughId === undefined ? await db.select({ id: inventoryObservations.id }).from(inventoryObservations).orderBy(desc(inventoryObservations.id)).limit(1) : [];
+  const boundary = throughId ?? latest?.id;
+  if (boundary === undefined) return { rows: [], hasNext: false, throughId: null };
+  const rows = await db.select({
+    id: inventoryObservations.id, fridgeId: fridges.id, fridgeNumber: fridges.number, fridgeName: fridges.name,
+    name: products.name, quantity: inventoryObservations.quantity, unit: inventoryObservations.unit, recordedAt: inventoryObservations.recordedAt,
+  }).from(inventoryObservations)
+    .innerJoin(fridges, eq(fridges.id, inventoryObservations.fridgeId))
+    .innerJoin(products, eq(products.id, inventoryObservations.productId))
+    .where(and(lte(inventoryObservations.id, boundary), fridgeId === undefined ? undefined : eq(fridges.id, fridgeId)))
+    .orderBy(desc(inventoryObservations.recordedAt), desc(inventoryObservations.id)).limit(101).offset((page - 1) * 100);
+  return { rows: rows.slice(0, 100).map((row) => ({ ...row, recordedAt: row.recordedAt.toISOString() })), hasNext: rows.length > 100, throughId: boundary };
 }

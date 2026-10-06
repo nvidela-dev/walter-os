@@ -279,3 +279,17 @@ Names allow 200 characters; commentary allows 1,000; either can be cleared.
 Fridge number, memberships and counts are unchanged. The action independently
 requires inventory access and only updates active fridges. Migration 0015 adds
 nullable `heladeras.comentario`; the deployment bootstrap applies it if absent.
+
+## History navigation
+
+Inventory home has one clipboard icon plus “Último inventario” linking to the
+shared current list and one icon-only clock button with an accessible history
+label linking to `/inventory/history`. The obsolete paper-review shortcut is
+removed; its route, source files and imported catalogue data are preserved.
+
+History shows all immutable count observations grouped by fridge, including
+inactive fridges, hidden memberships and earlier corrections. Units and dates
+come from the original count; product/fridge names use current catalogue names.
+Pages contain up to 100 observations, ordered newest first before grouping.
+A maximum observation ID is carried through pagination so counts saved while
+browsing do not shift records between pages. Inventory access is required.
