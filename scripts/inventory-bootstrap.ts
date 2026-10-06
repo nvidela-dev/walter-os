@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 export function inventoryBootstrapSql(): string {
   const migration = readFileSync("drizzle/0012_inventory.sql", "utf8");
   const visibilityMigration = readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8");
+  const noteMigration = readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -35,6 +36,12 @@ BEGIN
     ${visibilityMigration}
   END IF;
   PERFORM activo FROM public.heladera_productos LIMIT 0;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'heladera_productos' AND column_name = 'nota') THEN
+    ${noteMigration}
+  END IF;
+  PERFORM nota FROM public.heladera_productos LIMIT 0;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
 END;

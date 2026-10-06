@@ -15,3 +15,8 @@ export const inventoryCountSchema = z.object({
     quantity: nonNegativeDecimalSchema(2).refine((value) => Number(value) < 10000000000),
   })).min(1).max(200).refine((counts) => new Set(counts.map((count) => count.productId)).size === counts.length),
 });
+
+export const inventoryEntrySchema = fridgeProductInputSchema.extend({
+  note: z.string().trim().max(1000).transform((value) => value === "" ? null : value),
+  quantity: nonNegativeDecimalSchema(2).refine((value) => Number(value) < 10000000000).nullable(),
+});

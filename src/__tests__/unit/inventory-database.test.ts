@@ -23,7 +23,7 @@ vi.mock("@/db", async () => {
 
 import { db } from "@/db";
 import { expectedActionError } from "@/lib/action-result";
-import { addFridgeProduct, createFridge, createInventoryProduct, removeInventoryEntry, saveInventory } from "@/lib/actions/inventory";
+import { addFridgeProduct, createFridge, createInventoryProduct, editInventoryEntry, removeInventoryEntry, saveInventory } from "@/lib/actions/inventory";
 import { addManualCatalogue } from "@/lib/actions/manual-catalogue";
 import { linkExistingProduct } from "@/lib/actions/products";
 import { requireAccess } from "@/lib/auth/access";
@@ -40,7 +40,7 @@ beforeAll(async () => {
   if (!(clientValue instanceof PGlite)) throw new Error("Missing isolated database");
   client = clientValue;
   const migrations = readdirSync("drizzle").filter((name) => name.endsWith(".sql")).sort();
-  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013"))) {
+  for (const migration of migrations.filter((name) => !name.startsWith("0012") && !name.startsWith("0013") && !name.startsWith("0014"))) {
     await client.exec(readFileSync(`drizzle/${migration}`, "utf8"));
   }
   const units = await client.query<{ id: string }>("SELECT id FROM unidades WHERE codigo = 'unidad'");
@@ -51,6 +51,7 @@ beforeAll(async () => {
   const before = await client.query("SELECT * FROM productos ORDER BY id");
   await client.exec(readFileSync("drizzle/0012_inventory.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8"));
+  await client.exec(readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8"));
   expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows);
   await client.query("INSERT INTO heladeras (id, numero) VALUES ($1, 1), ($2, 2)", [fixture.fridge, fixture.secondFridge]);
 }, 30000);
@@ -194,4 +195,19 @@ it("shares inventory corrections between different Kitchen users", async () => {
   expect((await getFridgeInventory(fixture.fridge)).find((row) => row.id === productId)?.current?.quantity).toBe("3.00");
   const history = await client.query<{ registrado_por: string }>("SELECT registrado_por FROM observaciones_inventario WHERE producto_id=$1 ORDER BY id", [productId]);
   expect(history.rows.map((row) => row.registrado_por)).toEqual(["kitchen_a", "kitchen_b"]);
+});
+
+it("shares fridge-specific notes without creating counts, and allows clearing", async () => {
+  await addFridgeProduct({ fridgeId: fixture.secondFridge, productId: fixture.product });
+  const before = (await client.query("SELECT * FROM observaciones_inventario")).rows;
+  expect((await editInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product, quantity: null, note: "  Paquete abierto  " })).ok).toBe(true);
+  expect((await getFridgeInventory(fixture.fridge)).find((row) => row.id === fixture.product)?.note).toBe("Paquete abierto");
+  expect((await getFridgeInventory(fixture.secondFridge)).find((row) => row.id === fixture.product)?.note).toBeNull();
+  expect((await client.query("SELECT * FROM observaciones_inventario")).rows).toEqual(before);
+  expect((await editInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product, quantity: "7", note: "" })).ok).toBe(true);
+  const row = (await getFridgeInventory(fixture.fridge)).find((item) => item.id === fixture.product);
+  expect(row?.note).toBeNull();
+  expect(row?.current?.quantity).toBe("7.00");
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  expect((await editInventoryEntry({ fridgeId: fixture.fridge, productId: fixture.product, quantity: null, note: "Denied" })).ok).toBe(false);
 });

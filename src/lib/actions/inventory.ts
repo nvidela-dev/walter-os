@@ -10,7 +10,7 @@ import { fridgeProducts, fridges, inventoryObservations, products, units } from 
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
-import { fridgeInputSchema, fridgeProductInputSchema, inventoryCountSchema, inventoryProductInputSchema } from "@/lib/validators/inventory";
+import { fridgeInputSchema, fridgeProductInputSchema, inventoryCountSchema, inventoryEntrySchema, inventoryProductInputSchema } from "@/lib/validators/inventory";
 
 async function activeFridge(id: string): Promise<boolean> {
   const [row] = await db.select({ id: fridges.id }).from(fridges).where(and(eq(fridges.id, id), eq(fridges.active, true)));
@@ -86,6 +86,23 @@ export async function removeInventoryEntry(input: unknown): Promise<ActionResult
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     const result = await db.update(fridgeProducts).set({ active: false }).where(and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.productId, data.productId))).returning({ id: fridgeProducts.productId });
     if (result.length === 0) return actionError(t.inventory.invalidItems);
+    revalidatePath(`/inventory/${data.fridgeId}`);
+    revalidatePath("/inventory/list");
+    return actionOk(undefined);
+  } catch (error) { return unknownActionError(error); }
+}
+
+export async function editInventoryEntry(input: unknown): Promise<ActionResult> {
+  try {
+    const userId = await requireAccess("inventory");
+    const data = inventoryEntrySchema.parse(input);
+    if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
+    const condition = and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.productId, data.productId), eq(fridgeProducts.active, true));
+    const [product] = await db.select({ unit: products.unit }).from(fridgeProducts).innerJoin(products, eq(products.id, fridgeProducts.productId)).where(condition);
+    if (product == null) return actionError(t.inventory.invalidItems);
+    const update = db.update(fridgeProducts).set({ note: data.note }).where(condition);
+    if (data.quantity === null) await update;
+    else await db.batch([update, db.insert(inventoryObservations).values({ fridgeId: data.fridgeId, productId: data.productId, quantity: data.quantity, unit: product.unit, recordedBy: userId })]);
     revalidatePath(`/inventory/${data.fridgeId}`);
     revalidatePath("/inventory/list");
     return actionOk(undefined);

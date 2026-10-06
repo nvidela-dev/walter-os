@@ -7,7 +7,7 @@ import { saveInventory } from "@/lib/actions/inventory";
 import type { InventoryRow } from "@/lib/queries/inventory";
 
 vi.mock("@/lib/actions/inventory", () => ({ saveInventory: vi.fn() }));
-const rows: InventoryRow[] = [{ id: "product1", name: "Cola", unit: "unidad", providers: [], current: { quantity: "12", unit: "unidad", recordedAt: "2026-09-30T12:00:00Z" }, previous: null, difference: null }, { id: "product2", name: "Water", unit: "unidad", providers: ["Provider"], current: null, previous: null, difference: null }];
+const rows: InventoryRow[] = [{ id: "product1", name: "Cola", unit: "unidad", note: null, providers: [], current: { quantity: "12", unit: "unidad", recordedAt: "2026-09-30T12:00:00Z" }, previous: null, difference: null }, { id: "product2", name: "Water", unit: "unidad", note: null, providers: ["Provider"], current: null, previous: null, difference: null }];
 
 beforeEach(() => { vi.mocked(saveInventory).mockReset(); });
 describe("fast inventory entry", () => {

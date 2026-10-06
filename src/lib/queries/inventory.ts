@@ -13,6 +13,7 @@ export interface InventoryRow {
   id: string;
   name: string;
   unit: string;
+  note: string | null;
   providers: string[];
   current: CountSnapshot | null;
   previous: CountSnapshot | null;
@@ -52,7 +53,7 @@ function buildInventoryQuery(fridgeId: string) {
     sql`${historical.recordedAt} <= ${latest.recordedAt} - interval '168 hours'`,
   )).orderBy(desc(historical.recordedAt), desc(historical.id)).limit(1).as("previous");
   return db.select({
-    id: products.id, name: products.name, unit: products.unit,
+    id: products.id, name: products.name, unit: products.unit, note: fridgeProducts.note,
     currentQuantity: latest.quantity, currentUnit: latest.unit, currentAt: latest.recordedAt,
     previousQuantity: previous.quantity, previousUnit: previous.unit, previousAt: previous.recordedAt,
     providers: sql<string[]>`ARRAY(SELECT p.nombre FROM proveedor_productos pp JOIN proveedores p ON p.id = pp.proveedor_id WHERE pp.producto_id = ${products.id} ORDER BY p.nombre)`,
@@ -72,7 +73,7 @@ export async function getFridgeInventory(fridgeId: string): Promise<InventoryRow
     const previous = row.previousAt === null || row.previousQuantity === null || row.previousUnit === null ? null : {
       quantity: row.previousQuantity, unit: row.previousUnit, recordedAt: row.previousAt.toISOString(),
     };
-    return { id: row.id, name: row.name, unit: row.unit, providers: row.providers, current, previous, difference: inventoryDifference(current, previous) };
+    return { id: row.id, name: row.name, unit: row.unit, note: row.note, providers: row.providers, current, previous, difference: inventoryDifference(current, previous) };
   });
 }
 

@@ -264,3 +264,11 @@ Migration `0013_soft_valkyrie.sql` adds only the membership flag, defaulting all
 existing rows to active. The deployment bootstrap applies that reviewed addition
 only when the column is absent, without replaying legacy migrations. Tests use
 isolated PostgreSQL; no production schema or inventory data is modified locally.
+
+Each fridge/product also has an optional shared note (`heladera_productos.nota`,
+migration 0014). The list shows the note and edits it alongside quantity. Notes
+are specific to the fridge membership and visible to all inventory-authorized
+users. Editing or clearing only a note creates no observation; when quantity is
+changed, the note update and new count are committed atomically. Notes are limited
+to 1,000 characters. Existing notes are retained when memberships are hidden or
+restored. The deployment bootstrap safely adds the nullable note column.
