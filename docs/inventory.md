@@ -273,10 +273,10 @@ changed, the note update and new count are committed atomically. Notes are limit
 to 1,000 characters. Existing notes are retained when memberships are hidden or
 restored. The deployment bootstrap safely adds the nullable note column.
 
-Kitchen and Admin can edit fridge names and shared commentary through “Editar
-nombre y comentario” on the fridge list, fridge detail or simple inventory list.
+Kitchen and Admin can edit fridge numbers, names and shared commentary through “Editar
+heladera” on the fridge list, fridge detail or simple inventory list.
 Names allow 200 characters; commentary allows 1,000; either can be cleared.
-Fridge number, memberships and counts are unchanged. The action independently
+Fridge identity, memberships and counts are unchanged. The action independently
 requires inventory access and only updates active fridges. Migration 0015 adds
 nullable `heladeras.comentario`; the deployment bootstrap applies it if absent.
 
@@ -293,3 +293,9 @@ come from the original count; product/fridge names use current catalogue names.
 Pages contain up to 100 observations, ordered newest first before grouping.
 A maximum observation ID is carried through pagination so counts saved while
 browsing do not shift records between pages. Inventory access is required.
+
+Fridge numbers can be changed in the same edit form. Numbers must be positive
+integers within the existing PostgreSQL integer range and unique across all
+fridges. Duplicate numbers return the existing Spanish error and preserve the
+form for correction. Renumbering retains the UUID, catalogue, notes and history;
+no database migration is needed. Kitchen and Admin have the same edit access.

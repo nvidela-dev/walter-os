@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
@@ -112,10 +112,18 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
 export async function updateFridgeDetails(input: unknown): Promise<ActionResult> {
   try {
     await requireAccess("inventory");
-    const { fridgeId, name, commentary } = fridgeDetailsSchema.parse(input);
-    const rows = await db.update(fridges).set({ name, commentary, updatedAt: new Date() }).where(and(eq(fridges.id, fridgeId), eq(fridges.active, true))).returning({ id: fridges.id });
+    const { fridgeId, number, name, commentary } = fridgeDetailsSchema.parse(input);
+    const [duplicate] = await db.select({ id: fridges.id }).from(fridges).where(and(eq(fridges.number, number), ne(fridges.id, fridgeId)));
+    if (duplicate != null) return actionError(t.inventory.duplicateFridge);
+    const rows = await db.update(fridges).set({ number, name, commentary, updatedAt: new Date() }).where(and(eq(fridges.id, fridgeId), eq(fridges.active, true))).returning({ id: fridges.id });
     if (rows.length === 0) return actionError(t.inventory.invalidFridge);
     revalidatePath("/inventory", "layout");
     return actionOk(undefined);
-  } catch (error) { return unknownActionError(error); }
+  } catch (error) {
+    // The unique database constraint also protects concurrent renumbering.
+    const cause: unknown = error instanceof Error ? error.cause : null;
+    if ((typeof error === "object" && error !== null && "code" in error && error.code === "23505") ||
+      (typeof cause === "object" && cause !== null && "code" in cause && cause.code === "23505")) return actionError(t.inventory.duplicateFridge);
+    return unknownActionError(error);
+  }
 }

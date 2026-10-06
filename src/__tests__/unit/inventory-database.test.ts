@@ -216,17 +216,17 @@ it("shares fridge-specific notes without creating counts, and allows clearing", 
 it("allows Kitchen to edit shared fridge details while preserving its number and contents", async () => {
   const before = (await client.query("SELECT * FROM heladera_productos WHERE heladera_id=$1", [fixture.fridge])).rows;
   vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_a");
-  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "  Cocina  ", commentary: "  Revisar puerta  " })).ok).toBe(true);
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number: 1, name: "  Cocina  ", commentary: "  Revisar puerta  " })).ok).toBe(true);
   vi.mocked(requireAccess).mockResolvedValueOnce("kitchen_b");
   const fridge = await getFridge(fixture.fridge);
   expect(fridge?.name).toBe("Cocina");
   expect(fridge?.commentary).toBe("Revisar puerta");
   expect(fridge?.number).toBe(1);
   expect((await client.query("SELECT * FROM heladera_productos WHERE heladera_id=$1", [fixture.fridge])).rows).toEqual(before);
-  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "", commentary: "" })).ok).toBe(true);
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number: 1, name: "", commentary: "" })).ok).toBe(true);
   expect((await getFridge(fixture.fridge))?.commentary).toBeNull();
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
-  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, name: "Denied", commentary: "" })).ok).toBe(false);
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number: 1, name: "Denied", commentary: "" })).ok).toBe(false);
 });
 
 it("keeps full historical counts for hidden products and pages without losing old records", async () => {
@@ -247,4 +247,16 @@ it("keeps full historical counts for hidden products and pages without losing ol
   expect(historical.some((row) => row.quantity === "106.00")).toBe(false);
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
   await expect(getInventoryHistory(1)).rejects.toThrow("Denied");
+});
+
+it("renumbers a fridge without changing its identity and rejects duplicate or invalid numbers", async () => {
+  const before = (await client.query("SELECT * FROM heladera_productos WHERE heladera_id=$1", [fixture.fridge])).rows;
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number: 10, name: "Cocina", commentary: "" })).ok).toBe(true);
+  expect((await getFridge(fixture.fridge))?.number).toBe(10);
+  expect((await client.query("SELECT * FROM heladera_productos WHERE heladera_id=$1", [fixture.fridge])).rows).toEqual(before);
+  expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number: 2, name: "Cocina", commentary: "" })).ok).toBe(false);
+  for (const number of [0, -1, 1.5, "", 2147483648]) {
+    expect((await updateFridgeDetails({ fridgeId: fixture.fridge, number, name: "Cocina", commentary: "" })).ok).toBe(false);
+  }
+  expect((await getFridge(fixture.fridge))?.number).toBe(10);
 });

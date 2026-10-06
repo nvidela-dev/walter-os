@@ -23,6 +23,7 @@ export const inventoryEntrySchema = fridgeProductInputSchema.extend({
 
 export const fridgeDetailsSchema = z.object({
   fridgeId: uuidSchema,
+  number: fridgeInputSchema.shape.number,
   name: z.string().trim().max(200).transform((value) => value === "" ? null : value),
   commentary: z.string().trim().max(1000).transform((value) => value === "" ? null : value),
 });
