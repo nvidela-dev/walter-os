@@ -357,3 +357,5 @@ and suppresses baseline changes. Provider associations are catalogue links,
 not evidence of which supplier delivered the current stock. Both suggestion
 and detail queries require Kitchen/Admin inventory access; hidden items are
 excluded and invalid/non-inventory IDs return not found. No schema change.
+
+Weekly inventories run Tuesday through Monday in America/Montevideo. `inventarios.fecha` is the Tuesday; its unique constraint and Tuesday check enforce one run per week. Counts remain append-only audit observations; corrections update the weekly snapshot. New inventory prompts users to edit the existing weekly run. History labels use “Martes 6 de octubre”. Migration 0017 consolidates prior daily snapshots without deleting observations.

@@ -8,6 +8,15 @@ export function runChange(value: string | null, initial = false): string | null 
   return `${delta.isPositive() ? "+" : ""}${delta.toString()}`;
 }
 
+/** Tuesday through Monday, using a local date rather than the host timezone. */
+export function inventoryWeek(day: string): string {
+  const date = new Date(`${day}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 5) % 7);
+  return date.toISOString().slice(0, 10);
+}
+
 export function runDate(day: string): string {
-  return new Intl.DateTimeFormat("es-UY", { timeZone: "America/Montevideo", dateStyle: "long" }).format(new Date(`${day}T12:00:00-03:00`));
+  const date = new Date(`${inventoryWeek(day)}T12:00:00Z`);
+  const month = new Intl.DateTimeFormat("es-UY", { timeZone: "UTC", month: "long" }).format(date).toLocaleLowerCase("es-UY");
+  return `Martes ${date.getUTCDate()} de ${month}`;
 }

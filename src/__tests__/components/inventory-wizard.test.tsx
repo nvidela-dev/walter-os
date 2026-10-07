@@ -16,7 +16,7 @@ it("starts from a separate intro, leaves new counts blank, and records explicit 
   render(<InventoryWizard groups={groups} today="2026-10-13" continuing={false} />);
   expect(startInventoryRun).not.toHaveBeenCalled();
   expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Comenzar inventario de hoy" }));
+  fireEvent.click(screen.getByRole("button", { name: "Comenzar inventario semanal" }));
   const field = await screen.findByRole("spinbutton");
   expect(field).toHaveValue(null);
   fireEvent.change(field, { target: { value: "0" } });
@@ -26,8 +26,8 @@ it("starts from a separate intro, leaves new counts blank, and records explicit 
 });
 it("keeps entered quantities on failure and does not advance", async () => {
   vi.mocked(saveInventory).mockResolvedValue({ ok: false, error: "Sin conexión" });
-  render(<InventoryWizard groups={groups} today="2026-10-06" continuing />);
-  fireEvent.click(screen.getByRole("button", { name: "Continuar inventario de hoy" }));
+  render(<InventoryWizard groups={groups} today="2026-10-07" continuing />);
+  fireEvent.click(screen.getByRole("button", { name: "Editar inventario de la semana" }));
   const field = await screen.findByRole("spinbutton");
   expect(field).toHaveValue(12);
   fireEvent.change(field, { target: { value: "9" } });
@@ -38,7 +38,7 @@ it("keeps entered quantities on failure and does not advance", async () => {
 });
 it("leaves untouched items uncounted rather than recording zero", async () => {
   render(<InventoryWizard groups={groups} today="2026-10-13" continuing={false} />);
-  fireEvent.click(screen.getByRole("button", { name: "Comenzar inventario de hoy" }));
+  fireEvent.click(screen.getByRole("button", { name: "Comenzar inventario semanal" }));
   fireEvent.click(await screen.findByRole("button", { name: "Guardar y terminar" }));
   expect(await screen.findByText("1 productos quedaron sin revisar. No se registraron como cero.")).toBeInTheDocument();
   expect(saveInventory).not.toHaveBeenCalled();

@@ -120,6 +120,13 @@
       "when": 1791328417609,
       "tag": "0016_zippy_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791391084869,
+      "tag": "0017_weekly_inventory",
+      "breakpoints": true
     }
   ]
 }
