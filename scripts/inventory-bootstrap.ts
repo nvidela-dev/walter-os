@@ -7,6 +7,7 @@ export function inventoryBootstrapSql(): string {
   const noteMigration = readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8");
   const fridgeMigration = readFileSync("drizzle/0015_bored_mandroid.sql", "utf8");
   const runMigration = readFileSync("drizzle/0016_zippy_leper_queen.sql", "utf8");
+  const weeklyMigration = readFileSync("drizzle/0017_weekly_inventory.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -61,6 +62,10 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_inventario'::regclass
     AND tgname='observaciones_inventario_run' AND tgenabled='O') THEN
     RAISE EXCEPTION 'Inventory run trigger is missing or disabled';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.inventarios'::regclass AND conname='inventarios_fecha_tuesday') THEN
+    ${weeklyMigration}
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

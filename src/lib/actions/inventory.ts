@@ -101,7 +101,7 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
     const userId = await requireAccess("inventory");
     const data = inventoryEntrySchema.parse(input);
     if (data.quantity !== null) {
-      const [todayRun] = await db.select({ id: inventoryRuns.id }).from(inventoryRuns).where(eq(inventoryRuns.day, sql`(now() AT TIME ZONE 'America/Montevideo')::date`));
+      const [todayRun] = await db.select({ id: inventoryRuns.id }).from(inventoryRuns).where(eq(inventoryRuns.day, sql`public.inventory_week((now() AT TIME ZONE 'America/Montevideo')::date)`));
       if (todayRun == null) return actionError("Para registrar cantidades de un nuevo inventario, abrí Nuevo inventario.");
     }
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
@@ -140,7 +140,7 @@ export async function updateFridgeDetails(input: unknown): Promise<ActionResult>
 export async function startInventoryRun(): Promise<ActionResult> {
   try {
     await requireAccess("inventory");
-    await db.insert(inventoryRuns).values({ day: sql`(now() AT TIME ZONE 'America/Montevideo')::date` }).onConflictDoNothing();
+    await db.insert(inventoryRuns).values({ day: sql`public.inventory_week((now() AT TIME ZONE 'America/Montevideo')::date)` }).onConflictDoNothing();
     revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }

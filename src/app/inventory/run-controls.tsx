@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 
@@ -7,7 +8,7 @@ import { FormMessage } from "@/components/form-feedback";
 import { useActionForm } from "@/components/hooks/use-action-form";
 import { Button } from "@/components/ui/button";
 import { startInventoryRun } from "@/lib/actions/inventory";
-import { runDate } from "@/lib/inventory/run-display";
+import { inventoryWeek, runDate } from "@/lib/inventory/run-display";
 
 export function RunControls({ day, today }: { day: string | null; today: string }): ReactElement {
   const router = useRouter();
@@ -18,7 +19,7 @@ export function RunControls({ day, today }: { day: string | null; today: string 
   }
   return <div className="space-y-2">
     <p className="text-sm">{day === null ? "Todavía no hay inventarios." : `Último inventario: ${runDate(day)}`}</p>
-    {day === today ? <p className="text-sm text-muted">Los conteos de hoy se guardan juntos en este inventario.</p> : <><Button disabled={isSubmitting} onClick={() => { void start(); }}>Comenzar inventario de hoy</Button><p className="text-sm text-muted">Los productos quedan sin conteo hasta que los revises. El inventario anterior se conserva.</p></>}
+    {day === inventoryWeek(today) ? <><p className="text-sm text-muted">Ya hay un inventario de esta semana. ¿Querés editarlo?</p><Link href="/inventory/new" className="underline">Editar inventario de la semana</Link></> : <><Button disabled={isSubmitting} onClick={() => { void start(); }}>Comenzar inventario semanal</Button><p className="text-sm text-muted">Los productos quedan sin conteo hasta que los revises. El inventario anterior se conserva.</p></>}
     <FormMessage message={error} />
   </div>;
 }

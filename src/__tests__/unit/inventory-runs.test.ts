@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { PGlite } from "@electric-sql/pglite";
 import { expect, it } from "vitest";
 
-import { runChange } from "@/lib/inventory/run-display";
+import { inventoryWeek, runChange, runDate } from "@/lib/inventory/run-display";
 
 it("consolidates the baseline and records next-run increases, decreases and unchanged counts", async () => {
   const db = new PGlite();
@@ -32,6 +32,19 @@ it("consolidates the baseline and records next-run increases, decreases and unch
     // Midnight in UTC remains the same inventory day in Montevideo.
     await count(2,6,'2026-10-14T01:00:00Z');
     expect((await db.query("SELECT * FROM inventarios")).rows).toHaveLength(2);
+    // Migrate existing daily runs, including the accidental empty Wednesday.
+    await db.exec("INSERT INTO inventarios(fecha) VALUES ('2026-10-14')");
+    const audit = (await db.query("SELECT * FROM observaciones_inventario ORDER BY id")).rows;
+    await db.exec(`BEGIN;${  readFileSync('drizzle/0017_weekly_inventory.sql','utf8')  };COMMIT;`);
+    expect((await db.query("SELECT * FROM inventarios")).rows).toHaveLength(2);
+    await count(1,11,'2026-10-14T14:00:00Z');
+    await count(1,9,'2026-10-19T14:00:00Z');
+    expect((await db.query("SELECT * FROM inventarios")).rows).toHaveLength(2);
+    expect((await db.query("SELECT cantidad,cambio FROM inventario_items i JOIN inventarios r ON r.id=i.inventario_id WHERE r.fecha='2026-10-13' AND producto_nombre='Pasta'")).rows).toEqual([{cantidad:'9.00',cambio:'1.00'}]);
+    expect((await db.query("SELECT * FROM observaciones_inventario ORDER BY id LIMIT 8")).rows).toEqual(audit);
+    await expect(db.exec("INSERT INTO inventarios(fecha) VALUES ('2026-10-14')")).rejects.toThrow();
+    await count(1,7,'2026-10-20T14:00:00Z');
+    expect((await db.query("SELECT * FROM inventarios")).rows).toHaveLength(3);
     // Renaming later does not rewrite the recorded snapshot.
     await db.exec("UPDATE heladeras SET numero=9,nombre='Freezer'; UPDATE productos SET nombre='Renamed' WHERE nombre='Pasta'");
     expect((await db.query("SELECT DISTINCT heladera_numero FROM inventario_items")).rows).toEqual([{heladera_numero:1}]);
@@ -45,4 +58,12 @@ it("hides initial comparisons and formats later differences", () => {
   expect(runChange('-3.00')).toBe('-3');
   expect(runChange('4.00')).toBe('+4');
   expect(runChange(null)).toBe('Sin cantidad comparable en el inventario anterior');
+});
+
+it("uses Tuesday to Monday weeks across month/year boundaries and labels their Tuesday", () => {
+  expect(inventoryWeek("2026-10-07")).toBe("2026-10-06");
+  expect(inventoryWeek("2026-10-12")).toBe("2026-10-06");
+  expect(inventoryWeek("2026-10-13")).toBe("2026-10-13");
+  expect(inventoryWeek("2027-01-01")).toBe("2026-12-29");
+  expect(runDate("2026-10-07")).toBe("Martes 6 de octubre");
 });

@@ -46,7 +46,7 @@ export const inventoryObservations = pgTable("observaciones_inventario", {
 export const inventoryRuns = pgTable("inventarios", {
   id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
   day: date("fecha").notNull().unique(),
-});
+}, (table) => [check("inventarios_fecha_tuesday", sql`extract(dow from ${table.day}) = 2`)]);
 
 export const inventoryRunEntries = pgTable("inventario_items", {
   runId: bigint("inventario_id", { mode: "number" }).notNull().references(() => inventoryRuns.id, { onDelete: "restrict" }),
