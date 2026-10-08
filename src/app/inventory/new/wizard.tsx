@@ -7,6 +7,7 @@ import { FormMessage } from "@/components/form-feedback";
 import { useActionForm } from "@/components/hooks/use-action-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { t } from "@/i18n";
 import { saveInventory, startInventoryRun } from "@/lib/actions/inventory";
 import { runDate } from "@/lib/inventory/run-display";
 import type { InventoryRow } from "@/lib/queries/inventory";
@@ -49,6 +50,6 @@ export function InventoryWizard({ groups, today, continuing }: {
       </FridgeGroup></fieldset>
       <div className="flex gap-2">{step > 0 && <Button variant="secondary" disabled={isSubmitting} onClick={() => { setStep(step - 1); }}>Anterior</Button>}<Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Guardando…" : step === groups.length - 1 ? "Guardar y terminar" : "Guardar y siguiente"}</Button></div>
     </form>}
-    {step >= groups.length && step >= 0 && <div className="ios-glass space-y-3 rounded-2xl p-5"><p role="status">Los conteos ingresados quedaron guardados en el inventario de la semana.</p>{missing > 0 && <p>{missing} productos quedaron sin revisar. No se registraron como cero.</p>}<Link href="/inventory/list" className="block font-medium underline">Ver inventario</Link><Button variant="secondary" onClick={() => { setStep(0); }}>Revisar heladeras</Button></div>}
+    {step >= groups.length && step >= 0 && <div className="ios-glass space-y-3 rounded-2xl p-5"><p role="status">Los conteos ingresados quedaron guardados en el inventario de la semana.</p>{missing > 0 && <p>{missing} productos quedaron sin revisar. No se registraron como cero.</p>}<Link href="/inventory/list" className="block font-medium underline">Ver inventario</Link><Link href="/inventory/purchases" className="block font-medium underline">{t.inventoryPurchases.title}</Link><Button variant="secondary" onClick={() => { setStep(0); }}>Revisar heladeras</Button></div>}
   </main>;
 }

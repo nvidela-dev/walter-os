@@ -2,13 +2,14 @@
 
 This document records the requested workflow and distinguishes it from the
 current implementation. Repository inspection: **2026-10-07**, based on commit
-`e7fe957`. This is a documentation-only review; no production inspection or
-application changes were made for this document.
+`e7fe957`. This document now includes the implementation decisions in the three inventory
+PRs: counting progress, target-stock history, and supplier-grouped purchase
+planning. It describes repository behavior rather than confirming live data.
 
 Kitchen staff inspect each fridge, report how much stock exists, and add missing
 products in their actual fridge locations. One shared inventory covers Tuesday
-through Monday. After counting, the intended next step is to compare stock with
-the active target quantity and group the resulting purchase needs by supplier.
+through Monday. After counting, the purchase screen compares stock with the active target
+quantity and groups the resulting purchase needs by supplier.
 
 ## Workflow and current coverage
 
@@ -19,8 +20,8 @@ the active target quantity and group the resulting purchase needs by supplier.
 | Count stock | Record the actual quantity and unit for each product in each fridge. | Implemented. Blank means unreviewed; explicit zero means none remains. |
 | Maintain the weekly inventory | Tuesday–Monday edits belong to one shared weekly instance. | Implemented through weekly date normalization, a unique date, and a constraint requiring that date to be Tuesday. |
 | Maintain target stock | Each product has a target quantity, its own history, and only one active target at a time. | Implemented with immutable revisions and one active target pointer per product. Admin can edit; Kitchen can read. Targets are global per product across all active fridge placements. |
-| Calculate purchases | Compare observed stock with the applicable target. | Intended; current differences compare inventories with each other. |
-| Group by supplier | Use existing product–supplier links to organize purchase quantities. | Links and supplier display exist. Purchase calculation, supplier selection, and grouped purchase output do not. |
+| Calculate purchases | Compare observed stock with the applicable target. | Implemented separately as a nonnegative target shortage. The existing stock-change display still compares inventories with each other. |
+| Group by supplier | Use existing product–supplier links to organize purchase quantities. | Implemented. A sole supplier is selected automatically; multiple suppliers require a manual choice for the current view. |
 
 ## Products and fridge placement
 
@@ -38,8 +39,8 @@ catalogue to have a fridge.
 
 Removing an inventory entry currently hides its fridge membership, preserving
 the product and past observations. A product can therefore have no remaining
-active placements. Decide whether the intended rule requires preventing that
-state or simply treating such a product as outside the active inventory.
+active placements. Products without active fridge placements are outside the active inventory.
+Their catalogue identity and historical records remain intact.
 
 Sources: [inventory schema](../src/db/schema/inventory.ts),
 [product schema](../src/db/schema/products.ts),
@@ -137,28 +138,29 @@ Sources: [target schema](../src/db/schema/inventory-targets.ts),
 [target actions](../src/lib/actions/inventory-targets.ts),
 [target history screen](../src/app/inventory/items/[id]/targets/page.tsx).
 
-## From shortages to supplier groups — intended behavior
+## From shortages to supplier groups
 
 Existing `proveedor_productos` links associate products with suppliers and carry
 price and package quantity. Products may have no supplier or several suppliers.
-The inventory currently displays those links; it does not select a supplier or
-produce purchase groups.
+The purchase screen automatically uses the sole linked supplier. When several
+are linked, the user chooses one. The selection applies only to the current view;
+there is no saved preferred supplier, purchase order, or automatic sending.
 
-After calculating valid shortages, assign each shortage to the selected supplier
-and group the purchase lines by supplier. Retain product identities and units in
+The screen assigns each valid shortage to its selected supplier and groups
+the purchase lines by supplier. Retain product identities and units in
 each group; quantities in different units cannot be combined into a single
 supplier total. A supplier link identifies a purchasing option, not proof of who
 supplied the observed stock.
 
-| Situation | What is known | Rule still required |
+| Situation | What is known | Implemented rule or remaining decision |
 | --- | --- | --- |
-| Missing count | Stock is unknown; blank is not zero. | How to handle incomplete inventory when preparing a purchase list. Do not present a shortage as final from unknown stock. |
-| Missing target | Observed stock may be known, but no desired level is defined. | How to surface and resolve the missing target; do not assume a zero target. |
-| Incompatible units | Stock and target cannot yet be compared. | Supported conversions and their source; no automatic kg/unit conversion is established. |
-| No supplier | A shortage can exist without a supplier link. | How unresolved purchase lines are shown or assigned. |
-| Multiple suppliers | Several links are valid. | Manual choice, preferred supplier, split purchase, or another explicit policy. Do not duplicate the shortage across suppliers. |
-| Package quantities | Supplier links have a package quantity. | Meaning/unit compatibility, whole-package rounding, and whether the displayed amount is stock units or packages. |
-| Target changes during/after a week | A target history is required. | Whether a purchase calculation uses the currently active target or the target effective at inventory time; how past calculations are reproduced. |
+| Missing count | Stock is unknown; blank is not zero. | The product stays unresolved and is excluded from purchase groups until every active placement is counted. |
+| Missing target | Observed stock may be known, but no desired level is defined. | The product stays unresolved with a link to its detail. Admin can define a target; no zero is assumed. |
+| Incompatible units | Stock and target cannot yet be compared. | The product stays unresolved. No automatic conversion is performed; compatible targets and counts are required. |
+| No supplier | A shortage can exist without a supplier link. | The shortage is shown separately until an Admin associates a supplier through the existing catalogue workflow. |
+| Multiple suppliers | Several links are valid. | Manual selection assigns the entire shortage to one linked supplier. Changing or clearing the selection moves that line; it is never duplicated across suppliers. Preferred suppliers and split purchases are not implemented. |
+| Package quantities | Supplier links have a package quantity. | The display uses stock units and does not round to packages. Package conversion and whole-package rounding still need an explicit rule. |
+| Target changes during/after a week | A target history is required. | The screen uses the currently active target and the latest saved weekly inventory. It is a live planning view; purchase calculations are not persisted as historical orders. Reproducing past purchase plans remains outside this implementation. |
 
 Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
 [item detail queries](../src/lib/queries/inventory-items.ts),
@@ -166,8 +168,9 @@ Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
 
 ## Polishing gaps verified in the repository
 
-1. Global target quantities, immutable history, and a single active target are
-   implemented. Purchase shortages and supplier grouping follow in a separate PR.
+1. Global targets, immutable target history, and a single active target are
+   implemented. `/inventory/purchases` calculates shortages and groups them by
+   supplier, keeping incomplete or ambiguous lines separate.
 2. The history screen now describes one inventory per Tuesday–Monday week. Fridge
    home shows current-week progress and offers starting or editing that week.
 3. The older [inventory implementation notes](inventory.md) contain superseded
@@ -177,12 +180,22 @@ Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
    explicit zeros. Empty fridges are not labeled complete. This is counting progress,
    not an approval state; a separate approval workflow remains undefined.
 5. Kitchen users can count and add inventory products; supplier link management
-   is in the main application, which is restricted to Admin. Target edits require Admin; Kitchen can read them. Supplier selection follows
-   in a separate PR.
+   is in the main application, which is restricted to Admin. Target edits require Admin; Kitchen can read them and prepare the purchase
+   view, including selecting among existing supplier links.
 
 Access sources: [group policy](../src/lib/auth/policy.ts),
 [inventory mutation authorization](../src/lib/actions/inventory.ts).
 
-Verification for this document consists of reading the schema, migrations,
-actions, queries, and screens linked above and checking the Markdown's local
-references. It does not establish current production contents or runtime behavior.
+Implementation tests cover exact decimal shortages across fridges, zero counts,
+partial totals, missing targets, unit mismatches, active target changes, new-week
+counts, hidden placements, and supplier selection without duplication.
+
+Sources: [purchase calculation and grouping](../src/lib/inventory/purchases.ts),
+[purchase queries](../src/lib/queries/inventory-purchases.ts),
+[purchase screen](../src/app/inventory/purchases/page.tsx).
+
+The view is available to Kitchen and Admin from fridge home, latest inventory,
+and the wizard result. It identifies when the latest inventory is from an older
+week. No completion approval, package conversions, purchase-order history, or
+external supplier messaging has been added. Local tests and document references
+do not establish current production contents or signed-in production behavior.

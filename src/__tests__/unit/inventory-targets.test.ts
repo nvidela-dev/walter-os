@@ -91,3 +91,42 @@ it("paginates target revisions and never reactivates an older identity", async (
   await client.query("INSERT INTO historial_objetivos_inventario(id,producto_id,cantidad,unidad,registrado_por) OVERRIDING SYSTEM VALUE VALUES (0,$1,1,'unidad','admin')", [productId]);
   expect((await getInventoryTargetProduct(productId))?.target?.id).toBe(active?.id);
 });
+
+it("calculates purchases from the latest run, the active target, and active fridge placements without multiplying supplier links", async () => {
+  const { getInventoryPurchases } = await import("@/lib/queries/inventory-purchases");
+  const { groupInventoryPurchases } = await import("@/lib/inventory/purchases");
+  const rice = randomUUID();
+  const fridgeTwo = randomUUID();
+  const supplierA = randomUUID();
+  const supplierB = randomUUID();
+  await client.query("INSERT INTO productos(id,nombre,unidad) VALUES ($1,'Purchase rice','kg')", [rice]);
+  await client.query("INSERT INTO heladeras(id,numero) VALUES ($1,2)", [fridgeTwo]);
+  await client.query("INSERT INTO heladera_productos(heladera_id,producto_id) VALUES ($1,$3),($2,$3)", [fridgeId, fridgeTwo, rice]);
+  await client.query("INSERT INTO proveedores(id,nombre) VALUES ($1,'Supplier A'),($2,'Supplier B')", [supplierA, supplierB]);
+  await client.query("INSERT INTO proveedor_productos(proveedor_id,producto_id,precio,cantidad) VALUES ($1,$3,50,6),($2,$3,40,4)", [supplierA, supplierB, rice]);
+  await setInventoryTarget({ productId: rice, quantity: "12" });
+  async function count(fridge: string, quantity: number, day: string): Promise<void> {
+    await client.query("INSERT INTO observaciones_inventario(heladera_id,producto_id,cantidad,unidad,registrado_por,registrado_at) VALUES ($1,$2,$3,'kg','kitchen',$4)", [fridge, rice, quantity, day]);
+  }
+  await count(fridgeId, 3, "2026-10-06T12:00:00Z");
+  let purchases = await getInventoryPurchases();
+  expect(purchases.products.find((row) => row.id === rice)?.comparison).toMatchObject({ stock: null, shortage: null, issues: ["missing-count"] });
+  await count(fridgeTwo, 5, "2026-10-09T12:00:00Z");
+  purchases = await getInventoryPurchases();
+  expect(purchases.day).toBe("2026-10-06");
+  const line = purchases.products.find((row) => row.id === rice);
+  expect(line?.comparison).toMatchObject({ stock: "8", target: "12.00", shortage: "4", issues: [] });
+  expect(line?.suppliers).toHaveLength(2);
+  expect(groupInventoryPurchases(purchases.products, {}).unresolved.some((row) => row.id === rice)).toBe(true);
+  expect(groupInventoryPurchases(purchases.products, { [rice]: supplierB }).groups.find((group) => group.supplier.id === supplierB)?.products).toHaveLength(1);
+  await setInventoryTarget({ productId: rice, quantity: "10" });
+  expect((await getInventoryPurchases()).products.find((row) => row.id === rice)?.comparison.shortage).toBe("2");
+  await count(fridgeId, 0, "2026-10-13T12:00:00Z");
+  expect((await getInventoryPurchases()).products.find((row) => row.id === rice)?.comparison.shortage).toBeNull();
+  await client.query("UPDATE heladera_productos SET activo=false WHERE heladera_id=$1 AND producto_id=$2", [fridgeTwo, rice]);
+  expect((await getInventoryPurchases()).products.find((row) => row.id === rice)?.comparison).toMatchObject({ stock: "0", shortage: "10" });
+  await client.query("UPDATE productos SET unidad='unidad' WHERE id=$1", [rice]);
+  expect((await getInventoryPurchases()).products.find((row) => row.id === rice)?.comparison.issues).toContain("unit-mismatch");
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  await expect(getInventoryPurchases()).rejects.toThrow("Denied");
+});
