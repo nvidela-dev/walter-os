@@ -13,7 +13,8 @@ recipes, menu, access management, and the dashboard.
   `.home-screen`; modal backdrops only dim the page.
 - Geist variable typography with tighter heading tracking, balanced titles, and
   tabular stock numbers; consistent page widths, spacing, controls, and focus.
-- The inventory overview omits the top status card, uses “Inventario semanal”
+- The inventory overview omits the top status card and introductory heading,
+  hides the purchases shortcut for now, uses “Inventario semanal”
   for weekly navigation, and shows compact count labels on each fridge. Empty
   comments are hidden; opening a fridge edit form expands its tile to full width.
 - Inputs use 16px text; shared buttons and icon controls have 44px touch targets.
