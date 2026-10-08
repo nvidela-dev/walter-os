@@ -35,7 +35,7 @@ export default async function ProductEditPage({
       <PageHeader backHref={`/providers/${id}`} title={t.products.editTitle} />
 
       <main className="flex-1 py-5">
-        <section className="app-card rounded-2xl bg-white p-6">
+        <section className="app-card rounded-2xl p-6">
           <ProductEditForm
             providerId={id}
             productId={productId}

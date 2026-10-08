@@ -28,8 +28,8 @@ export default async function RecipePage({
         actions={<DeleteButton id={recipe.id} name={recipe.name} deleteAction={deleteRecipe} redirectTo="/recipes" />}
       />
       <main className="flex-1 space-y-4 px-6 py-4">
-        <div className="app-card rounded-2xl bg-white p-6"><RecipeForm recipe={recipe} /></div>
-        <div className="app-card rounded-2xl bg-white p-6">
+        <div className="app-card rounded-2xl p-6"><RecipeForm recipe={recipe} /></div>
+        <div className="app-card rounded-2xl p-6">
           <h2 className="mb-4 text-lg font-medium text-[#0f172a]">{t.recipes.ingredients}</h2>
           {recipe.ingredients.length === 0 ? (
             <p className="text-[#475569]">{t.recipes.noIngredients}</p>

@@ -88,11 +88,11 @@ export function InvoiceList({
               className={`min-h-11 shrink-0 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${
                 active
                   ? "bg-white text-[#0f172a] shadow-sm"
-                  : "text-[#475569] hover:bg-slate-50"
+                  : "text-[#475569] hover:bg-zinc-200"
               }`}
             >
               {f.label}
-              <span className={`ml-1 text-xs ${active ? "text-[#2563eb]" : "text-[#64748b]"}`}>
+              <span className={`ml-1 text-xs ${active ? "text-[#3f3f46]" : "text-[#64748b]"}`}>
                 {counts[f.key]}
               </span>
             </button>
@@ -263,7 +263,7 @@ function InvoiceRowItem({
             aria-label={t.invoices.list.delete}
             variant="ghost"
             size="icon"
-            className="ml-auto h-12 w-12 shrink-0 rounded-full bg-white text-[#475569] hover:bg-slate-50"
+            className="ml-auto h-12 w-12 shrink-0 rounded-full bg-white text-[#475569] hover:bg-zinc-200"
           >
             <TrashIcon className="h-5 w-5" />
           </Button>

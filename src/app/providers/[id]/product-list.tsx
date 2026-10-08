@@ -70,7 +70,7 @@ export function ProductList({
           <button
             onClick={(e) => void handleDelete(e, product.productId)}
             disabled={deletingId === product.productId}
-            className="rounded-full p-2 text-[#2563eb] hover:bg-[#f8fafc] disabled:opacity-50"
+            className="rounded-full p-2 text-[#3f3f46] hover:bg-[#f8fafc] disabled:opacity-50"
           >
             {deletingId === product.productId ? t.common.loading : "×"}
           </button>

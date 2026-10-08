@@ -26,7 +26,7 @@ export default async function EmployeePage({
         title={employee.name}
         actions={<DeleteButton id={employee.id} name={employee.name} deleteAction={deleteEmployee} redirectTo="/employees" />}
       />
-      <main className="flex-1 py-5"><div className="app-card rounded-2xl bg-white p-6"><EmployeeForm employee={employee} /></div></main>
+      <main className="flex-1 py-5"><div className="app-card rounded-2xl p-6"><EmployeeForm employee={employee} /></div></main>
     </div>
   );
 }

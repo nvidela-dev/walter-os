@@ -77,7 +77,7 @@ export default async function ProvidersPage({
       <main className="flex-1 py-4">
         {providers.length === 0 ? (
           <div className="app-panel flex flex-col items-center justify-center px-6 py-16 text-center">
-            <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-[#b45309] text-white">
+            <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-zinc-200 text-zinc-700">
               <Icon className="h-8 w-8" />
             </div>
             <h2 className="mb-2 text-lg font-semibold text-[#0f172a]">{emptyTitle}</h2>
@@ -88,8 +88,8 @@ export default async function ProvidersPage({
           <div className="space-y-3">
             {providers.map((provider) => (
               <Link key={provider.id} href={`/providers/${provider.id}`}
-                className="app-list-row flex items-center gap-4 rounded-2xl p-4 transition hover:bg-slate-50 active:scale-[0.99]">
-                <div className={`app-icon flex h-12 w-12 items-center justify-center text-white ${provider.productCount > 0 ? "bg-[#b45309]" : "bg-[#2563eb]"}`}>
+                className="app-list-row flex items-center gap-4 rounded-2xl p-4 transition hover:bg-zinc-200 active:scale-[0.99]">
+                <div className="app-icon flex h-12 w-12 items-center justify-center bg-zinc-200 text-zinc-700">
                   <Icon className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">

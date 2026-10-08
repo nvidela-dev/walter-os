@@ -10,7 +10,7 @@ export default function NewProviderPage(): ReactElement {
     <div className="app-page flex flex-col bg-white">
       <PageHeader backHref="/providers" title={t.providers.newTitle} />
       <main className="flex-1 py-5">
-        <div className="app-card rounded-2xl bg-white p-6">
+        <div className="app-card rounded-2xl p-6">
           <ProviderForm />
         </div>
       </main>

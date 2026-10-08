@@ -1,20 +1,20 @@
 # Clear mobile design
 
-The launcher at `/` keeps its wallpaper, glass groups, and colorful app icons.
-Every work screen uses a white background and solid surfaces. This includes
+The launcher at `/` keeps its wallpaper, glass groups, and neutral app icons.
+Every work screen uses a white background and solid, light-gray card surfaces. This includes
 inventory, history, target stock, purchases, suppliers, invoices, employees,
 recipes, menu, access management, and the dashboard.
 
 ## Visual rules
 
-- White canvas; slate text and dividers; blue primary actions. Status colors keep
+- White canvas; neutral text and dividers; charcoal primary actions. Status colors keep
   their meaning and have readable contrast on white.
 - Solid cards with fine borders. Blur and translucent panels are scoped to
   `.home-screen`; modal backdrops only dim the page.
 - Consistent page widths, spacing, headers, rounded controls, and visible focus.
 - Inputs use 16px text; shared buttons and icon controls have 44px touch targets.
   Browser zoom is enabled, and reduced-motion preferences are respected.
-- Fridge colors are restrained header accents; their contents remain white.
+- Fridge groups use neutral gray headers and cards instead of colored accents.
 - The dashboard has a light palette and larger rows; its detail panes take the
   full phone width while retaining a split view on larger screens.
 - No stock, targets, purchasing, authorization, or database rules change.

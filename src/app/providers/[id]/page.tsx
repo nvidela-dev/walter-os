@@ -43,12 +43,12 @@ export default async function ProviderPage({
       />
 
       <main className="flex-1 space-y-6 py-5">
-        <section className="app-card rounded-2xl bg-white p-6">
+        <section className="app-card rounded-2xl p-6">
           <ProviderForm provider={provider} />
         </section>
 
         {provider.type === "producto" && (
-          <section className="app-card rounded-2xl bg-white p-6">
+          <section className="app-card rounded-2xl p-6">
             <ProductList products={provider.products} providerId={provider.id} />
             <div className="mt-4 border-t border-[#e2e8f0] pt-4">
               <AddProductForm providerId={provider.id} units={units} />
@@ -57,7 +57,7 @@ export default async function ProviderPage({
           </section>
         )}
 
-        <section className="app-card rounded-2xl bg-white p-6">
+        <section className="app-card rounded-2xl p-6">
           <DebtForm providerId={provider.id} currentDebt={provider.debt} />
         </section>
       </main>

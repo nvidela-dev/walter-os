@@ -14,7 +14,7 @@ export function InvoiceSummary({
   total: number;
 }): ReactElement {
   return (
-    <section className="app-card rounded-2xl bg-white p-6">
+    <section className="app-card rounded-2xl p-6">
       <div className="mb-4 flex items-center justify-between">
         <span className="text-sm text-[#475569]">{t.invoices.fields.total}</span>
         <span className="text-2xl font-light text-[#0f172a]">${total.toFixed(2)}</span>

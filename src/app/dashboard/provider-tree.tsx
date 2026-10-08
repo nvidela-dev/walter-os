@@ -52,12 +52,12 @@ const c = {
   grey: "#475569",
   grey0: "#64748b",
   red: "#b91c1c",
-  orange: "#c2410c",
-  yellow: "#a16207",
-  green: "#15803d",
-  aqua: "#047857",
-  blue: "#1d4ed8",
-  purple: "#7e22ce",
+  orange: "#52525b",
+  yellow: "#52525b",
+  green: "#3f3f46",
+  aqua: "#52525b",
+  blue: "#3f3f46",
+  purple: "#52525b",
 } as const;
 
 type IconType = ComponentType<{ className?: string; style?: CSSProperties }>;

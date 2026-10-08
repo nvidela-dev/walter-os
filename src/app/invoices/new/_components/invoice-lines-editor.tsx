@@ -33,7 +33,7 @@ export function InvoiceLinesEditor({
     <section className="space-y-3">
       <div className="flex items-center justify-between px-1">
         <h2 className="text-sm font-medium text-[#475569]">{t.invoices.lines.heading}</h2>
-        <span className="text-xs text-[#2563eb]">{t.invoices.lines.count(lines.length)}</span>
+        <span className="text-xs text-[#3f3f46]">{t.invoices.lines.count(lines.length)}</span>
       </div>
 
       {lines.map((line, idx) => {
@@ -163,7 +163,7 @@ export function InvoiceLinesEditor({
         onClick={addLine}
         disabled={!providerSelected}
         variant="secondary"
-        className="w-full border-dashed border-[#2563eb] py-3 text-sm text-[#2563eb] hover:bg-slate-50"
+        className="w-full border-dashed border-[#3f3f46] py-3 text-sm text-[#3f3f46] hover:bg-zinc-200"
       >
         <PlusIcon className="h-4 w-4" />
         {t.invoices.lines.add}

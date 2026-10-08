@@ -54,7 +54,7 @@ interface EmptyStateProps {
 export function EmptyState({ icon: Icon, title, description, ctaHref, ctaText }: EmptyStateProps): ReactElement {
   return (
     <div className="app-panel flex flex-col items-center justify-center px-6 py-16 text-center">
-      <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-[#2563eb] text-white">
+      <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-zinc-200 text-zinc-700">
         <Icon className="h-8 w-8" />
       </div>
       <h2 className="mb-2 text-lg font-semibold text-[#0f172a]">{title}</h2>
@@ -82,8 +82,8 @@ export function ListPageRow({
   subtitleClassName,
 }: ListPageRowProps): ReactElement {
   return (
-    <Link href={href} className="app-list-row flex items-center gap-4 rounded-2xl p-4 transition hover:bg-slate-50 active:scale-[0.99]">
-      <div className="app-icon flex h-12 w-12 items-center justify-center bg-[#2563eb] text-white">
+    <Link href={href} className="app-list-row flex items-center gap-4 rounded-2xl p-4 transition hover:bg-zinc-200 active:scale-[0.99]">
+      <div className="app-icon flex h-12 w-12 items-center justify-center bg-zinc-200 text-zinc-700">
         <Icon className="h-6 w-6" />
       </div>
       <div className="min-w-0 flex-1">

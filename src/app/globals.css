@@ -2,13 +2,13 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
-  --cream: #f8fafc;
-  --cream-dark: #e2e8f0;
-  --warm: #2563eb;
-  --warm-dark: #1d4ed8;
+  --foreground: #18181b;
+  --cream: #f4f4f5;
+  --cream-dark: #e4e4e7;
+  --warm: #3f3f46;
+  --warm-dark: #27272a;
   --accent: #b45309;
-  --muted: #475569;
+  --muted: #52525b;
 }
 
 @theme inline {
@@ -42,12 +42,12 @@ body {
 }
 
 :where(button, a, input, select, textarea, summary):focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #52525b;
   outline-offset: 3px;
 }
 
 :where(button, a, summary) { touch-action: manipulation; }
-:where(input, select, textarea) { accent-color: #2563eb; }
+:where(input, select, textarea) { accent-color: #3f3f46; }
 summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
 
 @layer components {
@@ -61,8 +61,8 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
   }
   .app-page-wide { max-width: 72rem; }
   .app-card, .app-panel, .app-panel-strong, .app-list-row {
-    border: 1px solid #e2e8f0;
-    background: #fff;
+    border: 1px solid #e4e4e7;
+    background: #f4f4f5;
   }
   .app-panel, .app-panel-strong { border-radius: 1rem; }
   .app-panel-strong { box-shadow: 0 20px 60px rgb(15 23 42 / 18%); }
@@ -88,13 +88,14 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
     padding-inline: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #1d4ed8;
+    color: #3f3f46;
   }
 
   /* Wallpaper and translucent surfaces belong only to the launcher at /. */
   .home-screen {
     min-height: 100svh;
-    background: #eff5f4 url("/wallpapers/calm-ios-v2.webp") center / cover fixed no-repeat;
+    background: #e4e4e7 url("/wallpapers/calm-ios-v2.webp") center / cover fixed no-repeat;
+    background-blend-mode: luminosity;
   }
   .home-screen .ios-glass {
     border: 1px solid rgb(255 255 255 / 68%);
