@@ -1,4 +1,10 @@
-# Inventory MVP
+# Inventory implementation history
+
+For the current workflow, see [inventory-workflow.md](inventory-workflow.md).
+The dated sections below describe earlier implementations; weekly runs supersede
+daily runs and the original 168-hour comparison. Current inventory progress counts
+active placements with saved quantities; it does not represent approval.
+
 
 Implemented on `codex/inventory-pwa`. This repository is named Walter OS; its
 restaurant data model and existing app are preserved for the requested Juancarta

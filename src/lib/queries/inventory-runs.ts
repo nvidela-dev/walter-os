@@ -1,9 +1,9 @@
 import "server-only";
 
-import { desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { inventoryRunEntries, inventoryRuns } from "@/db/schema";
+import { fridgeProducts, fridges, inventoryRunEntries, inventoryRuns } from "@/db/schema";
 import { requireAccess } from "@/lib/auth/access";
 
 export type RunEntry = typeof inventoryRunEntries.$inferSelect;
@@ -37,4 +37,21 @@ export async function getLatestInventoryRun(): Promise<InventoryRun | null> {
   const [previous] = await db.select({ id: inventoryRuns.id }).from(inventoryRuns).where(lt(inventoryRuns.day, run.day)).limit(1);
   const entries = await db.select().from(inventoryRunEntries).where(eq(inventoryRunEntries.runId, run.id));
   return { ...run, initial: previous == null, entries };
+}
+
+/** Progress counts active placements only; historical snapshots stay untouched. */
+export async function getLatestInventoryProgress(): Promise<{
+  day: string | null; fridges: { id: string; counted: number; total: number }[];
+}> {
+  await requireAccess("inventory");
+  const [run] = await db.select({ id: inventoryRuns.id, day: inventoryRuns.day }).from(inventoryRuns).orderBy(desc(inventoryRuns.day)).limit(1);
+  const rows = await db.select({
+    id: fridges.id,
+    total: sql<number>`count(${fridgeProducts.productId})`.mapWith(Number),
+    counted: sql<number>`count(${inventoryRunEntries.productId})`.mapWith(Number),
+  }).from(fridges)
+    .leftJoin(fridgeProducts, and(eq(fridgeProducts.fridgeId, fridges.id), eq(fridgeProducts.active, true)))
+    .leftJoin(inventoryRunEntries, and(eq(inventoryRunEntries.runId, run?.id ?? -1), eq(inventoryRunEntries.fridgeId, fridges.id), eq(inventoryRunEntries.productId, fridgeProducts.productId)))
+    .where(eq(fridges.active, true)).groupBy(fridges.id);
+  return { day: run?.day ?? null, fridges: rows };
 }

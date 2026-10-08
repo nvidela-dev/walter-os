@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 
+import { t } from "@/i18n";
 import { runChange, runDate } from "@/lib/inventory/run-display";
 import { getInventoryRuns, type RunEntry } from "@/lib/queries/inventory-runs";
 
@@ -17,7 +18,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
   return <main className="space-y-5">
     <nav className="flex flex-wrap gap-4 text-sm underline"><Link href="/inventory">← Heladeras</Link><Link href="/inventory/list">Último inventario</Link></nav>
     <h1 className="text-3xl font-semibold">Historial de inventarios</h1>
-    <p className="text-sm text-muted">Un inventario por día. Abrí una fecha para ver sus cantidades y cambios frente al inventario anterior.</p>
+    <p className="text-sm text-muted">{t.inventory.weeklyHistoryHint}</p>
     {runs.length === 0 && <p>No hay inventarios guardados.</p>}
     {runs.map((run) => {
       const groups = new Map<string, RunEntry[]>();
