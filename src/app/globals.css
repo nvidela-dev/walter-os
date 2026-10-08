@@ -56,7 +56,7 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
 
 @layer components {
   .app-screen { min-height: 100svh; background: #fff; }
-  .app-page, .ios-page {
+  .app-page {
     margin-inline: auto;
     min-height: 100svh;
     width: 100%;
@@ -118,9 +118,28 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
 
   /* Wallpaper and translucent surfaces belong only to the launcher at /. */
   .home-screen {
+    --foreground: #1f2d35;
+    --font-sans: var(--font-geist-sans);
     min-height: 100svh;
-    background: #e4e4e7 url("/wallpapers/calm-ios-v2.webp") center / cover fixed no-repeat;
-    background-blend-mode: luminosity;
+    background-color: #eff5f4;
+    background-image: linear-gradient(rgba(239, 245, 244, 0.16), rgba(239, 245, 244, 0.18)), url("/wallpapers/calm-ios-v2.webp");
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+    color: #1f2d35;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-sans), system-ui, sans-serif;
+    font-variant-numeric: normal;
+    font-synthesis: weight style;
+    letter-spacing: normal;
+    line-height: 1.5;
+  }
+  .home-screen .ios-page {
+    margin-inline: auto;
+    min-height: 100svh;
+    width: 100%;
+    max-width: 48rem;
+    padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 2rem;
   }
   .home-screen .ios-glass {
     border: 1px solid rgb(255 255 255 / 68%);
@@ -136,8 +155,13 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
 }
 
 @media (min-width: 640px) {
-  .app-page, .ios-page { padding-inline: 1.5rem; padding-top: 1.5rem; }
+  .app-page { padding-inline: 1.5rem; padding-top: 1.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* The launcher's original scrollbar treatment must not affect work screens. */
+html:has(.home-screen)::-webkit-scrollbar { width: 4px; }
+html:has(.home-screen)::-webkit-scrollbar-track { background: transparent; }
+html:has(.home-screen)::-webkit-scrollbar-thumb { background: rgba(102, 121, 130, 0.35); border-radius: 4px; }

@@ -9,6 +9,7 @@ import {
   TruckIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import type { Viewport } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactElement } from "react";
@@ -39,13 +40,13 @@ const sections: {
             ...t.home.tiles.providers,
             href: "/providers",
             icon: TruckIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#f6b05f,#d86e42)]",
           },
           {
             ...t.home.tiles.invoices,
             href: "/invoices",
             icon: DocumentTextIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#8a96a8,#44556a)]",
           },
         ],
       },
@@ -56,13 +57,13 @@ const sections: {
             ...t.home.tiles.employees,
             href: "/employees",
             icon: UserGroupIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#e990a9,#c84d7b)]",
           },
           {
             ...t.home.tiles.hours,
             href: "#",
             icon: ClockIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#b9c0c5,#707b84)]",
           },
         ],
       },
@@ -78,13 +79,13 @@ const sections: {
             ...t.home.tiles.recipes,
             href: "/recipes",
             icon: BookOpenIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#5bd0c6,#2c9b91)]",
           },
           {
             ...t.home.tiles.inventory,
             href: "/inventory",
             icon: ArchiveBoxIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#a8b3bd,#6f7b86)]",
           },
         ],
       },
@@ -100,13 +101,13 @@ const sections: {
             ...t.home.tiles.menu,
             href: "/menu",
             icon: ClipboardDocumentListIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#9f7aea,#6b4bd6)]",
           },
           {
             ...t.home.tiles.cashOutputs,
             href: "#",
             icon: BanknotesIcon,
-            bg: "bg-[linear-gradient(145deg,#71717a,#3f3f46)]",
+            bg: "bg-[linear-gradient(145deg,#b8c0c5,#727d86)]",
           },
         ],
       },
@@ -118,7 +119,7 @@ function HomeTile({ app }: { app: HomeApp }): ReactElement {
   return (
     <Link
       href={app.href}
-      className="group flex w-[6.5rem] min-w-0 sm:w-[7.25rem] flex-col items-center gap-2 text-center transition active:scale-[0.96]"
+      className="group flex w-[7.25rem] min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
     >
       <div className={`ios-icon flex h-[4.25rem] w-[4.25rem] items-center justify-center text-white transition group-hover:scale-[1.03] ${app.bg}`}>
         <app.icon className="h-8 w-8" />
@@ -132,6 +133,7 @@ function HomeTile({ app }: { app: HomeApp }): ReactElement {
 }
 
 export const dynamic = "force-dynamic";
+export const viewport: Viewport = { themeColor: "#dce7e4" };
 
 export default async function Home(): Promise<ReactElement> {
   const group = await getCurrentGroup();
@@ -170,7 +172,7 @@ export default async function Home(): Promise<ReactElement> {
                     <h2 className="mb-5 px-1 text-[15px] font-semibold text-[#53656d] drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">
                       {group.title}
                     </h2>
-                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-7 sm:gap-x-10">
+                    <div className="flex flex-wrap justify-center gap-x-10 gap-y-7">
                       {group.apps.map((app) => (
                         <HomeTile key={`${group.title}-${app.name}`} app={app} />
                       ))}

@@ -1,6 +1,8 @@
 # Clear mobile design
 
-The launcher at `/` keeps its wallpaper, glass groups, and neutral app icons.
+The launcher at `/` retains its original wallpaper, glass groups, colorful app
+icons, system typography, spacing, and browser theme color. Its styles are
+scoped separately from the flat work screens.
 Every work screen uses a white background and solid, light-gray card surfaces. This includes
 inventory, history, target stock, purchases, suppliers, invoices, employees,
 recipes, menu, access management, and the dashboard.
@@ -17,6 +19,8 @@ recipes, menu, access management, and the dashboard.
   hides the purchases shortcut for now, uses “Inventario semanal”
   for weekly navigation, and shows compact count labels on each fridge. Empty
   comments are hidden; opening a fridge edit form expands its tile to full width.
+- A + control beside the history clock opens the add-fridge form in a native
+  dialog, with keyboard focus handling, Escape dismissal, and a cancel action.
 - Inputs use 16px text; shared buttons and icon controls have 44px touch targets.
   Browser zoom is enabled, and reduced-motion preferences are respected.
 - Fridge groups use neutral gray headers and cards instead of colored accents.
