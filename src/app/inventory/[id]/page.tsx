@@ -27,7 +27,7 @@ export default async function FridgePage({ params, searchParams }: {
   const available = matches.filter((product) => !rows.some((row) => row.id === product.id));
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm text-warm-dark">← {t.inventory.fridges}</Link>
-    <div><h1 className="mt-3 text-3xl font-semibold">{t.inventory.fridge(fridge.number)}</h1><p className="text-muted">{fridge.name}</p></div>
+    <div><h1 className="app-title mt-3">{t.inventory.fridge(fridge.number)}</h1><p className="text-muted">{fridge.name}</p></div>
     <details className="app-card rounded-2xl p-4" open={q.length > 0}>
       <summary className="cursor-pointer font-medium">{t.inventory.search}</summary>
       <form action={`/inventory/${id}`} className="my-4 flex gap-2">

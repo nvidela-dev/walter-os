@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default async function InventoryLayout({ children }: { children: ReactNode }): Promise<ReactElement> {
   const group = await getCurrentGroup();
   return <div className="app-page max-w-2xl">
-    <header className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+    <header className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-4">
       <Link href="/inventory" className="text-lg font-semibold">{t.inventory.title}</Link>
       <div className="flex flex-wrap items-center gap-3">
         <Link href="/inventory/new" className="app-text-action">Nuevo inventario</Link>

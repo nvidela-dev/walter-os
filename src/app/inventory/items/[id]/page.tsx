@@ -22,7 +22,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   const change = comparable ? item.locations.reduce((sum, { row }) => sum.plus(row.difference ?? "0"), new Decimal(0)).toString() : null;
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm underline">← Buscar otro producto</Link>
-    <h1 className="text-3xl font-semibold">{item.name}</h1>
+    <h1 className="app-title">{item.name}</h1>
     <p className="text-sm text-muted">{item.day === null ? "Todavía no hay inventario." : `Inventario del ${runDate(item.day)}`}</p>
     <section className="app-card space-y-3 rounded-2xl p-5">
       <h2 className="font-semibold">Cantidad disponible</h2>

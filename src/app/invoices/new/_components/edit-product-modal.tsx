@@ -61,7 +61,7 @@ export function EditProductModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[#0f172a]">{t.invoices.editProduct.title}</h3>
+          <h3 className="text-lg font-medium text-foreground">{t.invoices.editProduct.title}</h3>
           <Button
             type="button"
             onClick={onClose}
@@ -75,11 +75,11 @@ export function EditProductModal({
           </Button>
         </div>
 
-        <p className="mb-4 text-sm text-[#475569]">{t.invoices.editProduct.hint}</p>
+        <p className="mb-4 text-sm text-muted">{t.invoices.editProduct.hint}</p>
 
         <div className="mb-4">
-          <p className="mb-2 text-xs font-medium text-[#475569]">{t.invoices.fields.product}</p>
-          <p className="rounded-xl bg-[#ffffff] px-4 py-3 text-sm text-[#0f172a]">
+          <p className="mb-2 text-xs font-medium text-muted">{t.invoices.fields.product}</p>
+          <p className="rounded-xl bg-[#ffffff] px-4 py-3 text-sm text-foreground">
             {product.name}
           </p>
         </div>

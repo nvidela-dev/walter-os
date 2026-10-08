@@ -22,8 +22,8 @@ export default async function NotAuthorizedPage(): Promise<ReactElement> {
     <div className="app-screen flex items-center justify-center px-5 py-8 text-center">
       <div className="app-panel-strong w-full max-w-sm space-y-6 p-7">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-[#0f172a]">{t.auth.deniedTitle}</h1>
-          <p className="text-sm text-[#475569]">{t.auth.deniedBody}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.auth.deniedTitle}</h1>
+          <p className="text-sm text-muted">{t.auth.deniedBody}</p>
         </div>
         <Link href="/" className="block text-sm font-semibold text-warm-dark">{t.access.checkAgain}</Link>
         <SignOutActionButton label={t.auth.signOut} />

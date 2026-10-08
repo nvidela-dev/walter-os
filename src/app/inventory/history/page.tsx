@@ -15,8 +15,8 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
   if (!Number.isSafeInteger(page) || page < 1 || page > 1000000) notFound();
   const { runs, hasNext } = await getInventoryRuns(page);
   return <main className="space-y-5">
-    <nav className="flex flex-wrap gap-4 text-sm underline"><Link href="/inventory">← Heladeras</Link><Link href="/inventory/list">Último inventario</Link></nav>
-    <h1 className="text-3xl font-semibold">Historial de inventarios</h1>
+    <nav className="flex flex-wrap gap-4 text-sm underline"><Link href="/inventory">← Heladeras</Link><Link href="/inventory/list">{t.inventory.weeklyInventory}</Link></nav>
+    <h1 className="app-title">Historial de inventarios</h1>
     <p className="text-sm text-muted">{t.inventory.weeklyHistoryHint}</p>
     {runs.length === 0 && <p>No hay inventarios guardados.</p>}
     <div className="space-y-3">{runs.map((run) => <Link key={run.id} href={`/inventory/history/${run.id}`} className="app-card block rounded-2xl px-5 py-4 font-semibold">

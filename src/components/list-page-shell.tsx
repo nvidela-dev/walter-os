@@ -24,11 +24,11 @@ export function ListPageShell<T>({ title, backHref, addHref, items, renderItem, 
           <Link
             href={backHref}
             aria-label={t.common.back}
-            className="app-icon-button flex h-11 w-11 items-center justify-center rounded-full text-[#475569]"
+            className="app-icon-button flex h-11 w-11 items-center justify-center rounded-full text-muted"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-semibold text-[#0f172a]">{title}</h1>
+          <h1 className="text-xl font-semibold text-foreground">{title}</h1>
         </div>
         <Link href={addHref} className={buttonClassName({ className: "rounded-full text-sm" })}>
           <PlusIcon className="h-4 w-4" />
@@ -57,8 +57,8 @@ export function EmptyState({ icon: Icon, title, description, ctaHref, ctaText }:
       <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-zinc-200 text-zinc-700">
         <Icon className="h-8 w-8" />
       </div>
-      <h2 className="mb-2 text-lg font-semibold text-[#0f172a]">{title}</h2>
-      <p className="mb-6 text-sm text-[#475569]">{description}</p>
+      <h2 className="mb-2 text-lg font-semibold text-foreground">{title}</h2>
+      <p className="mb-6 text-sm text-muted">{description}</p>
       <Link href={ctaHref} className={buttonClassName({ className: "rounded-full px-6 text-sm" })}>
         {ctaText}
       </Link>
@@ -87,9 +87,9 @@ export function ListPageRow({
         <Icon className="h-6 w-6" />
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-[#0f172a]">{title}</h3>
+        <h3 className="font-semibold text-foreground">{title}</h3>
         {subtitle != null && (
-          <p className={cn("text-sm text-[#475569]", subtitleClassName ?? "line-clamp-1")}>
+          <p className={cn("text-sm text-muted", subtitleClassName ?? "line-clamp-1")}>
             {subtitle}
           </p>
         )}

@@ -46,7 +46,7 @@ export function ProductList({
 
   if (products.length === 0) {
     return (
-      <p className="py-4 text-center text-sm text-[#475569]">
+      <p className="py-4 text-center text-sm text-muted">
         {t.products.emptyHint}
       </p>
     );
@@ -62,8 +62,8 @@ export function ProductList({
           className="flex items-center justify-between rounded-xl bg-white p-4 transition-colors hover:bg-[#ffffff] active:scale-[0.99]"
         >
           <div className="flex-1">
-            <p className="font-medium text-[#0f172a]">{product.name}</p>
-            <p className="text-sm text-[#475569]">
+            <p className="font-medium text-foreground">{product.name}</p>
+            <p className="text-sm text-muted">
               ${product.price} / {product.unit}
             </p>
           </div>

@@ -6,7 +6,7 @@ export function FridgeGroup({ number, name, children }: {
 }): ReactElement {
   return <section className="app-card overflow-hidden rounded-2xl">
     <header className="border-b border-zinc-300 bg-zinc-200 px-4 py-3">
-      <h2 className="text-lg font-semibold text-[#0f172a]">Heladera {number}{name === null ? "" : ` · ${name}`}</h2>
+      <h2 className="text-lg font-semibold text-foreground">Heladera {number}{name === null ? "" : ` · ${name}`}</h2>
     </header>
     <div className="space-y-2 px-4 py-3">{children}</div>
   </section>;

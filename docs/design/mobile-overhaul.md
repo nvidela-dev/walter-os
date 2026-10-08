@@ -11,7 +11,11 @@ recipes, menu, access management, and the dashboard.
   their meaning and have readable contrast on white.
 - Solid cards with fine borders. Blur and translucent panels are scoped to
   `.home-screen`; modal backdrops only dim the page.
-- Consistent page widths, spacing, headers, rounded controls, and visible focus.
+- Geist variable typography with tighter heading tracking, balanced titles, and
+  tabular stock numbers; consistent page widths, spacing, controls, and focus.
+- The inventory overview omits the top status card, uses “Inventario semanal”
+  for weekly navigation, and shows compact count labels on each fridge. Empty
+  comments are hidden; opening a fridge edit form expands its tile to full width.
 - Inputs use 16px text; shared buttons and icon controls have 44px touch targets.
   Browser zoom is enabled, and reduced-motion preferences are respected.
 - Fridge groups use neutral gray headers and cards instead of colored accents.

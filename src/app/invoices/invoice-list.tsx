@@ -77,7 +77,7 @@ export function InvoiceList({
 
   return (
     <div className="space-y-4">
-      <div className="app-card flex gap-0.5 overflow-x-auto rounded-xl bg-slate-100 p-1 [scrollbar-width:none] sm:gap-1 [&::-webkit-scrollbar]:hidden">
+      <div className="app-card flex gap-0.5 overflow-x-auto rounded-xl bg-zinc-100 p-1 [scrollbar-width:none] sm:gap-1 [&::-webkit-scrollbar]:hidden">
         {FILTERS.map((f) => {
           const active = filter === f.key;
           return (
@@ -87,8 +87,8 @@ export function InvoiceList({
               onClick={() => { setFilter(f.key); }}
               className={`min-h-11 shrink-0 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${
                 active
-                  ? "bg-white text-[#0f172a] shadow-sm"
-                  : "text-[#475569] hover:bg-zinc-200"
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-muted hover:bg-zinc-200"
               }`}
             >
               {f.label}
@@ -102,7 +102,7 @@ export function InvoiceList({
 
       {filtered.length === 0 ? (
         <div className="app-panel flex flex-col items-center gap-4 px-6 py-12 text-center">
-          <p className="text-sm text-[#475569]">{EMPTY_MESSAGE[filter]}</p>
+          <p className="text-sm text-muted">{EMPTY_MESSAGE[filter]}</p>
           {/* Offer to create only from Unpaid/All — not Paid/Overdue. */}
           {(filter === "all" || filter === "unpaid") && (
             <Link
@@ -206,7 +206,7 @@ function InvoiceRowItem({
             <div className="flex items-center gap-2">
               <p
                 className={`truncate font-medium ${
-                  optimisticPaid ? "text-[#475569]" : "text-[#0f172a]"
+                  optimisticPaid ? "text-muted" : "text-foreground"
                 }`}
               >
                 {invoice.providerName}
@@ -217,7 +217,7 @@ function InvoiceRowItem({
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#475569]">
+            <p className="text-xs text-muted">
               {invoice.date}
               {invoice.number != null && invoice.number !== "" && <> · #{invoice.number}</>}
             </p>
@@ -225,7 +225,7 @@ function InvoiceRowItem({
 
           <div
             className={`shrink-0 text-right text-sm font-medium ${
-              optimisticPaid ? "text-[#475569]" : "text-[#0f172a]"
+              optimisticPaid ? "text-muted" : "text-foreground"
             }`}
           >
             ${invoice.total}
@@ -243,7 +243,7 @@ function InvoiceRowItem({
                 type="button"
                 onClick={() => { applyPaid(false); }}
                 disabled={isPending}
-                className="text-xs font-medium text-[#475569] underline-offset-2 hover:underline disabled:opacity-50"
+                className="text-xs font-medium text-muted underline-offset-2 hover:underline disabled:opacity-50"
               >
                 {t.invoices.list.markUnpaid}
               </button>
@@ -263,7 +263,7 @@ function InvoiceRowItem({
             aria-label={t.invoices.list.delete}
             variant="ghost"
             size="icon"
-            className="ml-auto h-12 w-12 shrink-0 rounded-full bg-white text-[#475569] hover:bg-zinc-200"
+            className="ml-auto h-12 w-12 shrink-0 rounded-full bg-white text-muted hover:bg-zinc-200"
           >
             <TrashIcon className="h-5 w-5" />
           </Button>
@@ -275,29 +275,29 @@ function InvoiceRowItem({
       {showPayConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 p-6">
           <div className="app-panel-strong w-full max-w-sm p-6">
-            <h2 className="mb-1 text-lg font-semibold text-[#0f172a]">
+            <h2 className="mb-1 text-lg font-semibold text-foreground">
               {t.invoices.list.payConfirmTitle}
             </h2>
-            <p className="mb-4 text-sm text-[#475569]">{t.invoices.list.payConfirmHint}</p>
+            <p className="mb-4 text-sm text-muted">{t.invoices.list.payConfirmHint}</p>
 
-            <dl className="mb-6 space-y-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
+            <dl className="mb-6 space-y-2 rounded-2xl border border-zinc-200 bg-white p-4 text-sm">
               <div className="flex justify-between gap-4">
-                <dt className="text-[#475569]">{t.invoices.fields.provider}</dt>
-                <dd className="truncate font-medium text-[#0f172a]">{invoice.providerName}</dd>
+                <dt className="text-muted">{t.invoices.fields.provider}</dt>
+                <dd className="truncate font-medium text-foreground">{invoice.providerName}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-[#475569]">{t.invoices.fields.date}</dt>
-                <dd className="font-medium text-[#0f172a]">{invoice.date}</dd>
+                <dt className="text-muted">{t.invoices.fields.date}</dt>
+                <dd className="font-medium text-foreground">{invoice.date}</dd>
               </div>
               {invoice.number != null && invoice.number !== "" && (
                 <div className="flex justify-between gap-4">
-                  <dt className="text-[#475569]">{t.invoices.fields.number}</dt>
-                  <dd className="font-medium text-[#0f172a]">#{invoice.number}</dd>
+                  <dt className="text-muted">{t.invoices.fields.number}</dt>
+                  <dd className="font-medium text-foreground">#{invoice.number}</dd>
                 </div>
               )}
-              <div className="flex justify-between gap-4 border-t border-slate-200 pt-2">
-                <dt className="text-[#475569]">{t.invoices.fields.total}</dt>
-                <dd className="font-semibold text-[#0f172a]">${invoice.total}</dd>
+              <div className="flex justify-between gap-4 border-t border-zinc-200 pt-2">
+                <dt className="text-muted">{t.invoices.fields.total}</dt>
+                <dd className="font-semibold text-foreground">${invoice.total}</dd>
               </div>
             </dl>
 
@@ -323,8 +323,8 @@ function InvoiceRowItem({
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/40 p-6">
           <div className="app-panel-strong w-full max-w-sm p-6">
-            <h2 className="mb-2 text-lg font-semibold text-[#0f172a]">{t.deleteDialog.title}</h2>
-            <p className="mb-6 text-sm text-[#475569]">
+            <h2 className="mb-2 text-lg font-semibold text-foreground">{t.deleteDialog.title}</h2>
+            <p className="mb-6 text-sm text-muted">
               {t.deleteDialog.confirm(invoice.providerName)}
             </p>
             <FormMessage message={deleteError} />

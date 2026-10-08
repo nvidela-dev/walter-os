@@ -56,7 +56,7 @@ export default async function ProvidersPage({
       />
 
       <nav className="pb-2 pt-5">
-        <div className="app-card grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+        <div className="app-card grid grid-cols-2 gap-1 rounded-xl bg-zinc-100 p-1">
           {TABS.map((tab) => {
             const isActive = tab.value === activeType;
             return (
@@ -64,7 +64,7 @@ export default async function ProvidersPage({
                 key={tab.value}
                 href={tab.value === "producto" ? "/providers" : `/providers?type=${tab.value}`}
                 className={`rounded-lg py-2.5 text-center text-sm font-semibold transition ${
-                  isActive ? "bg-white text-[#0f172a] shadow-sm" : "text-[#475569]"
+                  isActive ? "bg-white text-foreground shadow-sm" : "text-muted"
                 }`}
               >
                 {tab.label}
@@ -80,8 +80,8 @@ export default async function ProvidersPage({
             <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-zinc-200 text-zinc-700">
               <Icon className="h-8 w-8" />
             </div>
-            <h2 className="mb-2 text-lg font-semibold text-[#0f172a]">{emptyTitle}</h2>
-            <p className="mb-6 text-sm text-[#475569]">{emptyDescription}</p>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">{emptyTitle}</h2>
+            <p className="mb-6 text-sm text-muted">{emptyDescription}</p>
             <Link href="/providers/new" className={buttonClassName({ className: "rounded-full px-6 text-sm" })}>{t.providers.addCta}</Link>
           </div>
         ) : (
@@ -93,9 +93,9 @@ export default async function ProvidersPage({
                   <Icon className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-[#0f172a]">{provider.name}</h3>
+                  <h3 className="font-semibold text-foreground">{provider.name}</h3>
                   {provider.description != null && (
-                    <p className="text-sm text-[#475569]">{provider.description}</p>
+                    <p className="text-sm text-muted">{provider.description}</p>
                   )}
                   {Number(provider.debt) > 0 && (
                     <p className="text-sm font-medium text-[#b45309]">{t.providers.debtLabel(provider.debt)}</p>
@@ -104,7 +104,7 @@ export default async function ProvidersPage({
                 {provider.days != null && (
                   <div className="flex shrink-0 flex-wrap justify-end gap-1">
                     {provider.days.split(",").map((day) => (
-                      <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-semibold text-[#475569]">
+                      <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-semibold text-muted">
                         {day}
                       </span>
                     ))}

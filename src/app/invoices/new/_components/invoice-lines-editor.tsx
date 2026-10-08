@@ -32,7 +32,7 @@ export function InvoiceLinesEditor({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-sm font-medium text-[#475569]">{t.invoices.lines.heading}</h2>
+        <h2 className="text-sm font-medium text-muted">{t.invoices.lines.heading}</h2>
         <span className="text-xs text-[#3f3f46]">{t.invoices.lines.count(lines.length)}</span>
       </div>
 
@@ -123,7 +123,7 @@ export function InvoiceLinesEditor({
                   type="text"
                   readOnly
                   value={product?.unitCode ?? "—"}
-                  className="bg-[#ffffff] px-3 text-[#475569]"
+                  className="bg-[#ffffff] px-3 text-muted"
                 />
               </FormField>
               <FormField htmlFor={priceId} label={t.invoices.fields.unitPrice}>
@@ -143,14 +143,14 @@ export function InvoiceLinesEditor({
             </div>
 
             <div className="flex items-center justify-between border-t border-[#f8fafc] pt-3 text-sm">
-              <div className="text-[#475569]">
+              <div className="text-muted">
                 {isNewPrice && (
                   <span className="text-amber-700">
                     {t.invoices.lines.newPrice(product.currentPrice)}
                   </span>
                 )}
               </div>
-              <div className="font-medium text-[#0f172a]">
+              <div className="font-medium text-foreground">
                 {t.invoices.lines.subtotal(lineTotal.toFixed(2))}
               </div>
             </div>

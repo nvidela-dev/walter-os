@@ -24,12 +24,12 @@ export function PageHeader({
       <div className="flex min-w-0 items-center gap-3">
         <Link
           aria-label={t.common.back}
-          className="app-icon-button flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#475569]"
+          className="app-icon-button flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted"
           href={backHref}
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
-        <h1 className="break-words text-xl font-semibold tracking-normal text-[#0f172a]">
+        <h1 className="break-words text-xl font-semibold tracking-tight text-foreground">
           {title}
         </h1>
       </div>

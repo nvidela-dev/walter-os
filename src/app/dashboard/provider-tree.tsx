@@ -63,7 +63,7 @@ const c = {
 type IconType = ComponentType<{ className?: string; style?: CSSProperties }>;
 
 const openAffordanceClass =
-  "shrink-0 rounded p-0.5 opacity-100 transition hover:bg-[#cbd5e1] hover:text-[#0f172a] group-hover:opacity-100";
+  "shrink-0 rounded p-0.5 opacity-100 transition hover:bg-[#cbd5e1] hover:text-foreground group-hover:opacity-100";
 
 function NoIcon(): ReactElement {
   return <span className="inline-block h-4 w-4" />;
@@ -611,7 +611,7 @@ function todayLocal(): string {
 }
 
 const fieldClass =
-  "w-full rounded border border-[#e2e8f0] bg-[#ffffff] px-2 py-1 text-[13px] text-[#0f172a] outline-none focus:border-[#15803d] placeholder:text-[#64748b]";
+  "w-full rounded border border-[#e2e8f0] bg-[#ffffff] px-2 py-1 text-[13px] text-foreground outline-none focus:border-[#15803d] placeholder:text-[#64748b]";
 
 function AddInvoicePanel({
   providers,

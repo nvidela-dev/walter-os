@@ -20,7 +20,7 @@ export default async function TargetHistoryPage({ params, searchParams }: {
   const { revisions, hasNext } = await getInventoryTargetHistory(id, page);
   return <main className="space-y-5">
     <Link href={`/inventory/items/${id}`} className="text-sm underline">{t.inventoryTargets.back}</Link>
-    <h1 className="text-3xl font-semibold">{t.inventoryTargets.history}</h1>
+    <h1 className="app-title">{t.inventoryTargets.history}</h1>
     <p>{product.name}</p>
     <p className="text-sm text-muted">{t.inventoryTargets.historyHint}</p>
     {revisions.length === 0 && <p>{t.inventoryTargets.missing}</p>}

@@ -36,8 +36,12 @@ body {
   width: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  line-height: 1.5;
+  font-family: var(--font-geist-sans, system-ui), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums;
+  font-synthesis: none;
+  letter-spacing: -0.012em;
+  line-height: 1.55;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -59,6 +63,26 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
     max-width: 48rem;
     padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
+  .app-title {
+    font-size: clamp(1.75rem, 5vw, 2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  .app-nav-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 4rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    transition: background-color 150ms;
+  }
+  .app-nav-card:hover { background: #ebebed; }
+  .app-fridge-card:has(form) { grid-column: 1 / -1; }
   .app-page-wide { max-width: 72rem; }
   .app-card, .app-panel, .app-panel-strong, .app-list-row {
     border: 1px solid #e4e4e7;
@@ -70,12 +94,12 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
     position: sticky;
     top: 0;
     z-index: 10;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e4e4e7;
     background: #fff;
   }
   .app-icon { border-radius: 0.75rem; }
   .app-icon-button {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e4e4e7;
     background: #fff;
     min-width: 2.75rem;
     min-height: 2.75rem;
@@ -87,8 +111,9 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
     min-height: 2.75rem;
     padding-inline: 0.5rem;
     font-size: 0.875rem;
-    font-weight: 600;
-    color: #3f3f46;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: #52525b;
   }
 
   /* Wallpaper and translucent surfaces belong only to the launcher at /. */

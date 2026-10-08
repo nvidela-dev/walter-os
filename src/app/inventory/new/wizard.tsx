@@ -38,7 +38,7 @@ export function InventoryWizard({ groups, today, continuing }: {
   const missing = groups.reduce((total, fridge) => total + fridge.rows.filter((row) => (quantities[`${fridge.id}:${row.id}`] ?? "").trim() === "").length, 0);
   return <main className="space-y-5">
     <Link className="text-sm underline" href="/inventory">← Heladeras</Link>
-    <h1 className="text-3xl font-semibold">{continuing ? "Editar inventario de la semana" : "Nuevo inventario"}</h1>
+    <h1 className="app-title">{continuing ? "Editar inventario de la semana" : "Nuevo inventario"}</h1>
     <p>{runDate(today)}</p>
     <FormMessage message={error} />
     {step === -1 && <div className="app-card space-y-4 rounded-2xl p-5"><p>{continuing ? "Ya hay un inventario de esta semana. ¿Querés editar sus cantidades?" : "Contá una heladera por vez. Todos los conteos de martes a lunes se guardan como un solo inventario semanal."}</p><p className="text-sm text-muted">Vacío significa sin revisar; cero significa que no queda nada. Cada paso guarda sus conteos y conserva los inventarios anteriores.</p>{groups.length === 0 ? <p>Creá una heladera antes de comenzar.</p> : <Button disabled={isSubmitting} onClick={() => { void start(); }}>{continuing ? "Editar inventario de la semana" : "Comenzar inventario semanal"}</Button>}</div>}

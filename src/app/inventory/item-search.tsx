@@ -33,7 +33,7 @@ export function ItemSearch({ items }: { items: ItemSuggestion[] }): ReactElement
         if (item != null) { setOpen(false); router.push(`/inventory/items/${item.id}`); }
       }
     }} />
-    {visible && <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+    {visible && <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg">
       {matches.length === 0 ? <p role="status" className="p-4 text-sm text-muted">No hay productos que coincidan.</p> : <ul id={listId} role="listbox" aria-label="Productos encontrados">{matches.map((item, index) => <li key={item.id} id={`${listId}-${index}`} role="option" aria-selected={index === selected} className={index === selected ? "bg-zinc-100" : ""}><Link className="block px-4 py-3 text-sm hover:bg-zinc-100" href={`/inventory/items/${item.id}`} onClick={() => { setOpen(false); }}>{item.name}</Link></li>)}</ul>}
     </div>}
   </div>;

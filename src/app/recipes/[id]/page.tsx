@@ -30,15 +30,15 @@ export default async function RecipePage({
       <main className="flex-1 space-y-4 px-6 py-4">
         <div className="app-card rounded-2xl p-6"><RecipeForm recipe={recipe} /></div>
         <div className="app-card rounded-2xl p-6">
-          <h2 className="mb-4 text-lg font-medium text-[#0f172a]">{t.recipes.ingredients}</h2>
+          <h2 className="mb-4 text-lg font-medium text-foreground">{t.recipes.ingredients}</h2>
           {recipe.ingredients.length === 0 ? (
-            <p className="text-[#475569]">{t.recipes.noIngredients}</p>
+            <p className="text-muted">{t.recipes.noIngredients}</p>
           ) : (
             <div className="space-y-2">
               {recipe.ingredients.map((ingredient) => (
                 <div key={ingredient.productId} className="flex justify-between rounded-xl bg-[#e2e8f0] p-4">
-                  <span className="text-[#0f172a]">{ingredient.name}</span>
-                  <span className="text-[#475569]">{ingredient.quantity} {ingredient.unit}</span>
+                  <span className="text-foreground">{ingredient.name}</span>
+                  <span className="text-muted">{ingredient.quantity} {ingredient.unit}</span>
                 </div>
               ))}
             </div>

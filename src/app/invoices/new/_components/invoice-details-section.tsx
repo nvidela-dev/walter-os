@@ -42,7 +42,7 @@ export function InvoiceDetailsSection({
   return (
     <section className="space-y-4 app-card rounded-2xl p-6">
       <div>
-        <p className="mb-2 text-xs font-medium text-[#475569]">{t.invoices.fields.type}</p>
+        <p className="mb-2 text-xs font-medium text-muted">{t.invoices.fields.type}</p>
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-1">
           {TYPE_TABS.map((tab) => (
             <Button

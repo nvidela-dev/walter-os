@@ -16,7 +16,7 @@ export function ServiceAmountSection({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-sm font-medium text-[#475569]">{t.invoices.fields.amount}</h2>
+        <h2 className="text-sm font-medium text-muted">{t.invoices.fields.amount}</h2>
       </div>
       <div className="rounded-xl bg-white p-4">
         <FormField htmlFor="invoice-amount" label={t.invoices.fields.amountPrompt}>

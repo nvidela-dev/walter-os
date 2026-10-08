@@ -7,8 +7,8 @@ type ButtonSize = "default" | "compact" | "icon";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "border border-zinc-800 bg-zinc-800 text-white hover:bg-zinc-900 active:bg-zinc-950",
-  secondary: "border border-slate-300 bg-white text-slate-900 hover:bg-zinc-200 active:bg-slate-100",
-  ghost: "border border-transparent bg-transparent text-slate-600 hover:bg-slate-100 active:bg-slate-200",
+  secondary: "border border-zinc-300 bg-white text-foreground hover:bg-zinc-200 active:bg-zinc-100",
+  ghost: "border border-transparent bg-transparent text-muted hover:bg-zinc-100 active:bg-zinc-200",
   danger: "border border-red-600 bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
 };
 

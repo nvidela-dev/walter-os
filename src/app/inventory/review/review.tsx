@@ -65,7 +65,7 @@ export function ManualReview({ userId, photos, fridges, units, catalogue }: {
   }
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm underline">← Heladeras</Link>
-    <h1 className="text-3xl font-semibold">Revisar inventario en papel</h1>
+    <h1 className="app-title">Revisar inventario en papel</h1>
     <p>Las dos páginas del 29/9/26 están transcritas como posibles productos. Confirmá los nombres, las unidades y dónde se guardan.</p>
     <p className="text-sm text-muted">Tu progreso queda en este navegador. «HAY», fracciones y símbolos quedan como referencia; este paso arma el catálogo y no carga conteos.</p>
     {error !== "" && <p role="alert">{error}</p>}{message !== "" && <p role="status">{message}</p>}
