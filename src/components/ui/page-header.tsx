@@ -17,19 +17,19 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "ios-header flex min-w-0 items-center gap-3 px-4 py-4",
+        "app-header flex min-w-0 items-center gap-3 py-4",
         actions != null ? "justify-between" : "gap-4"
       )}
     >
       <div className="flex min-w-0 items-center gap-3">
         <Link
           aria-label={t.common.back}
-          className="ios-icon-button flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#43636e]"
+          className="app-icon-button flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#475569]"
           href={backHref}
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
-        <h1 className="truncate text-xl font-semibold tracking-normal text-[#1f2d35]">
+        <h1 className="break-words text-xl font-semibold tracking-normal text-[#0f172a]">
           {title}
         </h1>
       </div>

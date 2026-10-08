@@ -24,13 +24,13 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
     <Link href="/inventory" className="text-sm underline">← Buscar otro producto</Link>
     <h1 className="text-3xl font-semibold">{item.name}</h1>
     <p className="text-sm text-muted">{item.day === null ? "Todavía no hay inventario." : `Inventario del ${runDate(item.day)}`}</p>
-    <section className="ios-glass space-y-3 rounded-2xl p-5">
+    <section className="app-card space-y-3 rounded-2xl p-5">
       <h2 className="font-semibold">Cantidad disponible</h2>
       {totals.size === 0 ? <p>Sin conteo en el último inventario</p> : [...totals.entries()].map(([unit, amount]) => <p className="text-2xl font-semibold" key={unit}>{amount.toString()} {unit}</p>)}
       {missing && totals.size > 0 && <p className="text-sm text-muted">Total parcial: hay heladeras sin contar.</p>}
       {item.initial ? <p className="text-sm text-muted">Inventario inicial: sin comparación.</p> : <div><h2 className="font-semibold">Cambio de stock esta semana</h2><p>{runChange(change)}</p><p className="text-sm text-muted">Comparado con el inventario anterior; no indica consumo.</p></div>}
     </section>
-    <section className="ios-glass rounded-2xl p-5"><h2 className="font-semibold">Proveedor</h2><p className="mt-2">{item.providers.length === 0 ? "Proveedor no asignado" : item.providers.join(" · ")}</p></section>
+    <section className="app-card rounded-2xl p-5"><h2 className="font-semibold">Proveedor</h2><p className="mt-2">{item.providers.length === 0 ? "Proveedor no asignado" : item.providers.join(" · ")}</p></section>
     <TargetStock productId={id} />
     <h2 className="text-lg font-semibold">Ubicación</h2>
     {item.locations.map((location) => <FridgeGroup key={location.id} number={location.number} name={location.name}>

@@ -14,10 +14,10 @@ export function InvoiceSummary({
   total: number;
 }): ReactElement {
   return (
-    <section className="rounded-2xl bg-[#f5f0e8] p-6">
+    <section className="app-card rounded-2xl bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
-        <span className="text-sm text-[#8b7355]">{t.invoices.fields.total}</span>
-        <span className="text-2xl font-light text-[#3d3530]">${total.toFixed(2)}</span>
+        <span className="text-sm text-[#475569]">{t.invoices.fields.total}</span>
+        <span className="text-2xl font-light text-[#0f172a]">${total.toFixed(2)}</span>
       </div>
 
       <FormMessage message={error} className="mb-3" />

@@ -118,7 +118,7 @@ function HomeTile({ app }: { app: HomeApp }): ReactElement {
   return (
     <Link
       href={app.href}
-      className="group flex w-[7.25rem] min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
+      className="group flex w-[6.5rem] min-w-0 sm:w-[7.25rem] flex-col items-center gap-2 text-center transition active:scale-[0.96]"
     >
       <div className={`ios-icon flex h-[4.25rem] w-[4.25rem] items-center justify-center text-white transition group-hover:scale-[1.03] ${app.bg}`}>
         <app.icon className="h-8 w-8" />
@@ -137,7 +137,7 @@ export default async function Home(): Promise<ReactElement> {
   const group = await getCurrentGroup();
   if (group !== "admin") redirect(landingPath(group));
   return (
-    <div className="ios-screen">
+    <div className="home-screen">
       <main className="ios-page flex flex-col">
         <header className="mb-9 flex items-center justify-between">
           <div className="ios-glass rounded-full px-4 py-2">
@@ -170,7 +170,7 @@ export default async function Home(): Promise<ReactElement> {
                     <h2 className="mb-5 px-1 text-[15px] font-semibold text-[#53656d] drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">
                       {group.title}
                     </h2>
-                    <div className="flex flex-wrap justify-center gap-x-10 gap-y-7">
+                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-7 sm:gap-x-10">
                       {group.apps.map((app) => (
                         <HomeTile key={`${group.title}-${app.name}`} app={app} />
                       ))}

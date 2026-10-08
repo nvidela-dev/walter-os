@@ -7,9 +7,9 @@ import { EmployeeForm } from "../employee-form";
 
 export default function NewEmployeePage(): ReactElement {
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+    <div className="app-page flex flex-col bg-white">
       <PageHeader backHref="/employees" title={t.employees.newTitle} />
-      <main className="flex-1 px-6 py-4"><div className="rounded-2xl bg-[#f5f0e8] p-6"><EmployeeForm /></div></main>
+      <main className="flex-1 py-5"><div className="app-card rounded-2xl bg-white p-6"><EmployeeForm /></div></main>
     </div>
   );
 }

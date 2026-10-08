@@ -20,8 +20,8 @@ export default async function InvoicesPage(): Promise<ReactElement> {
   }));
 
   return (
-    <div className="ios-screen overflow-x-hidden">
-      <div className="ios-page flex min-w-0 flex-col">
+    <div className="app-screen overflow-x-hidden">
+      <div className="app-page flex min-w-0 flex-col">
         <PageHeader
           backHref="/"
           title={t.invoices.title}

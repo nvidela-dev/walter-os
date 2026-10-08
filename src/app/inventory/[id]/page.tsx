@@ -28,7 +28,7 @@ export default async function FridgePage({ params, searchParams }: {
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm text-warm-dark">← {t.inventory.fridges}</Link>
     <div><h1 className="mt-3 text-3xl font-semibold">{t.inventory.fridge(fridge.number)}</h1><p className="text-muted">{fridge.name}</p></div>
-    <details className="ios-glass rounded-2xl p-4" open={q.length > 0}>
+    <details className="app-card rounded-2xl p-4" open={q.length > 0}>
       <summary className="cursor-pointer font-medium">{t.inventory.search}</summary>
       <form action={`/inventory/${id}`} className="my-4 flex gap-2">
         <Input name="q" aria-label={t.inventory.search} placeholder={t.inventory.search} defaultValue={q} maxLength={200} />

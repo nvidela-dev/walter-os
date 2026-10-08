@@ -15,7 +15,7 @@ export function FormField({
 }): ReactElement {
   return (
     <div className={className}>
-      <label className={cn("mb-2 block text-sm font-semibold text-[#526b74]")} htmlFor={htmlFor}>
+      <label className={cn("mb-2 block text-sm font-semibold text-[#475569]")} htmlFor={htmlFor}>
         {label}
       </label>
       {children}

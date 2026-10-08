@@ -12,7 +12,7 @@ export async function TargetStock({ productId }: { productId: string }): Promise
   const [product, group] = await Promise.all([getInventoryTargetProduct(productId), getCurrentGroup()]);
   if (product === null) return null;
   const target = product.target;
-  return <section className="ios-glass space-y-3 rounded-2xl p-5">
+  return <section className="app-card space-y-3 rounded-2xl p-5">
     <h2 className="font-semibold">{t.inventoryTargets.title}</h2>
     <p className="text-sm text-muted">{t.inventoryTargets.scope}</p>
     <p>{target === null ? t.inventoryTargets.missing : `${target.quantity} ${target.unit}`}</p>

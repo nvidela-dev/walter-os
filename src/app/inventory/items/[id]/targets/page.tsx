@@ -24,7 +24,7 @@ export default async function TargetHistoryPage({ params, searchParams }: {
     <p>{product.name}</p>
     <p className="text-sm text-muted">{t.inventoryTargets.historyHint}</p>
     {revisions.length === 0 && <p>{t.inventoryTargets.missing}</p>}
-    <ul className="ios-glass divide-y rounded-2xl p-4">{revisions.map((revision) => <li className="space-y-1 py-3" key={revision.id}>
+    <ul className="app-card divide-y rounded-2xl p-4">{revisions.map((revision) => <li className="space-y-1 py-3" key={revision.id}>
       <p>{revision.quantity} {revision.unit}{revision.id === product.target?.id && <span className="ml-2 text-sm">{t.inventoryTargets.active}</span>}</p>
       <p className="text-xs text-muted">{inventoryDate(revision.recordedAt.toISOString())}</p>
     </li>)}</ul>

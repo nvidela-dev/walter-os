@@ -31,11 +31,11 @@ export default async function ProductEditPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+    <div className="app-page flex flex-col bg-white">
       <PageHeader backHref={`/providers/${id}`} title={t.products.editTitle} />
 
-      <main className="flex-1 px-6 py-4">
-        <section className="rounded-2xl bg-[#f5f0e8] p-6">
+      <main className="flex-1 py-5">
+        <section className="app-card rounded-2xl bg-white p-6">
           <ProductEditForm
             providerId={id}
             productId={productId}

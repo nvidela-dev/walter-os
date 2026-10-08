@@ -19,7 +19,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
     <h1 className="text-3xl font-semibold">Historial de inventarios</h1>
     <p className="text-sm text-muted">{t.inventory.weeklyHistoryHint}</p>
     {runs.length === 0 && <p>No hay inventarios guardados.</p>}
-    <div className="space-y-3">{runs.map((run) => <Link key={run.id} href={`/inventory/history/${run.id}`} className="ios-glass block rounded-2xl px-5 py-4 font-semibold">
+    <div className="space-y-3">{runs.map((run) => <Link key={run.id} href={`/inventory/history/${run.id}`} className="app-card block rounded-2xl px-5 py-4 font-semibold">
       {runDate(run.day)}
     </Link>)}</div>
     <nav aria-label="Páginas del historial" className="flex items-center justify-between gap-3 text-sm">

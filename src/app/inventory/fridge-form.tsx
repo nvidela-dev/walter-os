@@ -19,7 +19,7 @@ export function FridgeForm(): ReactElement {
     const result = await runAction(() => createFridge({ number: getFormString(data, "number"), name: getFormString(data, "name") }));
     if (result.ok) form.reset();
   }
-  return <details className="ios-glass rounded-2xl p-5"><summary className="cursor-pointer font-medium">{t.inventory.createFridge}</summary>
+  return <details className="app-card rounded-2xl p-5"><summary className="cursor-pointer font-medium">{t.inventory.createFridge}</summary>
     <form onSubmit={(event) => void submit(event)} className="mt-4 space-y-3">
       <FormMessage message={error} />
       <label className="block">{t.inventory.number}<Input name="number" type="number" inputMode="numeric" min="1" step="1" required /></label>

@@ -28,7 +28,7 @@ export function CountForm({ fridgeId, rows }: { fridgeId: string; rows: Inventor
   return <form onSubmit={(event) => void submit(event)} onChange={() => { setSaved(false); }} className="space-y-3">
     <p className="text-sm text-muted">{t.inventory.hint}</p>
     <fieldset disabled={isSubmitting} className="space-y-3">
-      {rows.map((row) => <article key={row.id} className="ios-glass rounded-2xl p-4">
+      {rows.map((row) => <article key={row.id} className="app-card rounded-2xl p-4">
         <h2 className="text-lg font-semibold">{row.name}</h2>
         {row.note !== null && <p className="whitespace-pre-wrap text-sm">{row.note}</p>}
         <p className="text-xs text-muted">{row.providers.length > 0 ? row.providers.join(" · ") : t.inventory.noProvider}</p>

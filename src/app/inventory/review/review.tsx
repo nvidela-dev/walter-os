@@ -77,7 +77,7 @@ export function ManualReview({ userId, photos, fridges, units, catalogue }: {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photos[source.page - 1]} alt={`Inventario manuscrito, página ${source.page}`} className="max-h-[32rem] w-full rounded-xl object-contain" />
       </details>
-      <div className="ios-glass space-y-3 rounded-2xl p-4"><h2 className="text-lg font-semibold">Lo que leí</h2><p>{source.transcription}</p><p className="rounded-xl bg-amber-50 p-3 text-amber-900">{source.question}</p></div>
+      <div className="app-card space-y-3 rounded-2xl p-4"><h2 className="text-lg font-semibold">Lo que leí</h2><p>{source.transcription}</p><p className="rounded-xl bg-amber-50 p-3 text-amber-900">{source.question}</p></div>
       {row.status === "saved" ? <p>Este producto ya fue agregado.</p> : <>
         <label className="block">Producto existente<Select value={row.productId} onChange={(event) => {
           const product = catalogue.find((item) => item.id === event.target.value);
@@ -92,6 +92,6 @@ export function ManualReview({ userId, photos, fridges, units, catalogue }: {
       <div className="flex gap-2"><Button variant="secondary" disabled={index === 0} onClick={() => { setIndex(index - 1); }}>Anterior</Button><Button variant="secondary" disabled={index === rows.length - 1} onClick={() => { setIndex(index + 1); }}>Siguiente</Button></div>
       <details><summary className="cursor-pointer">Todos los posibles productos</summary><div className="space-y-2">{rows.map((item, i) => <button type="button" key={item.id} className="block w-full rounded-xl border p-3 text-left" onClick={() => { setIndex(i); }}>{item.name} · {({ pending: "Pendiente", reviewed: "Revisado", skipped: "Pendiente", saved: "Agregado" })[item.status]}</button>)}</div></details>
     </fieldset>}
-    {reviewed.length > 0 && <section className="ios-glass space-y-3 rounded-2xl p-4"><h2 className="font-semibold">Confirmar {reviewed.length} revisados</h2><ul>{reviewed.map((item) => <li key={item.id}>{item.name} → Heladera {fridges.find((fridge) => fridge.id === item.fridgeId)?.number} · {units.find((unit) => unit.id === item.unitId)?.name}</li>)}</ul><Button disabled={busy || !ready} onClick={() => { void save(); }}>Agregar lote al catálogo</Button></section>}
+    {reviewed.length > 0 && <section className="app-card space-y-3 rounded-2xl p-4"><h2 className="font-semibold">Confirmar {reviewed.length} revisados</h2><ul>{reviewed.map((item) => <li key={item.id}>{item.name} → Heladera {fridges.find((fridge) => fridge.id === item.fridgeId)?.number} · {units.find((unit) => unit.id === item.unitId)?.name}</li>)}</ul><Button disabled={busy || !ready} onClick={() => { void save(); }}>Agregar lote al catálogo</Button></section>}
   </main>;
 }

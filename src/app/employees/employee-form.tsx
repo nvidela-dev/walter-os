@@ -32,22 +32,22 @@ function InfoCard({
   items: { label: string; value: string; detail?: string }[];
 }): ReactElement {
   return (
-    <div className="grid grid-cols-2 overflow-hidden rounded-3xl border border-white/65 bg-white/58 shadow-[0_12px_34px_rgba(31,45,53,0.08)] backdrop-blur-xl">
+    <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
       {items.map((item, index) => (
         <div
           key={item.label}
           className={`min-w-0 px-4 py-5 text-center ${
-            index > 0 ? "border-l border-white/70" : ""
+            index > 0 ? "border-l border-slate-200" : ""
           }`}
         >
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#7d8b91]">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#475569]">
             {item.label}
           </p>
-          <p className="mt-1 truncate text-2xl font-semibold text-[#2f3c42]">
+          <p className="mt-1 truncate text-2xl font-semibold text-[#0f172a]">
             {item.value}
           </p>
           {item.detail != null && (
-            <p className="mt-1 text-xs font-medium text-[#879399]">{item.detail}</p>
+            <p className="mt-1 text-xs font-medium text-[#475569]">{item.detail}</p>
           )}
         </div>
       ))}

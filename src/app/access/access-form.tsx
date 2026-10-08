@@ -27,7 +27,7 @@ export function AccessForm({ members }: { members: AccessMember[] }): ReactEleme
   }
 
   return <div className="space-y-5">
-    <form onSubmit={(event) => void submit(event)} onChange={() => { setSaved(false); }} className="ios-glass space-y-4 rounded-2xl p-5">
+    <form onSubmit={(event) => void submit(event)} onChange={() => { setSaved(false); }} className="app-card space-y-4 rounded-2xl p-5">
       <p className="text-sm text-muted">{t.access.hint}</p>
       <fieldset disabled={isSubmitting} className="space-y-4">
         <label className="block">{t.access.email}
@@ -47,7 +47,7 @@ export function AccessForm({ members }: { members: AccessMember[] }): ReactEleme
     </form>
     <ul className="space-y-2">
       {members.map((member) => <li key={member.email}>
-        <button type="button" disabled={isSubmitting} onClick={() => { setEmail(member.email); setGroup(member.group); setSaved(false); }} className="ios-glass flex w-full flex-wrap justify-between gap-2 rounded-2xl p-4 text-left">
+        <button type="button" disabled={isSubmitting} onClick={() => { setEmail(member.email); setGroup(member.group); setSaved(false); }} className="app-card flex w-full flex-wrap justify-between gap-2 rounded-2xl p-4 text-left">
           <span className="break-all">{member.email}</span>
           <span className="text-sm text-muted">{member.group === "admin" ? t.access.admin : t.access.kitchen}</span>
         </button>

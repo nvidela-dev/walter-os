@@ -15,12 +15,12 @@ export const metadata: Metadata = {
 
 export default async function InventoryLayout({ children }: { children: ReactNode }): Promise<ReactElement> {
   const group = await getCurrentGroup();
-  return <div className="ios-page max-w-2xl">
-    <header className="mb-6 flex items-center justify-between">
+  return <div className="app-page max-w-2xl">
+    <header className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
       <Link href="/inventory" className="text-lg font-semibold">{t.inventory.title}</Link>
-      <div className="flex items-center gap-4">
-        <Link href="/inventory/new" className="text-sm font-medium underline">Nuevo inventario</Link>
-        {group === "admin" && <Link href="/" className="text-sm text-warm-dark">{t.access.mainApp}</Link>}
+      <div className="flex flex-wrap items-center gap-3">
+        <Link href="/inventory/new" className="app-text-action">Nuevo inventario</Link>
+        {group === "admin" && <Link href="/" className="app-text-action">{t.access.mainApp}</Link>}
         <UserButton />
       </div>
     </header>
