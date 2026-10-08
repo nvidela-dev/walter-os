@@ -50,6 +50,7 @@ export async function updateProvider(
 
     revalidatePath("/providers");
     revalidatePath(`/providers/${parsedId.data}`);
+    revalidatePath("/inventory", "layout");
     return actionOk(updated);
   } catch (error) {
     return unknownActionError(error);

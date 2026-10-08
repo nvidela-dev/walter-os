@@ -7,6 +7,7 @@ import { runChange, runDate } from "@/lib/inventory/run-display";
 import { getInventoryItemDetail } from "@/lib/queries/inventory-items";
 
 import { FridgeGroup } from "../../fridge-group";
+import { TargetStock } from "./target-stock";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
       {item.initial ? <p className="text-sm text-muted">Inventario inicial: sin comparación.</p> : <div><h2 className="font-semibold">Cambio de stock esta semana</h2><p>{runChange(change)}</p><p className="text-sm text-muted">Comparado con el inventario anterior; no indica consumo.</p></div>}
     </section>
     <section className="ios-glass rounded-2xl p-5"><h2 className="font-semibold">Proveedor</h2><p className="mt-2">{item.providers.length === 0 ? "Proveedor no asignado" : item.providers.join(" · ")}</p></section>
+    <TargetStock productId={id} />
     <h2 className="text-lg font-semibold">Ubicación</h2>
     {item.locations.map((location) => <FridgeGroup key={location.id} number={location.number} name={location.name}>
       <p>{location.row.current === null ? "Sin conteo en este inventario" : `${location.row.current.quantity} ${location.row.current.unit}`}</p>
