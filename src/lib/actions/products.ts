@@ -192,6 +192,7 @@ export async function updateProduct(
 
     revalidatePath(`/providers/${parsed.data.providerId}`);
     revalidatePath(`/providers/${parsed.data.providerId}/products/${parsed.data.productId}`);
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) {
     return unknownActionError(error);

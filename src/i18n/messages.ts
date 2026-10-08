@@ -54,6 +54,23 @@ export const t = {
     active: "Activo", unitChanged: "La unidad del producto cambió. Definí un objetivo con la unidad actual antes de calcular compras.",
     back: "← Volver al producto", newer: "← Más recientes", older: "Más antiguos →",
   },
+  inventoryPurchases: {
+    title: "Compras por proveedor", back: "← Heladeras",
+    hint: "Faltantes del último inventario frente al stock objetivo activo. Cada producto se suma entre todas sus heladeras.",
+    unitsHint: "Las cantidades son unidades de stock. No se redondean a paquetes ni se convierten unidades automáticamente.",
+    noInventory: "Todavía no hay un inventario. Registrá los conteos antes de preparar compras.",
+    olderInventory: "El último inventario pertenece a una semana anterior. Revisá los conteos antes de usar estas cantidades.",
+    noProducts: "No hay productos activos en inventario.",
+    buy: (quantity: string, unit: string): string => `Comprar ${quantity} ${unit}`,
+    comparison: (stock: string, target: string, unit: string): string => `Stock: ${stock} ${unit} · Objetivo: ${target} ${unit}`,
+    supplierFor: (name: string): string => `Proveedor para ${name}`,
+    chooseSupplier: "Elegí un proveedor", noSupplier: "Sin proveedor asociado. Un administrador puede asociarlo al producto.",
+    unresolved: (count: number): string => `Pendientes de resolver (${count})`,
+    unresolvedHint: "Estos productos no se incluyen en los grupos de compra hasta resolver sus datos.",
+    noPurchase: (count: number): string => `Sin faltante a comprar (${count})`,
+    selectionHint: "La elección de proveedor se aplica a esta vista. Al recargar, se vuelve a elegir; no se guarda un proveedor preferido ni se envían pedidos.",
+    issues: { "missing-count": "Hay heladeras sin contar. No se asumió stock cero.", "missing-target": "Falta definir el stock objetivo.", "unit-mismatch": "Las unidades de los conteos, el objetivo o el producto no coinciden. Revisalos antes de calcular." },
+  },
   /** App-level metadata (next/metadata, manifest). */
   app: {
     name: "Gestión",
