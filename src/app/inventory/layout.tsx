@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactElement, ReactNode } from "react";
 
+import { buttonClassName } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
 import { getCurrentGroup } from "@/lib/auth/access";
 
@@ -16,14 +18,11 @@ export const metadata: Metadata = {
 export default async function InventoryLayout({ children }: { children: ReactNode }): Promise<ReactElement> {
   const group = await getCurrentGroup();
   return <div className="app-page max-w-2xl">
-    <header className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-4">
-      <Link href="/inventory" className="text-lg font-semibold">{t.inventory.title}</Link>
-      <div className="flex flex-wrap items-center gap-3">
-        <Link href="/inventory/new" className="app-text-action">Nuevo inventario</Link>
-        {group === "admin" && <Link href="/" className="app-text-action">{t.access.mainApp}</Link>}
-        <UserButton />
-      </div>
-    </header>
+    <PageHeader
+      title={t.inventory.title} titleHref="/inventory" titleAs="div" className="mb-6"
+      backHref={group === "admin" ? "/" : undefined} backLabel={t.access.mainApp}
+      actions={<><Link href="/inventory/new" aria-label={t.inventory.newInventory} className={buttonClassName({ variant: "secondary", size: "compact" })}>{t.inventory.newInventoryShort}</Link><UserButton /></>}
+    />
     {children}
     <p className="mt-8 text-center text-xs text-muted">{t.inventory.online}</p>
   </div>;

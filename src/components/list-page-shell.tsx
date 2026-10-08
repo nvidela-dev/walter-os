@@ -1,8 +1,9 @@
-import { ArrowLeftIcon, ChevronRightIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 
 import { buttonClassName } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 
@@ -19,22 +20,7 @@ export function ListPageShell<T>({ title, backHref, addHref, items, renderItem, 
   return (
     <div className="app-screen">
       <div className="app-page flex flex-col">
-      <header className="app-header flex items-center justify-between py-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            href={backHref}
-            aria-label={t.common.back}
-            className="app-icon-button flex h-11 w-11 items-center justify-center rounded-full text-muted"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-          </Link>
-          <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-        </div>
-        <Link href={addHref} className={buttonClassName({ className: "rounded-full text-sm" })}>
-          <PlusIcon className="h-4 w-4" />
-          {t.common.add}
-        </Link>
-      </header>
+      <PageHeader title={title} backHref={backHref} actions={<Link href={addHref} className={buttonClassName({ className: "text-sm" })}><PlusIcon className="h-4 w-4" />{t.common.add}</Link>} />
       <main className="flex-1 py-5">
         {items.length === 0 ? emptyState : <div className="space-y-3">{items.map(renderItem)}</div>}
       </main>

@@ -19,6 +19,8 @@ recipes, menu, access management, and the dashboard.
   hides the purchases shortcut for now, uses “Inventario semanal”
   for weekly navigation, and shows compact count labels on each fridge. Empty
   comments are hidden; opening a fridge edit form expands its tile to full width.
+- Work apps share a full-width, sticky white header bar with a stronger title,
+  consistent back controls, separated actions, and a subtle bottom divider.
 - A + control beside the history clock opens the add-fridge form in a native
   dialog, with keyboard focus handling, Escape dismissal, and a cancel action.
 - Inputs use 16px text; shared buttons and icon controls have 44px touch targets.
@@ -60,7 +62,7 @@ signed-in production records or proof of every end-to-end workflow.
 
 ## Verification
 
-The existing 140 tests, lint, type checking, and production build pass. Visual
+The existing 142 tests, lint, type checking, and production build pass. Visual
 previews were inspected at phone widths; DOM checks at 320px and 390px confirmed
 no horizontal overflow on the sampled screens, with a 768px inventory check as
 well. Computed styles confirmed a white work-screen background, 16px input text,

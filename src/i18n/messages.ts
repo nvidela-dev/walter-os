@@ -23,6 +23,7 @@ export const t = {
     initialRun: "Inventario inicial",
     emptyRun: "Este inventario todavía no tiene conteos guardados.",
     runDetailHint: "Cantidades guardadas en este inventario. Los cambios comparan con el inventario anterior.",
+    newInventory: "Nuevo inventario", newInventoryShort: "Nuevo",
     weeklyInventory: "Inventario semanal",
     weeklyListHint: "Conteos del inventario semanal, agrupados por heladera. Los cambios comparan con el inventario anterior.",
     compactProgress: (counted: number, total: number): string => `${counted}/${total} contados`,
