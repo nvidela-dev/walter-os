@@ -279,3 +279,25 @@ it("searches active inventory items and returns all fridge locations and provide
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
   await expect(getInventoryItemDetail(fixture.product)).rejects.toThrow("Denied");
 });
+
+it("reports saved weekly counts including zero, and excludes hidden placements without deleting history", async () => {
+  const { getLatestInventoryProgress, getLatestInventoryRun } = await import("@/lib/queries/inventory-runs");
+  const fridgeId = randomUUID();
+  const countedId = randomUUID();
+  const uncountedId = randomUUID();
+  await client.query("INSERT INTO heladeras(id,numero) VALUES ($1,77)", [fridgeId]);
+  await client.query("INSERT INTO productos(id,nombre,unidad) VALUES ($1,'Zero count','unidad'),($2,'Not reviewed','unidad')", [countedId, uncountedId]);
+  await addFridgeProduct({ fridgeId, productId: countedId });
+  await addFridgeProduct({ fridgeId, productId: uncountedId });
+  const run = await getLatestInventoryRun();
+  if (run === null) throw new Error("Missing fixture run");
+  await client.query("INSERT INTO observaciones_inventario(heladera_id,producto_id,cantidad,unidad,registrado_por,registrado_at) VALUES ($1,$2,0,'unidad','kitchen',$3)", [fridgeId, countedId, `${run.day}T15:00:00Z`]);
+  expect((await getLatestInventoryProgress()).fridges.find((row) => row.id === fridgeId)).toEqual({ id: fridgeId, counted: 1, total: 2 });
+  await removeInventoryEntry({ fridgeId, productId: uncountedId });
+  expect((await getLatestInventoryProgress()).fridges.find((row) => row.id === fridgeId)).toEqual({ id: fridgeId, counted: 1, total: 1 });
+  await removeInventoryEntry({ fridgeId, productId: countedId });
+  expect((await getLatestInventoryProgress()).fridges.find((row) => row.id === fridgeId)).toEqual({ id: fridgeId, counted: 0, total: 0 });
+  expect((await client.query("SELECT * FROM inventario_items WHERE heladera_id=$1", [fridgeId])).rows).toHaveLength(1);
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  await expect(getLatestInventoryProgress()).rejects.toThrow("Denied");
+});

@@ -14,7 +14,7 @@ the active target quantity and group the resulting purchase needs by supplier.
 
 | Step | Required behavior | Current implementation |
 | --- | --- | --- |
-| Inspect fridges | Kitchen staff inspect each fridge and report its inventory status. | Fridge pages, quantity edits, notes, and a wizard with one step per fridge exist. No completed or reviewed status is persisted. |
+| Inspect fridges | Kitchen staff inspect each fridge and report its inventory status. | Fridge pages, quantity edits, notes, and a wizard with one step per fridge exist. Counted/unreviewed progress is derived from saved quantities for active placements; no approval status is persisted. |
 | Add products | Every inventory product has a fridge placement. | Kitchen users can associate an existing product or create a product and placement together. A product can occupy multiple fridges. |
 | Count stock | Record the actual quantity and unit for each product in each fridge. | Implemented. Blank means unreviewed; explicit zero means none remains. |
 | Maintain the weekly inventory | Tuesday–Monday edits belong to one shared weekly instance. | Implemented through weekly date normalization, a unique date, and a constraint requiring that date to be Tuesday. |
@@ -161,14 +161,14 @@ Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
 
 1. Target quantities, their history and active-target enforcement still need
    implementation. Purchase shortages and supplier grouping also need implementation.
-2. The history screen still says “Un inventario por día” (“One inventory per day”)
-   even though its date cards and database behavior are weekly. This document
-   records the mismatch without changing the screen.
+2. The history screen now describes one inventory per Tuesday–Monday week. Fridge
+   home shows current-week progress and offers starting or editing that week.
 3. The older [inventory implementation notes](inventory.md) contain superseded
    daily-run and 168-hour comparison descriptions. Their final weekly paragraph
    supersedes the daily rule; current inventory screens use weekly run snapshots.
-4. The wizard reports unreviewed fields but does not persist a completed, reviewed,
-   or approved status. Define what “inventory status” must mean operationally.
+4. Inventory status reports saved counts versus active product placements, including
+   explicit zeros. Empty fridges are not labeled complete. This is counting progress,
+   not an approval state; a separate approval workflow remains undefined.
 5. Kitchen users can count and add inventory products; supplier link management
    is in the main application, which is restricted to Admin. Permissions for
    editing targets and resolving suppliers remain undecided.

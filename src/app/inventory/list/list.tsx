@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { editInventoryEntry, removeInventoryEntry } from "@/lib/actions/inventory";
 import { inventoryDate } from "@/lib/inventory/comparison";
+import { inventoryProgress } from "@/lib/inventory/progress";
 import { runChange } from "@/lib/inventory/run-display";
 import type { InventoryRow } from "@/lib/queries/inventory";
 
 import { FridgeDetails } from "../fridge-details";
 import { FridgeGroup } from "../fridge-group";
+import { InventoryProgress } from "../progress";
 
 export function InventoryList({ groups }: { groups: { id: string; number: number; name: string | null; commentary: string | null; rows: InventoryRow[] }[] }): ReactElement {
   const router = useRouter();
@@ -37,6 +39,7 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
     {groups.length === 0 && <p>No hay heladeras.</p>}
     {groups.map((fridge) => <FridgeGroup key={fridge.id} number={fridge.number} name={fridge.name}>
       <FridgeDetails fridge={fridge} />
+      <InventoryProgress {...inventoryProgress(fridge.rows)} />
       {fridge.rows.length === 0 && <p className="text-sm text-muted">Sin productos.</p>}
       <ul className="divide-y divide-cream-dark">
         {fridge.rows.map((row) => {
