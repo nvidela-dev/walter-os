@@ -18,7 +18,11 @@ export const t = {
     empty: "No hay usuarios con acceso.", checkAgain: "Ya solicité acceso · Volver a intentar",
   },
   inventory: {
-    weeklyHistoryHint: "Un inventario por semana, de martes a lunes. Abrí una fecha para ver sus cantidades y cambios frente al inventario anterior.",
+    weeklyHistoryHint: "Un inventario por semana, de martes a lunes. Seleccioná una fecha para abrir su inventario y ver las cantidades y cambios frente al inventario anterior.",
+    historyBack: "← Historial de inventarios",
+    initialRun: "Inventario inicial",
+    emptyRun: "Este inventario todavía no tiene conteos guardados.",
+    runDetailHint: "Cantidades guardadas en este inventario. Los cambios comparan con el inventario anterior.",
     weeklyStatus: "Estado del inventario semanal",
     weeklyNotStarted: "Todavía no se inició el inventario de esta semana.",
     weeklyStart: "Comenzar inventario semanal",

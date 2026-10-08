@@ -82,7 +82,7 @@ These answer different questions and must remain separate:
 
 | History | Question answered | Status |
 | --- | --- | --- |
-| Weekly inventory history | How much was recorded for each fridge/product in each inventory week? | Implemented through `inventarios` and `inventario_items`; the history screen displays the latest summary for each week. |
+| Weekly inventory history | How much was recorded for each fridge/product in each inventory week? | Implemented through `inventarios` and `inventario_items`; the history list links each week to its own detail page containing that week's saved summary. |
 | Count audit history | Who recorded which quantity, and when, including corrections within a week? | Immutable `observaciones_inventario` rows retain the quantity, unit, user, and timestamp. The weekly history screen does not expose every audit correction. |
 | Target-stock history | What quantity did we intend to maintain, and how did that target change? | Implemented separately in `historial_objetivos_inventario`, with one active revision referenced by `objetivos_inventario_activos`. |
 

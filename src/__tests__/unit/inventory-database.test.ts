@@ -302,3 +302,26 @@ it("reports saved weekly counts including zero, and excludes hidden placements w
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
   await expect(getLatestInventoryProgress()).rejects.toThrow("Denied");
 });
+
+it("loads the selected historical inventory rather than the latest, retaining saved names and hidden placements", async () => {
+  const { getInventoryRun, getInventoryRuns } = await import("@/lib/queries/inventory-runs");
+  const fridgeId = randomUUID();
+  const productId = randomUUID();
+  await client.query("INSERT INTO heladeras(id,numero,nombre) VALUES ($1,88,'Original fridge')", [fridgeId]);
+  await client.query("INSERT INTO productos(id,nombre,unidad) VALUES ($1,'Original product','kg')", [productId]);
+  await client.query("INSERT INTO heladera_productos(heladera_id,producto_id,nota) VALUES ($1,$2,'Saved note')", [fridgeId, productId]);
+  await client.query("INSERT INTO observaciones_inventario(heladera_id,producto_id,cantidad,unidad,registrado_por,registrado_at) VALUES ($1,$2,5,'kg','kitchen','2030-01-01T12:00:00Z'),($1,$2,3,'kg','kitchen','2030-01-08T12:00:00Z')", [fridgeId, productId]);
+  const headers = await client.query<{ id: number; fecha: string }>("SELECT id,fecha::text FROM inventarios WHERE fecha IN ('2030-01-01','2030-01-08') ORDER BY fecha");
+  const oldId = Number(headers.rows[0]?.id);
+  const newId = Number(headers.rows[1]?.id);
+  await client.query("UPDATE productos SET nombre='Renamed' WHERE id=$1", [productId]);
+  await client.query("UPDATE heladeras SET nombre='Renamed fridge',activa=false WHERE id=$1", [fridgeId]);
+  await client.query("UPDATE heladera_productos SET activo=false,nota='Changed note' WHERE heladera_id=$1", [fridgeId]);
+  expect((await getInventoryRun(oldId))?.entries).toEqual([expect.objectContaining({ quantity: "5.00", name: "Original product", fridgeName: "Original fridge", note: "Saved note" })]);
+  expect((await getInventoryRun(newId))?.entries).toEqual([expect.objectContaining({ quantity: "3.00", difference: "-2.00" })]);
+  expect((await getInventoryRuns()).runs[0]).toEqual({ id: newId, day: "2030-01-08", initial: false });
+  expect(await getInventoryRun(-1)).toBeNull();
+  expect(await getInventoryRun(999999)).toBeNull();
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  await expect(getInventoryRun(oldId)).rejects.toThrow("Denied");
+});
