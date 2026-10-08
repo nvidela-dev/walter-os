@@ -55,7 +55,7 @@ export function ProviderForm({ provider }: { provider?: ProviderView }): ReactEl
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <FormMessage message={error} />
       <div>
-        <p className="mb-2 text-xs font-medium text-[#8b7355]">{t.providers.fields.type}</p>
+        <p className="mb-2 text-xs font-medium text-muted">{t.providers.fields.type}</p>
         <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
@@ -98,7 +98,7 @@ export function ProviderForm({ provider }: { provider?: ProviderView }): ReactEl
       </FormField>
 
       <div>
-        <p className="mb-2 text-xs font-medium text-[#8b7355]">{t.providers.fields.visitDays}</p>
+        <p className="mb-2 text-xs font-medium text-muted">{t.providers.fields.visitDays}</p>
         <div className="flex gap-2">
           {DAY_KEYS.map((key) => (
             <button
@@ -108,7 +108,7 @@ export function ProviderForm({ provider }: { provider?: ProviderView }): ReactEl
               className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                 selectedDays.includes(key)
                   ? "bg-amber-500 text-white"
-                  : "bg-[#e8e0d4] text-[#8b7355]"
+                  : "bg-[#e2e8f0] text-muted"
               }`}
               title={t.providers.days[key]}
             >

@@ -23,7 +23,7 @@ export default async function InventoryHistoryDetail({ params }: { params: Promi
   }
   return <main className="space-y-5">
     <Link href="/inventory/history" className="text-sm underline">{t.inventory.historyBack}</Link>
-    <h1 className="text-3xl font-semibold">{runDate(run.day)}</h1>
+    <h1 className="app-title">{runDate(run.day)}</h1>
     <p className="text-sm text-muted">{t.inventory.runDetailHint}</p>
     {run.initial && <p className="text-sm text-muted">{t.inventory.initialRun}</p>}
     {run.entries.length === 0 && <p>{t.inventory.emptyRun}</p>}

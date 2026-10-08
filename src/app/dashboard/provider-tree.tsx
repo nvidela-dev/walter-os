@@ -41,30 +41,29 @@ interface Unit {
   name: string;
 }
 
-// Everforest (dark, medium) — a woodsy palette: warm tan foreground over
-// muted forest-green backgrounds, with earthy accent hues.
+// Solid light surfaces and high-contrast semantic accents, consistent with the app.
 const c = {
-  bg0: "#2d353b",
-  bg1: "#272e33",
-  bg2: "#343f44",
-  bg3: "#3d484d",
-  bg4: "#475258",
-  fg: "#d3c6aa",
-  grey: "#859289",
-  grey0: "#7a8478",
-  red: "#e67e80",
-  orange: "#e69875",
-  yellow: "#dbbc7f",
-  green: "#a7c080",
-  aqua: "#83c092",
-  blue: "#7fbbb3",
-  purple: "#d699b6",
+  bg0: "#ffffff",
+  bg1: "#f8fafc",
+  bg2: "#f1f5f9",
+  bg3: "#e2e8f0",
+  bg4: "#cbd5e1",
+  fg: "#0f172a",
+  grey: "#475569",
+  grey0: "#64748b",
+  red: "#b91c1c",
+  orange: "#52525b",
+  yellow: "#52525b",
+  green: "#3f3f46",
+  aqua: "#52525b",
+  blue: "#3f3f46",
+  purple: "#52525b",
 } as const;
 
 type IconType = ComponentType<{ className?: string; style?: CSSProperties }>;
 
 const openAffordanceClass =
-  "shrink-0 rounded p-0.5 opacity-0 transition hover:bg-[#475258] hover:text-[#d3c6aa] group-hover:opacity-100";
+  "shrink-0 rounded p-0.5 opacity-100 transition hover:bg-[#cbd5e1] hover:text-foreground group-hover:opacity-100";
 
 function NoIcon(): ReactElement {
   return <span className="inline-block h-4 w-4" />;
@@ -98,7 +97,7 @@ function Row({
   const marginClass = meta != null ? "ml-2" : "ml-auto";
   return (
     <div
-      className={`group flex items-stretch hover:bg-[#343f44] ${
+      className={`group flex items-stretch hover:bg-[#f1f5f9] ${
         expandable ? "cursor-pointer" : "cursor-default"
       }`}
       onClick={expandable ? onToggle : undefined}
@@ -111,7 +110,7 @@ function Row({
           style={{ width: 18, borderRight: `1px solid ${c.bg3}` }}
         />
       ))}
-      <div className="flex min-w-0 flex-1 items-center gap-1.5 py-[3px] pr-2 pl-1.5 text-[13px]">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 min-h-11 py-2 pr-2 pl-1.5 text-[13px]">
         <span
           className="flex h-4 w-4 shrink-0 items-center justify-center"
           style={{ color: c.grey0 }}
@@ -201,7 +200,7 @@ function ToolbarButton({
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="rounded p-1 hover:bg-[#3d484d]"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 hover:bg-[#e2e8f0]"
       style={{ color: c.grey }}
     >
       <Icon className="h-4 w-4" />
@@ -296,7 +295,7 @@ function BufferView({
 }): ReactElement {
   return (
     <aside
-      className="flex w-[44%] min-w-[320px] max-w-xl flex-col border-l"
+      className="fixed inset-0 z-30 flex w-full min-w-0 flex-col border-t md:static md:w-[44%] md:max-w-xl md:border-t-0 md:border-l"
       style={{ borderColor: c.bg3, backgroundColor: c.bg0 }}
     >
       <div
@@ -311,7 +310,7 @@ function BufferView({
             onClick={onClose}
             title="close (Esc)"
             aria-label="close"
-            className="rounded p-1 hover:bg-[#3d484d]"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 hover:bg-[#e2e8f0]"
             style={{ color: c.grey }}
           >
             <XMarkIcon className="h-4 w-4" />
@@ -321,7 +320,7 @@ function BufferView({
 
       <div className="flex-1 overflow-auto py-1 text-[13px]">
         {lines.map((node, i) => (
-          <div key={i} className="flex leading-6 hover:bg-[#272e33]">
+          <div key={i} className="flex leading-6 hover:bg-[#f8fafc]">
             <span
               className="w-10 shrink-0 select-none pr-3 text-right"
               style={{ color: c.grey0 }}
@@ -488,7 +487,7 @@ function ProductPanel({
           href={`/providers/${provider.id}/products/${product.productId}`}
           title="open detail page"
           aria-label="open detail page"
-          className="rounded p-1 hover:bg-[#3d484d]"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 hover:bg-[#e2e8f0]"
           style={{ color: c.grey }}
         >
           <ArrowTopRightOnSquareIcon className="h-4 w-4" />
@@ -587,7 +586,7 @@ function ProviderPanel({
           href={`/providers/${provider.id}`}
           title="open detail page"
           aria-label="open detail page"
-          className="rounded p-1 hover:bg-[#3d484d]"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 hover:bg-[#e2e8f0]"
           style={{ color: c.grey }}
         >
           <ArrowTopRightOnSquareIcon className="h-4 w-4" />
@@ -612,7 +611,7 @@ function todayLocal(): string {
 }
 
 const fieldClass =
-  "w-full rounded border border-[#3d484d] bg-[#2d353b] px-2 py-1 text-[13px] text-[#d3c6aa] outline-none focus:border-[#a7c080] placeholder:text-[#7a8478]";
+  "w-full rounded border border-[#e2e8f0] bg-[#ffffff] px-2 py-1 text-[13px] text-foreground outline-none focus:border-[#15803d] placeholder:text-[#64748b]";
 
 function AddInvoicePanel({
   providers,
@@ -797,7 +796,7 @@ function AddInvoicePanel({
 
   return (
     <aside
-      className="flex w-[44%] min-w-[340px] max-w-xl flex-col border-l"
+      className="fixed inset-0 z-30 flex w-full min-w-0 flex-col border-t md:static md:w-[44%] md:max-w-xl md:border-t-0 md:border-l"
       style={{ borderColor: c.bg3, backgroundColor: c.bg0 }}
       onKeyDown={(e) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -816,7 +815,7 @@ function AddInvoicePanel({
           onClick={onClose}
           title="cancel (Esc)"
           aria-label="cancel"
-          className="rounded p-1 hover:bg-[#3d484d]"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 hover:bg-[#e2e8f0]"
           style={{ color: c.grey }}
         >
           <XMarkIcon className="h-4 w-4" />
@@ -1000,7 +999,7 @@ function AddInvoicePanel({
                       setNpError(null);
                     }}
                     aria-label="cancel new product"
-                    className="rounded p-0.5 hover:bg-[#3d484d]"
+                    className="rounded p-0.5 hover:bg-[#e2e8f0]"
                     style={{ color: c.grey }}
                   >
                     <XMarkIcon className="h-3.5 w-3.5" />
@@ -1080,7 +1079,7 @@ function AddInvoicePanel({
                 onClick={() => {
                   setShowNewProduct(true);
                 }}
-                className="mt-2 flex items-center gap-1 rounded px-1 py-1 text-[12px] hover:bg-[#343f44]"
+                className="mt-2 flex items-center gap-1 rounded px-1 py-1 text-[12px] hover:bg-[#f1f5f9]"
                 style={{ color: c.aqua }}
               >
                 <PlusIcon className="h-3.5 w-3.5" />
@@ -1221,7 +1220,7 @@ export function ProviderTree({
 
   return (
     <div
-      className="flex h-screen flex-col font-[family-name:var(--font-geist-mono)]"
+      className="flex min-h-svh flex-col font-sans"
       style={{ backgroundColor: c.bg0, color: c.fg }}
     >
       {/* winbar */}
@@ -1233,7 +1232,7 @@ export function ProviderTree({
           <Link
             href="/"
             aria-label="back"
-            className="flex h-6 w-6 items-center justify-center rounded hover:bg-[#3d484d]"
+            className="flex h-11 w-11 items-center justify-center rounded hover:bg-[#e2e8f0]"
             style={{ color: c.grey }}
           >
             <ArrowLeftIcon className="h-4 w-4" />
@@ -1253,7 +1252,7 @@ export function ProviderTree({
             }}
             title="add invoice (A)"
             aria-label="add invoice"
-            className="flex items-center gap-1 rounded px-1.5 py-1 hover:bg-[#3d484d]"
+            className="flex items-center gap-1 rounded px-1.5 py-1 hover:bg-[#e2e8f0]"
             style={{ color: c.green }}
           >
             <PlusIcon className="h-4 w-4" />
@@ -1292,7 +1291,7 @@ export function ProviderTree({
           }}
           placeholder="search providers, products, invoices…"
           spellCheck={false}
-          className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#7a8478]"
+          className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#64748b]"
           style={{ color: c.fg }}
         />
         {searching && (
@@ -1307,7 +1306,7 @@ export function ProviderTree({
               }}
               title="clear search"
               aria-label="clear search"
-              className="rounded p-0.5 hover:bg-[#3d484d]"
+              className="rounded p-0.5 hover:bg-[#e2e8f0]"
               style={{ color: c.grey }}
             >
               <XMarkIcon className="h-3.5 w-3.5" />
@@ -1317,7 +1316,7 @@ export function ProviderTree({
       </div>
 
       {/* split: tree + optional invoice panel */}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <div className="flex-1 overflow-auto py-1">
           {filtered.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm" style={{ color: c.grey0 }}>

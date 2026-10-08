@@ -51,7 +51,7 @@ export function AddProductForm({
       <Button
         onClick={() => { setIsOpen(true); }}
         variant="secondary"
-        className="w-full border-dashed border-[#c4a77d] py-4 text-sm text-[#c4a77d] hover:bg-white"
+        className="w-full border-dashed border-[#3f3f46] py-4 text-sm text-[#3f3f46] hover:bg-zinc-200"
       >
         + {t.products.addCta}
       </Button>

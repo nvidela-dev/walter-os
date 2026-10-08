@@ -46,7 +46,7 @@ export function ProductList({
 
   if (products.length === 0) {
     return (
-      <p className="py-4 text-center text-sm text-[#8b7355]">
+      <p className="py-4 text-center text-sm text-muted">
         {t.products.emptyHint}
       </p>
     );
@@ -59,18 +59,18 @@ export function ProductList({
         <Link
           key={product.productId}
           href={`/providers/${providerId}/products/${product.productId}`}
-          className="flex items-center justify-between rounded-xl bg-white p-4 transition-colors hover:bg-[#faf8f5] active:scale-[0.99]"
+          className="flex items-center justify-between rounded-xl bg-white p-4 transition-colors hover:bg-[#ffffff] active:scale-[0.99]"
         >
           <div className="flex-1">
-            <p className="font-medium text-[#3d3530]">{product.name}</p>
-            <p className="text-sm text-[#8b7355]">
+            <p className="font-medium text-foreground">{product.name}</p>
+            <p className="text-sm text-muted">
               ${product.price} / {product.unit}
             </p>
           </div>
           <button
             onClick={(e) => void handleDelete(e, product.productId)}
             disabled={deletingId === product.productId}
-            className="rounded-full p-2 text-[#c4a77d] hover:bg-[#f5f0e8] disabled:opacity-50"
+            className="rounded-full p-2 text-[#3f3f46] hover:bg-[#f8fafc] disabled:opacity-50"
           >
             {deletingId === product.productId ? t.common.loading : "×"}
           </button>

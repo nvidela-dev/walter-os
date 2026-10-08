@@ -21,24 +21,24 @@ export default async function RecipePage({
   if (!recipe) notFound();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+    <div className="app-page flex flex-col bg-white">
       <PageHeader
         backHref="/recipes"
         title={recipe.name}
         actions={<DeleteButton id={recipe.id} name={recipe.name} deleteAction={deleteRecipe} redirectTo="/recipes" />}
       />
       <main className="flex-1 space-y-4 px-6 py-4">
-        <div className="rounded-2xl bg-[#f5f0e8] p-6"><RecipeForm recipe={recipe} /></div>
-        <div className="rounded-2xl bg-[#f5f0e8] p-6">
-          <h2 className="mb-4 text-lg font-medium text-[#3d3530]">{t.recipes.ingredients}</h2>
+        <div className="app-card rounded-2xl p-6"><RecipeForm recipe={recipe} /></div>
+        <div className="app-card rounded-2xl p-6">
+          <h2 className="mb-4 text-lg font-medium text-foreground">{t.recipes.ingredients}</h2>
           {recipe.ingredients.length === 0 ? (
-            <p className="text-[#8b7355]">{t.recipes.noIngredients}</p>
+            <p className="text-muted">{t.recipes.noIngredients}</p>
           ) : (
             <div className="space-y-2">
               {recipe.ingredients.map((ingredient) => (
-                <div key={ingredient.productId} className="flex justify-between rounded-xl bg-[#e8e0d4] p-4">
-                  <span className="text-[#3d3530]">{ingredient.name}</span>
-                  <span className="text-[#8b7355]">{ingredient.quantity} {ingredient.unit}</span>
+                <div key={ingredient.productId} className="flex justify-between rounded-xl bg-[#e2e8f0] p-4">
+                  <span className="text-foreground">{ingredient.name}</span>
+                  <span className="text-muted">{ingredient.quantity} {ingredient.unit}</span>
                 </div>
               ))}
             </div>

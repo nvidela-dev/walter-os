@@ -24,7 +24,7 @@ export function PurchaseList({ products }: { products: PurchaseProduct[] }): Rea
   }
   return <div className="space-y-5">
     {products.length === 0 && <p>{t.inventoryPurchases.noProducts}</p>}
-    {grouped.groups.map(({ supplier, products: lines }) => <section key={supplier.id} className="ios-glass space-y-3 rounded-2xl p-5">
+    {grouped.groups.map(({ supplier, products: lines }) => <section key={supplier.id} className="app-card space-y-3 rounded-2xl p-5">
       <h2 className="text-lg font-semibold">{supplier.name}</h2>
       <ul className="divide-y">{lines.map((product) => <li key={product.id} className="space-y-2 py-3">
         <div className="flex flex-wrap justify-between gap-2">{productLink(product)}<span>{t.inventoryPurchases.buy(product.comparison.shortage ?? "", product.unit)}</span></div>
@@ -32,7 +32,7 @@ export function PurchaseList({ products }: { products: PurchaseProduct[] }): Rea
         {supplierChoice(product)}
       </li>)}</ul>
     </section>)}
-    {grouped.unresolved.length > 0 && <section className="ios-glass space-y-3 rounded-2xl p-5">
+    {grouped.unresolved.length > 0 && <section className="app-card space-y-3 rounded-2xl p-5">
       <h2 className="text-lg font-semibold">{t.inventoryPurchases.unresolved(grouped.unresolved.length)}</h2>
       <p className="text-sm text-muted">{t.inventoryPurchases.unresolvedHint}</p>
       <ul className="divide-y">{grouped.unresolved.map((product) => <li key={product.id} className="space-y-2 py-3">
@@ -46,7 +46,7 @@ export function PurchaseList({ products }: { products: PurchaseProduct[] }): Rea
         </>}
       </li>)}</ul>
     </section>}
-    {grouped.noPurchase.length > 0 && <details className="ios-glass rounded-2xl p-5">
+    {grouped.noPurchase.length > 0 && <details className="app-card rounded-2xl p-5">
       <summary className="cursor-pointer font-medium">{t.inventoryPurchases.noPurchase(grouped.noPurchase.length)}</summary>
       <ul className="mt-3 space-y-3">{grouped.noPurchase.map((product) => <li key={product.id}>
         {productLink(product)}<p className="text-sm text-muted">{t.inventoryPurchases.comparison(product.comparison.stock ?? "", product.comparison.target ?? "", product.unit)}</p>

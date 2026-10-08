@@ -7,6 +7,7 @@ import { FormMessage } from "@/components/form-feedback";
 import { useActionForm } from "@/components/hooks/use-action-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { t } from "@/i18n";
 import { updateFridgeDetails } from "@/lib/actions/inventory";
 import { getFormString } from "@/lib/form";
 
@@ -21,8 +22,8 @@ export function FridgeDetails({ fridge }: { fridge: { id: string; number: number
     if (result.ok) { setOpen(false); router.refresh(); }
   }
   return <div className="space-y-2">
-    <p className="whitespace-pre-wrap text-sm text-muted">Comentario: {fridge.commentary ?? "—"}</p>
-    <button type="button" disabled={isSubmitting} className="text-sm underline" onClick={() => { setOpen(!open); }}>Editar heladera</button>
+    {fridge.commentary !== null && <p className="whitespace-pre-wrap text-sm text-muted">Comentario: {fridge.commentary}</p>}
+    <button type="button" disabled={isSubmitting} className="app-text-action -ml-2 whitespace-nowrap" onClick={() => { setOpen(!open); }}>{t.inventory.editFridge}</button>
     {open && <form onSubmit={(event) => { void save(event); }} className="space-y-3">
       <FormMessage message={error} />
       <fieldset disabled={isSubmitting} className="space-y-3">

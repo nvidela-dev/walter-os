@@ -7,9 +7,9 @@ import { RecipeForm } from "../recipe-form";
 
 export default function NewRecipePage(): ReactElement {
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+    <div className="app-page flex flex-col bg-white">
       <PageHeader backHref="/recipes" title={t.recipes.newTitle} />
-      <main className="flex-1 px-6 py-4"><div className="rounded-2xl bg-[#f5f0e8] p-6"><RecipeForm /></div></main>
+      <main className="flex-1 py-5"><div className="app-card rounded-2xl p-6"><RecipeForm /></div></main>
     </div>
   );
 }

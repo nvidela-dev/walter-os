@@ -39,8 +39,8 @@ export default async function ProvidersPage({
     : t.providers.emptyDescription;
 
   return (
-    <div className="ios-screen">
-      <div className="ios-page flex flex-col">
+    <div className="app-screen">
+      <div className="app-page flex flex-col">
       <PageHeader
         backHref="/"
         title={t.providers.title}
@@ -56,15 +56,15 @@ export default async function ProvidersPage({
       />
 
       <nav className="pb-2 pt-5">
-        <div className="ios-glass grid grid-cols-2 gap-1 rounded-full p-1">
+        <div className="app-card grid grid-cols-2 gap-1 rounded-xl bg-zinc-100 p-1">
           {TABS.map((tab) => {
             const isActive = tab.value === activeType;
             return (
               <Link
                 key={tab.value}
                 href={tab.value === "producto" ? "/providers" : `/providers?type=${tab.value}`}
-                className={`rounded-full py-2.5 text-center text-sm font-semibold transition ${
-                  isActive ? "bg-white text-[#1f2d35] shadow-sm" : "text-[#526b74]"
+                className={`rounded-lg py-2.5 text-center text-sm font-semibold transition ${
+                  isActive ? "bg-white text-foreground shadow-sm" : "text-muted"
                 }`}
               >
                 {tab.label}
@@ -76,41 +76,41 @@ export default async function ProvidersPage({
 
       <main className="flex-1 py-4">
         {providers.length === 0 ? (
-          <div className="ios-panel flex flex-col items-center justify-center px-6 py-16 text-center">
-            <div className="ios-icon mb-5 flex h-16 w-16 items-center justify-center bg-[#f08f55] text-white">
+          <div className="app-panel flex flex-col items-center justify-center px-6 py-16 text-center">
+            <div className="app-icon mb-5 flex h-16 w-16 items-center justify-center bg-zinc-200 text-zinc-700">
               <Icon className="h-8 w-8" />
             </div>
-            <h2 className="mb-2 text-lg font-semibold text-[#1f2d35]">{emptyTitle}</h2>
-            <p className="mb-6 text-sm text-[#526b74]">{emptyDescription}</p>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">{emptyTitle}</h2>
+            <p className="mb-6 text-sm text-muted">{emptyDescription}</p>
             <Link href="/providers/new" className={buttonClassName({ className: "rounded-full px-6 text-sm" })}>{t.providers.addCta}</Link>
           </div>
         ) : (
           <div className="space-y-3">
             {providers.map((provider) => (
               <Link key={provider.id} href={`/providers/${provider.id}`}
-                className="ios-list-row flex items-center gap-4 rounded-[1.4rem] p-4 transition hover:bg-white/65 active:scale-[0.99]">
-                <div className={`ios-icon flex h-12 w-12 items-center justify-center text-white ${provider.productCount > 0 ? "bg-[#f08f55]" : "bg-[#5aa6dd]"}`}>
+                className="app-list-row flex items-center gap-4 rounded-2xl p-4 transition hover:bg-zinc-200 active:scale-[0.99]">
+                <div className="app-icon flex h-12 w-12 items-center justify-center bg-zinc-200 text-zinc-700">
                   <Icon className="h-6 w-6" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-[#1f2d35]">{provider.name}</h3>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-foreground">{provider.name}</h3>
                   {provider.description != null && (
-                    <p className="text-sm text-[#526b74]">{provider.description}</p>
+                    <p className="text-sm text-muted">{provider.description}</p>
                   )}
                   {Number(provider.debt) > 0 && (
-                    <p className="text-sm font-medium text-[#c56f4e]">{t.providers.debtLabel(provider.debt)}</p>
+                    <p className="text-sm font-medium text-[#b45309]">{t.providers.debtLabel(provider.debt)}</p>
                   )}
                 </div>
                 {provider.days != null && (
-                  <div className="flex gap-1">
+                  <div className="flex shrink-0 flex-wrap justify-end gap-1">
                     {provider.days.split(",").map((day) => (
-                      <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-white/60 text-xs font-semibold text-[#526b74]">
+                      <span key={day} className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-semibold text-muted">
                         {day}
                       </span>
                     ))}
                   </div>
                 )}
-                <ChevronRightIcon className="h-5 w-5 text-[#799099]" />
+                <ChevronRightIcon className="h-5 w-5 text-[#64748b]" />
               </Link>
             ))}
           </div>

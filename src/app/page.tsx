@@ -9,6 +9,7 @@ import {
   TruckIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import type { Viewport } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactElement } from "react";
@@ -132,12 +133,13 @@ function HomeTile({ app }: { app: HomeApp }): ReactElement {
 }
 
 export const dynamic = "force-dynamic";
+export const viewport: Viewport = { themeColor: "#dce7e4" };
 
 export default async function Home(): Promise<ReactElement> {
   const group = await getCurrentGroup();
   if (group !== "admin") redirect(landingPath(group));
   return (
-    <div className="ios-screen">
+    <div className="home-screen">
       <main className="ios-page flex flex-col">
         <header className="mb-9 flex items-center justify-between">
           <div className="ios-glass rounded-full px-4 py-2">

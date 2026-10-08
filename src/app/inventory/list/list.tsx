@@ -47,11 +47,11 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
           return <li key={row.id} className="py-3">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span>{row.name} — {row.current === null ? "Sin conteo" : `${row.current.quantity} ${row.current.unit}`}</span>
-              <div className="flex gap-3"><button type="button" className="text-sm underline" disabled={isSubmitting} onClick={() => { setEditing(key); setQuantity(row.current?.quantity ?? ""); setNote(row.note ?? ""); }}>Editar</button><button type="button" className="text-sm underline" disabled={isSubmitting} onClick={() => { setRemoving(key); }}>Quitar</button></div>
+              <div className="flex gap-3"><button type="button" className="app-text-action" disabled={isSubmitting} onClick={() => { setEditing(key); setQuantity(row.current?.quantity ?? ""); setNote(row.note ?? ""); }}>Editar</button><button type="button" className="app-text-action" disabled={isSubmitting} onClick={() => { setRemoving(key); }}>Quitar</button></div>
             </div>
             {row.runInitial === false && row.current !== null && <p className="text-sm text-muted">{runChange(row.difference)}</p>}
             <p className="whitespace-pre-wrap text-sm text-muted">Nota: {row.note ?? "—"}</p>
-            {row.current !== null && <p className="text-xs text-muted">{inventoryDate(row.current.recordedAt)}</p>}
+            {row.current !== null && <p className="text-sm text-muted">{inventoryDate(row.current.recordedAt)}</p>}
             {removing === key && <div className="mt-2 space-y-2"><p className="text-sm">¿Quitar {row.name} de esta heladera? Su historial se conserva.</p><div className="flex gap-2"><Button disabled={isSubmitting} onClick={() => { void remove(fridge.id, row.id); }}>Confirmar quitar</Button><Button variant="secondary" disabled={isSubmitting} onClick={() => { setRemoving(null); }}>Cancelar</Button></div></div>}
             {editing === key && <form className="mt-2 flex flex-wrap gap-2" onSubmit={(event) => { event.preventDefault(); void save(fridge.id, row.id); }}>
               <label className="w-full text-sm">Cantidad ({row.unit})<Input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={quantity} disabled={isSubmitting} onChange={(event) => { setQuantity(event.target.value); }} /></label>

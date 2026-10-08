@@ -32,8 +32,8 @@ export function InvoiceLinesEditor({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-sm font-medium text-[#8b7355]">{t.invoices.lines.heading}</h2>
-        <span className="text-xs text-[#c4a77d]">{t.invoices.lines.count(lines.length)}</span>
+        <h2 className="text-sm font-medium text-muted">{t.invoices.lines.heading}</h2>
+        <span className="text-xs text-[#3f3f46]">{t.invoices.lines.count(lines.length)}</span>
       </div>
 
       {lines.map((line, idx) => {
@@ -123,7 +123,7 @@ export function InvoiceLinesEditor({
                   type="text"
                   readOnly
                   value={product?.unitCode ?? "—"}
-                  className="bg-[#faf8f5] px-3 text-[#8b7355]"
+                  className="bg-[#ffffff] px-3 text-muted"
                 />
               </FormField>
               <FormField htmlFor={priceId} label={t.invoices.fields.unitPrice}>
@@ -142,15 +142,15 @@ export function InvoiceLinesEditor({
               </FormField>
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#f5f0e8] pt-3 text-sm">
-              <div className="text-[#8b7355]">
+            <div className="flex items-center justify-between border-t border-[#f8fafc] pt-3 text-sm">
+              <div className="text-muted">
                 {isNewPrice && (
                   <span className="text-amber-700">
                     {t.invoices.lines.newPrice(product.currentPrice)}
                   </span>
                 )}
               </div>
-              <div className="font-medium text-[#3d3530]">
+              <div className="font-medium text-foreground">
                 {t.invoices.lines.subtotal(lineTotal.toFixed(2))}
               </div>
             </div>
@@ -163,7 +163,7 @@ export function InvoiceLinesEditor({
         onClick={addLine}
         disabled={!providerSelected}
         variant="secondary"
-        className="w-full border-dashed border-[#c4a77d] py-3 text-sm text-[#c4a77d] hover:bg-white"
+        className="w-full border-dashed border-[#3f3f46] py-3 text-sm text-[#3f3f46] hover:bg-zinc-200"
       >
         <PlusIcon className="h-4 w-4" />
         {t.invoices.lines.add}

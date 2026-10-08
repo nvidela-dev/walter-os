@@ -7,10 +7,10 @@ import { ProviderForm } from "../provider-form";
 
 export default function NewProviderPage(): ReactElement {
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+    <div className="app-page flex flex-col bg-white">
       <PageHeader backHref="/providers" title={t.providers.newTitle} />
-      <main className="flex-1 px-6 py-4">
-        <div className="rounded-2xl bg-[#f5f0e8] p-6">
+      <main className="flex-1 py-5">
+        <div className="app-card rounded-2xl p-6">
           <ProviderForm />
         </div>
       </main>

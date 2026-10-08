@@ -8,32 +8,42 @@ import { cn } from "@/lib/cn";
 export function PageHeader({
   actions,
   backHref,
+  backLabel = t.common.back,
   title,
+  titleHref,
+  titleAs = "h1",
+  className,
 }: {
   actions?: ReactNode;
-  backHref: string;
+  backHref?: string;
+  backLabel?: string;
   title: string;
+  titleHref?: string;
+  titleAs?: "h1" | "div";
+  className?: string;
 }): ReactElement {
+  const Title = titleAs;
   return (
     <header
       className={cn(
-        "ios-header flex min-w-0 items-center gap-3 px-4 py-4",
-        actions != null ? "justify-between" : "gap-4"
+        "app-header flex min-w-0 items-center gap-3",
+        actions != null ? "justify-between" : "gap-4",
+        className
       )}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <Link
-          aria-label={t.common.back}
-          className="ios-icon-button flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#43636e]"
+        {backHref !== undefined && <Link
+          aria-label={backLabel}
+          className="app-icon-button flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-muted"
           href={backHref}
         >
           <ArrowLeftIcon className="h-5 w-5" />
-        </Link>
-        <h1 className="truncate text-xl font-semibold tracking-normal text-[#1f2d35]">
-          {title}
-        </h1>
+        </Link>}
+        <Title className="app-header-title break-words text-foreground">
+          {titleHref === undefined ? title : <Link href={titleHref}>{title}</Link>}
+        </Title>
       </div>
-      {actions != null && <div className="shrink-0">{actions}</div>}
+      {actions != null && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </header>
   );
 }

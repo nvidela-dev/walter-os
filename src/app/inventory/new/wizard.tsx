@@ -38,10 +38,10 @@ export function InventoryWizard({ groups, today, continuing }: {
   const missing = groups.reduce((total, fridge) => total + fridge.rows.filter((row) => (quantities[`${fridge.id}:${row.id}`] ?? "").trim() === "").length, 0);
   return <main className="space-y-5">
     <Link className="text-sm underline" href="/inventory">← Heladeras</Link>
-    <h1 className="text-3xl font-semibold">{continuing ? "Editar inventario de la semana" : "Nuevo inventario"}</h1>
+    <h1 className="app-title">{continuing ? "Editar inventario de la semana" : "Nuevo inventario"}</h1>
     <p>{runDate(today)}</p>
     <FormMessage message={error} />
-    {step === -1 && <div className="ios-glass space-y-4 rounded-2xl p-5"><p>{continuing ? "Ya hay un inventario de esta semana. ¿Querés editar sus cantidades?" : "Contá una heladera por vez. Todos los conteos de martes a lunes se guardan como un solo inventario semanal."}</p><p className="text-sm text-muted">Vacío significa sin revisar; cero significa que no queda nada. Cada paso guarda sus conteos y conserva los inventarios anteriores.</p>{groups.length === 0 ? <p>Creá una heladera antes de comenzar.</p> : <Button disabled={isSubmitting} onClick={() => { void start(); }}>{continuing ? "Editar inventario de la semana" : "Comenzar inventario semanal"}</Button>}</div>}
+    {step === -1 && <div className="app-card space-y-4 rounded-2xl p-5"><p>{continuing ? "Ya hay un inventario de esta semana. ¿Querés editar sus cantidades?" : "Contá una heladera por vez. Todos los conteos de martes a lunes se guardan como un solo inventario semanal."}</p><p className="text-sm text-muted">Vacío significa sin revisar; cero significa que no queda nada. Cada paso guarda sus conteos y conserva los inventarios anteriores.</p>{groups.length === 0 ? <p>Creá una heladera antes de comenzar.</p> : <Button disabled={isSubmitting} onClick={() => { void start(); }}>{continuing ? "Editar inventario de la semana" : "Comenzar inventario semanal"}</Button>}</div>}
     {group != null && <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void save(); }}>
       <p className="text-sm text-muted">Heladera {step + 1} de {groups.length}</p>
       <fieldset disabled={isSubmitting}><FridgeGroup number={group.number} name={group.name}>
@@ -50,6 +50,6 @@ export function InventoryWizard({ groups, today, continuing }: {
       </FridgeGroup></fieldset>
       <div className="flex gap-2">{step > 0 && <Button variant="secondary" disabled={isSubmitting} onClick={() => { setStep(step - 1); }}>Anterior</Button>}<Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Guardando…" : step === groups.length - 1 ? "Guardar y terminar" : "Guardar y siguiente"}</Button></div>
     </form>}
-    {step >= groups.length && step >= 0 && <div className="ios-glass space-y-3 rounded-2xl p-5"><p role="status">Los conteos ingresados quedaron guardados en el inventario de la semana.</p>{missing > 0 && <p>{missing} productos quedaron sin revisar. No se registraron como cero.</p>}<Link href="/inventory/list" className="block font-medium underline">Ver inventario</Link><Link href="/inventory/purchases" className="block font-medium underline">{t.inventoryPurchases.title}</Link><Button variant="secondary" onClick={() => { setStep(0); }}>Revisar heladeras</Button></div>}
+    {step >= groups.length && step >= 0 && <div className="app-card space-y-3 rounded-2xl p-5"><p role="status">Los conteos ingresados quedaron guardados en el inventario de la semana.</p>{missing > 0 && <p>{missing} productos quedaron sin revisar. No se registraron como cero.</p>}<Link href="/inventory/list" className="block font-medium underline">Ver inventario</Link><Link href="/inventory/purchases" className="block font-medium underline">{t.inventoryPurchases.title}</Link><Button variant="secondary" onClick={() => { setStep(0); }}>Revisar heladeras</Button></div>}
   </main>;
 }

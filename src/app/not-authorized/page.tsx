@@ -19,11 +19,11 @@ export default async function NotAuthorizedPage(): Promise<ReactElement> {
   const group = await getCurrentGroup();
   if (group !== null) redirect(landingPath(group));
   return (
-    <div className="ios-screen flex items-center justify-center px-5 py-8 text-center">
-      <div className="ios-panel-strong w-full max-w-sm space-y-6 p-7">
+    <div className="app-screen flex items-center justify-center px-5 py-8 text-center">
+      <div className="app-panel-strong w-full max-w-sm space-y-6 p-7">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-[#1f2d35]">{t.auth.deniedTitle}</h1>
-          <p className="text-sm text-[#526b74]">{t.auth.deniedBody}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.auth.deniedTitle}</h1>
+          <p className="text-sm text-muted">{t.auth.deniedBody}</p>
         </div>
         <Link href="/" className="block text-sm font-semibold text-warm-dark">{t.access.checkAgain}</Link>
         <SignOutActionButton label={t.auth.signOut} />

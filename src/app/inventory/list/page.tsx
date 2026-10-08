@@ -17,8 +17,8 @@ export default async function InventoryListPage(): Promise<ReactElement> {
   })));
   return <main className="space-y-5">
     <Link href="/inventory" className="text-sm underline">← Heladeras</Link>
-    <h1 className="text-3xl font-semibold">Último inventario</h1>
-    <p className="text-sm text-muted">Cantidades del último inventario, agrupadas por heladera. Los cambios comparan con el inventario anterior.</p>
+    <h1 className="app-title">{t.inventory.weeklyInventory}</h1>
+    <p className="text-sm text-muted">{t.inventory.weeklyListHint}</p>
     <Link href="/inventory/purchases" className="block text-sm font-medium underline">{t.inventoryPurchases.title}</Link>
     <ItemSearch items={items} />
     <InventoryList groups={groups} />

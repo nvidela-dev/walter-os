@@ -35,29 +35,29 @@ export default async function ProviderPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf8f5]">
+    <div className="app-page flex flex-col bg-white">
       <PageHeader
         backHref="/providers"
         title={provider.name}
         actions={<DeleteButton id={provider.id} name={provider.name} deleteAction={deleteProvider} redirectTo="/providers" />}
       />
 
-      <main className="flex-1 space-y-6 px-6 py-4">
-        <section className="rounded-2xl bg-[#f5f0e8] p-6">
+      <main className="flex-1 space-y-6 py-5">
+        <section className="app-card rounded-2xl p-6">
           <ProviderForm provider={provider} />
         </section>
 
         {provider.type === "producto" && (
-          <section className="rounded-2xl bg-[#f5f0e8] p-6">
+          <section className="app-card rounded-2xl p-6">
             <ProductList products={provider.products} providerId={provider.id} />
-            <div className="mt-4 border-t border-[#e8e0d4] pt-4">
+            <div className="mt-4 border-t border-[#e2e8f0] pt-4">
               <AddProductForm providerId={provider.id} units={units} />
               <LinkProductForm providerId={provider.id} products={unlinkedProducts} />
             </div>
           </section>
         )}
 
-        <section className="rounded-2xl bg-[#f5f0e8] p-6">
+        <section className="app-card rounded-2xl p-6">
           <DebtForm providerId={provider.id} currentDebt={provider.debt} />
         </section>
       </main>
