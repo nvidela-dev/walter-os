@@ -33,3 +33,19 @@ describe("Vercel inventory setup", () => {
     } finally { await db.close(); }
   });
 });
+
+it("preserves target revisions and active pointers across setup, and refuses a missing immutable trigger", async () => {
+  const db = new PGlite();
+  try {
+    await db.exec("CREATE TABLE productos(id uuid PRIMARY KEY,nombre text); INSERT INTO productos VALUES ('00000000-0000-4000-8000-000000000001','Arroz')");
+    await db.exec(inventoryBootstrapSql());
+    await db.exec("INSERT INTO historial_objetivos_inventario(producto_id,cantidad,unidad,registrado_por) VALUES ('00000000-0000-4000-8000-000000000001',12,'kg','admin')");
+    const history = (await db.query("SELECT * FROM historial_objetivos_inventario")).rows;
+    const pointer = (await db.query("SELECT * FROM objetivos_inventario_activos")).rows;
+    await db.exec(inventoryBootstrapSql());
+    expect((await db.query("SELECT * FROM historial_objetivos_inventario")).rows).toEqual(history);
+    expect((await db.query("SELECT * FROM objetivos_inventario_activos")).rows).toEqual(pointer);
+    await db.exec("DROP TRIGGER objetivos_inmutables ON historial_objetivos_inventario");
+    await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Inventory target triggers are missing or disabled");
+  } finally { await db.close(); }
+});

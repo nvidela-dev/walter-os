@@ -34,9 +34,7 @@ export async function addFridgeProduct(input: unknown): Promise<ActionResult> {
     const data = fridgeProductInputSchema.parse(input);
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     await db.insert(fridgeProducts).values(data).onConflictDoUpdate({ target: [fridgeProducts.fridgeId, fridgeProducts.productId], set: { active: true } });
-    revalidatePath(`/inventory/${data.fridgeId}`);
-    revalidatePath("/inventory/list");
-    revalidatePath("/inventory/history");
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -53,9 +51,7 @@ export async function createInventoryProduct(input: unknown): Promise<ActionResu
       db.insert(products).values({ id: productId, name: data.name, unitId: unit.id, unit: unit.code }),
       db.insert(fridgeProducts).values({ fridgeId: data.fridgeId, productId }),
     ]);
-    revalidatePath(`/inventory/${data.fridgeId}`);
-    revalidatePath("/inventory/list");
-    revalidatePath("/inventory/history");
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -75,9 +71,7 @@ export async function saveInventory(input: unknown): Promise<ActionResult> {
     }));
     // One INSERT is atomic; the database supplies a common timestamp for this save.
     await db.insert(inventoryObservations).values(observations);
-    revalidatePath(`/inventory/${data.fridgeId}`);
-    revalidatePath("/inventory/list");
-    revalidatePath("/inventory/history");
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -89,9 +83,7 @@ export async function removeInventoryEntry(input: unknown): Promise<ActionResult
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     const result = await db.update(fridgeProducts).set({ active: false }).where(and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.productId, data.productId))).returning({ id: fridgeProducts.productId });
     if (result.length === 0) return actionError(t.inventory.invalidItems);
-    revalidatePath(`/inventory/${data.fridgeId}`);
-    revalidatePath("/inventory/list");
-    revalidatePath("/inventory/history");
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }
@@ -111,9 +103,7 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
     const update = db.update(fridgeProducts).set({ note: data.note }).where(condition);
     if (data.quantity === null) await update;
     else await db.batch([update, db.insert(inventoryObservations).values({ fridgeId: data.fridgeId, productId: data.productId, quantity: data.quantity, unit: product.unit, recordedBy: userId })]);
-    revalidatePath(`/inventory/${data.fridgeId}`);
-    revalidatePath("/inventory/list");
-    revalidatePath("/inventory/history");
+    revalidatePath("/inventory", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }

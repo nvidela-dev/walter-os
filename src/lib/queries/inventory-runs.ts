@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, eq, lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { fridgeProducts, fridges, inventoryRunEntries, inventoryRuns } from "@/db/schema";
@@ -11,16 +11,13 @@ export interface InventoryRun {
   id: number; day: string; initial: boolean; entries: RunEntry[];
 }
 
-export async function getInventoryRuns(page = 1): Promise<{ runs: InventoryRun[]; hasNext: boolean }> {
+export async function getInventoryRuns(page = 1): Promise<{ runs: Omit<InventoryRun, "entries">[]; hasNext: boolean }> {
   await requireAccess("inventory");
   if (!Number.isSafeInteger(page) || page < 1 || page > 1000000) throw new Error("Invalid run page");
   const headers = await db.select({ id: inventoryRuns.id, day: inventoryRuns.day,
-    initial: sql<boolean>`NOT EXISTS (SELECT 1 FROM inventarios previous WHERE previous.fecha < ${inventoryRuns.day})`,
+    initial: sql<boolean>`NOT EXISTS (SELECT 1 FROM inventarios previous WHERE previous.fecha < inventarios.fecha)`,
   }).from(inventoryRuns).orderBy(desc(inventoryRuns.day)).limit(11).offset((page - 1) * 10);
-  const selected = headers.slice(0, 10);
-  if (selected.length === 0) return { runs: [], hasNext: false };
-  const entries = await db.select().from(inventoryRunEntries).where(inArray(inventoryRunEntries.runId, selected.map((run) => run.id))).orderBy(inventoryRunEntries.fridgeNumber, inventoryRunEntries.name);
-  return { runs: selected.map((run) => ({ ...run, entries: entries.filter((entry) => entry.runId === run.id) })), hasNext: headers.length > 10 };
+  return { runs: headers.slice(0, 10), hasNext: headers.length > 10 };
 }
 
 export async function getPreviousRunEntries(day: string): Promise<RunEntry[]> {
@@ -54,4 +51,17 @@ export async function getLatestInventoryProgress(): Promise<{
     .leftJoin(inventoryRunEntries, and(eq(inventoryRunEntries.runId, run?.id ?? -1), eq(inventoryRunEntries.fridgeId, fridges.id), eq(inventoryRunEntries.productId, fridgeProducts.productId)))
     .where(eq(fridges.active, true)).groupBy(fridges.id);
   return { day: run?.day ?? null, fridges: rows };
+}
+
+/** Read the selected historical snapshot, including hidden products and fridges. */
+export async function getInventoryRun(id: number): Promise<InventoryRun | null> {
+  await requireAccess("inventory");
+  if (!Number.isSafeInteger(id) || id < 1) return null;
+  const [run] = await db.select({ id: inventoryRuns.id, day: inventoryRuns.day,
+    initial: sql<boolean>`NOT EXISTS (SELECT 1 FROM inventarios previous WHERE previous.fecha < inventarios.fecha)`,
+  }).from(inventoryRuns).where(eq(inventoryRuns.id, id)).limit(1);
+  if (run === undefined) return null;
+  const entries = await db.select().from(inventoryRunEntries).where(eq(inventoryRunEntries.runId, id))
+    .orderBy(inventoryRunEntries.fridgeNumber, inventoryRunEntries.name, inventoryRunEntries.productId);
+  return { ...run, entries };
 }

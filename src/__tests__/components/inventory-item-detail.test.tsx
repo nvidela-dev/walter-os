@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 
+vi.mock("@/app/inventory/items/[id]/target-stock", () => ({ TargetStock: () => null }));
+
 vi.mock("@/lib/queries/inventory-items", () => ({ getInventoryItemDetail: vi.fn() }));
 
 import ItemPage from "@/app/inventory/items/[id]/page";
