@@ -18,7 +18,7 @@ the active target quantity and group the resulting purchase needs by supplier.
 | Add products | Every inventory product has a fridge placement. | Kitchen users can associate an existing product or create a product and placement together. A product can occupy multiple fridges. |
 | Count stock | Record the actual quantity and unit for each product in each fridge. | Implemented. Blank means unreviewed; explicit zero means none remains. |
 | Maintain the weekly inventory | Tuesday–Monday edits belong to one shared weekly instance. | Implemented through weekly date normalization, a unique date, and a constraint requiring that date to be Tuesday. |
-| Maintain target stock | Each product has a target quantity, its own history, and only one active target at a time. | Intended; no target persistence, history, or editing UI was found. Target scope still needs a decision. |
+| Maintain target stock | Each product has a target quantity, its own history, and only one active target at a time. | Implemented with immutable revisions and one active target pointer per product. Admin can edit; Kitchen can read. Targets are global per product across all active fridge placements. |
 | Calculate purchases | Compare observed stock with the applicable target. | Intended; current differences compare inventories with each other. |
 | Group by supplier | Use existing product–supplier links to organize purchase quantities. | Links and supplier display exist. Purchase calculation, supplier selection, and grouped purchase output do not. |
 
@@ -83,7 +83,7 @@ These answer different questions and must remain separate:
 | --- | --- | --- |
 | Weekly inventory history | How much was recorded for each fridge/product in each inventory week? | Implemented through `inventarios` and `inventario_items`; the history screen displays the latest summary for each week. |
 | Count audit history | Who recorded which quantity, and when, including corrections within a week? | Immutable `observaciones_inventario` rows retain the quantity, unit, user, and timestamp. The weekly history screen does not expose every audit correction. |
-| Target-stock history | What quantity did we intend to maintain, and how did that target change? | Required but unimplemented. It needs its own historical records and one active target at a time for the chosen scope. |
+| Target-stock history | What quantity did we intend to maintain, and how did that target change? | Implemented separately in `historial_objetivos_inventario`, with one active revision referenced by `objetivos_inventario_activos`. |
 
 A Friday correction replaces the displayed weekly quantity but appends a count
 observation, preserving the earlier measurement in the audit history. This does
@@ -101,10 +101,10 @@ Sources: [append-only observations](../drizzle/0012_inventory.sql),
 [run queries](../src/lib/queries/inventory-runs.ts),
 [history UI](../src/app/inventory/history/page.tsx).
 
-## Target quantities and purchase needs — intended behavior
+## Target quantities and purchase needs
 
-Each inventory product should have a target stock quantity and unit. Changing
-that plan should preserve the prior target in its own history, while leaving
+Each inventory product can now have a target stock quantity and unit. Changing
+that plan preserves the prior target in its own history, while leaving
 only one target active at a time. This history must not be inferred from observed
 counts, supplier package quantities, or previous purchases.
 
@@ -118,7 +118,7 @@ For example, a target of 12 kg and observed stock of 8 kg gives a 4 kg shortage.
 Observed stock of 15 kg gives a zero shortage. That shortage is distinct from the
 signed change since the preceding inventory.
 
-Before implementing this calculation, settle the target scope:
+Implementation uses a **global product target**. The alternatives below explain the chosen scope and what a future per-fridge model would change:
 
 - **Global product target:** compare against the complete sum across its fridge
   placements. A partial sum cannot stand for a complete count.
@@ -126,9 +126,16 @@ Before implementing this calculation, settle the target scope:
   Decide whether excess in one fridge can offset a shortage in another before
   aggregating purchases; moving stock may be different from buying it.
 
-The user requirement is one active target at a time. The scope above determines
-whether that uniqueness applies to a product or to a product/fridge pair. Neither
-choice is established by the current schema.
+There is one active target per product. Inserting an immutable revision atomically
+advances its active pointer. The product key prevents multiple active pointers;
+a composite foreign key prevents referring to another product's target. The
+quantity and unit are preserved in every revision. Target edits require Admin
+access on the server; Kitchen has read access. No default targets are seeded.
+
+Sources: [target schema](../src/db/schema/inventory-targets.ts),
+[target migration](../drizzle/0018_inventory_stock_targets.sql),
+[target actions](../src/lib/actions/inventory-targets.ts),
+[target history screen](../src/app/inventory/items/[id]/targets/page.tsx).
 
 ## From shortages to supplier groups — intended behavior
 
@@ -159,8 +166,8 @@ Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
 
 ## Polishing gaps verified in the repository
 
-1. Target quantities, their history and active-target enforcement still need
-   implementation. Purchase shortages and supplier grouping also need implementation.
+1. Global target quantities, immutable history, and a single active target are
+   implemented. Purchase shortages and supplier grouping follow in a separate PR.
 2. The history screen now describes one inventory per Tuesday–Monday week. Fridge
    home shows current-week progress and offers starting or editing that week.
 3. The older [inventory implementation notes](inventory.md) contain superseded
@@ -170,8 +177,8 @@ Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
    explicit zeros. Empty fridges are not labeled complete. This is counting progress,
    not an approval state; a separate approval workflow remains undefined.
 5. Kitchen users can count and add inventory products; supplier link management
-   is in the main application, which is restricted to Admin. Permissions for
-   editing targets and resolving suppliers remain undecided.
+   is in the main application, which is restricted to Admin. Target edits require Admin; Kitchen can read them. Supplier selection follows
+   in a separate PR.
 
 Access sources: [group policy](../src/lib/auth/policy.ts),
 [inventory mutation authorization](../src/lib/actions/inventory.ts).

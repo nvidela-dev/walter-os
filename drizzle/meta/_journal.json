@@ -127,6 +127,13 @@
       "when": 1791391084869,
       "tag": "0017_weekly_inventory",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791418119269,
+      "tag": "0018_inventory_stock_targets",
+      "breakpoints": true
     }
   ]
 }

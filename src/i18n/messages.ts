@@ -45,6 +45,15 @@ export const t = {
     linkProduct: "Asociar producto existente", chooseProduct: "Seleccionar producto", linked: "Producto asociado",
     signOut: "Salir", tooMany: "Guardá hasta 200 productos por vez.",
   },
+  inventoryTargets: {
+    title: "Stock objetivo", scope: "Cantidad total que se busca mantener entre todas las heladeras.",
+    quantity: (unit: string): string => `Cantidad objetivo (${unit})`,
+    save: "Guardar objetivo", saved: "Objetivo guardado. El anterior queda en el historial.",
+    missing: "Sin objetivo definido", adminOnly: "Un administrador puede definir o cambiar el objetivo.",
+    history: "Historial de objetivos", historyHint: "Este historial registra cambios del plan, no conteos de stock. Solo hay un objetivo activo por producto.",
+    active: "Activo", unitChanged: "La unidad del producto cambió. Definí un objetivo con la unidad actual antes de calcular compras.",
+    back: "← Volver al producto", newer: "← Más recientes", older: "Más antiguos →",
+  },
   /** App-level metadata (next/metadata, manifest). */
   app: {
     name: "Gestión",
