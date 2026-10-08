@@ -8,6 +8,7 @@ export function inventoryBootstrapSql(): string {
   const fridgeMigration = readFileSync("drizzle/0015_bored_mandroid.sql", "utf8");
   const runMigration = readFileSync("drizzle/0016_zippy_leper_queen.sql", "utf8");
   const weeklyMigration = readFileSync("drizzle/0017_weekly_inventory.sql", "utf8");
+  const targetMigration = readFileSync("drizzle/0018_inventory_stock_targets.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -66,6 +67,18 @@ BEGIN
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.inventarios'::regclass AND conname='inventarios_fecha_tuesday') THEN
     ${weeklyMigration}
+  END IF;
+
+  IF to_regclass('public.historial_objetivos_inventario') IS NULL AND to_regclass('public.objetivos_inventario_activos') IS NULL THEN
+    ${targetMigration}
+  ELSIF to_regclass('public.historial_objetivos_inventario') IS NULL OR to_regclass('public.objetivos_inventario_activos') IS NULL THEN
+    RAISE EXCEPTION 'Partial inventory target schema: refusing automatic repair';
+  END IF;
+  PERFORM id, producto_id, cantidad, unidad, registrado_at, registrado_por FROM public.historial_objetivos_inventario LIMIT 0;
+  PERFORM producto_id, objetivo_id FROM public.objetivos_inventario_activos LIMIT 0;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.historial_objetivos_inventario'::regclass AND tgname='objetivos_inmutables' AND tgenabled='O')
+    OR NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.historial_objetivos_inventario'::regclass AND tgname='objetivos_actualizar' AND tgenabled='O') THEN
+    RAISE EXCEPTION 'Inventory target triggers are missing or disabled';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
