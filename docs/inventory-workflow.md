@@ -1,194 +1,181 @@
-# Inventario: conteos de cocina, existencias previstas y compras
+# Inventory: kitchen counts, target stock, and purchases
 
-Este documento registra el flujo solicitado y lo distingue de la implementación
-actual. Inspección del repositorio: **2026-10-07**, basada en el commit `e7fe957`.
-Esta revisión es únicamente documental; no se inspeccionó producción ni se
-modificó la aplicación para elaborar este documento.
+This document records the requested workflow and distinguishes it from the
+current implementation. Repository inspection: **2026-10-07**, based on commit
+`e7fe957`. This is a documentation-only review; no production inspection or
+application changes were made for this document.
 
-El personal de cocina revisa cada heladera, informa cuánto stock hay y agrega
-los productos que faltan en sus ubicaciones reales. Un único inventario compartido
-abarca de martes a lunes. Después del conteo, el siguiente paso previsto es
-comparar las existencias con la cantidad objetivo vigente y agrupar las
-necesidades de compra resultantes por proveedor.
+Kitchen staff inspect each fridge, report how much stock exists, and add missing
+products in their actual fridge locations. One shared inventory covers Tuesday
+through Monday. After counting, the intended next step is to compare stock with
+the active target quantity and group the resulting purchase needs by supplier.
 
-## Flujo de trabajo y cobertura actual
+## Workflow and current coverage
 
-| Paso | Comportamiento requerido | Implementación actual |
+| Step | Required behavior | Current implementation |
 | --- | --- | --- |
-| Revisar heladeras | El personal de cocina revisa cada heladera e informa el estado de su inventario. | Existen páginas de heladeras, edición de cantidades, notas y un asistente con un paso por heladera. No se guarda un estado de completado o revisado. |
-| Agregar productos | Todo producto de inventario tiene una ubicación en una heladera. | Cocina puede asociar un producto existente o crear el producto y su ubicación juntos. Un producto puede estar en varias heladeras. |
-| Contar existencias | Registrar la cantidad real y la unidad de cada producto en cada heladera. | Implementado. Un campo vacío significa sin revisar; un cero explícito significa que no queda nada. |
-| Mantener el inventario semanal | Las ediciones de martes a lunes pertenecen a una única instancia semanal compartida. | Implementado mediante la normalización de la fecha semanal, una fecha única y una restricción que exige que sea martes. |
-| Mantener las existencias previstas | Cada producto tiene una cantidad objetivo, su propio historial y un único objetivo activo a la vez. | Previsto; no se encontró almacenamiento, historial ni interfaz de edición de objetivos. Falta decidir su alcance. |
-| Calcular compras | Comparar las existencias observadas con el objetivo aplicable. | Previsto; las diferencias actuales comparan inventarios entre sí. |
-| Agrupar por proveedor | Usar las asociaciones existentes entre productos y proveedores para organizar las cantidades a comprar. | Existen las asociaciones y la visualización de proveedores. No existen el cálculo de compras, la selección de proveedor ni el resultado agrupado. |
+| Inspect fridges | Kitchen staff inspect each fridge and report its inventory status. | Fridge pages, quantity edits, notes, and a wizard with one step per fridge exist. No completed or reviewed status is persisted. |
+| Add products | Every inventory product has a fridge placement. | Kitchen users can associate an existing product or create a product and placement together. A product can occupy multiple fridges. |
+| Count stock | Record the actual quantity and unit for each product in each fridge. | Implemented. Blank means unreviewed; explicit zero means none remains. |
+| Maintain the weekly inventory | Tuesday–Monday edits belong to one shared weekly instance. | Implemented through weekly date normalization, a unique date, and a constraint requiring that date to be Tuesday. |
+| Maintain target stock | Each product has a target quantity, its own history, and only one active target at a time. | Intended; no target persistence, history, or editing UI was found. Target scope still needs a decision. |
+| Calculate purchases | Compare observed stock with the applicable target. | Intended; current differences compare inventories with each other. |
+| Group by supplier | Use existing product–supplier links to organize purchase quantities. | Links and supplier display exist. Purchase calculation, supplier selection, and grouped purchase output do not. |
 
-## Productos y ubicación en heladeras
+## Products and fridge placement
 
-`productos` es el catálogo compartido. `heladera_productos` asocia un producto
-con una heladera; las cantidades se registran para ese par. Esto permite que
-un mismo producto, como el arroz, esté en dos heladeras sin crear dos identidades
-de producto.
+`productos` is the shared product catalogue. `heladera_productos` associates a
+product with a fridge; quantities are recorded against that pair. This allows
+one product, such as rice, to exist in two fridges without creating two product
+identities.
 
-La acción de creación de productos de inventario exige una heladera activa y
-crea el producto y su ubicación de forma atómica. Al contar, se valida que el
-producto pertenezca a esa heladera y que la asociación esté activa. Las claves
-foráneas de la base de datos también exigen una ubicación para cada observación.
-Estas garantías implementan la regla de ubicación para los conteos de inventario;
-**no** exigen que todos los productos del catálogo general tengan una heladera.
+The inventory product creation action requires an active fridge and creates the
+product and placement atomically. Counting validates that the product belongs to
+that fridge and its membership is active. Database foreign keys also require a
+placement for every observation. These safeguards implement the placement rule
+for inventory counts; they do **not** require every product in the wider
+catalogue to have a fridge.
 
-Quitar una entrada de inventario actualmente oculta su asociación con la
-heladera y conserva el producto y sus observaciones anteriores. Por lo tanto,
-un producto puede quedarse sin ubicaciones activas. Falta decidir si la regla
-prevista debe impedir ese estado o si ese producto simplemente queda fuera del
-inventario activo.
+Removing an inventory entry currently hides its fridge membership, preserving
+the product and past observations. A product can therefore have no remaining
+active placements. Decide whether the intended rule requires preventing that
+state or simply treating such a product as outside the active inventory.
 
-Fuentes: [esquema de inventario](../src/db/schema/inventory.ts),
-[esquema de productos](../src/db/schema/products.ts),
-[acciones de inventario](../src/lib/actions/inventory.ts),
-[validación de entradas](../src/lib/validators/inventory.ts).
+Sources: [inventory schema](../src/db/schema/inventory.ts),
+[product schema](../src/db/schema/products.ts),
+[inventory actions](../src/lib/actions/inventory.ts),
+[input validation](../src/lib/validators/inventory.ts).
 
-## Un inventario por semana
+## One inventory per week
 
-La semana usa la zona horaria **America/Montevideo**, comienza el martes y termina
-el lunes. Su identificador es la fecha del martes. Todos los usuarios de cocina
-comparten la misma instancia. Por ejemplo:
+The week uses **America/Montevideo**, beginning Tuesday and ending Monday.
+Its identifier is the Tuesday date. All kitchen users share the same instance.
+For example:
 
-- El martes 6 de octubre se crea **Martes 6 de octubre**.
-- Las correcciones del viernes 9 de octubre actualizan ese mismo inventario.
-- El lunes 12 de octubre sigue perteneciendo a ese inventario.
-- El martes 13 de octubre comienza **Martes 13 de octubre**.
+- Tuesday October 6 creates **Martes 6 de octubre** (Tuesday October 6).
+- Friday October 9 corrections update that same inventory.
+- Monday October 12 still belongs to that inventory.
+- Tuesday October 13 begins **Martes 13 de octubre** (Tuesday October 13).
 
-La base de datos guarda el último conteo de cada combinación de inventario
-semanal, heladera y producto en `inventario_items`. Volver a iniciar la misma
-semana reutiliza su registro de cabecera; guardar conteos actualiza el resumen
-de esa semana. El asistente detecta si ya existe un inventario de la semana
-actual, propone editarlo y precarga sus cantidades. En una semana nueva, los
-productos sin contar permanecen desconocidos; no heredan los conteos anteriores.
+The Spanish labels above are the actual inventory labels shown by the application.
+The database stores the latest count for each weekly inventory/fridge/product
+in `inventario_items`. Starting the same week again reuses its header; saving
+counts updates that week's summary. The wizard detects an existing inventory
+for the current week, prompts the user to edit it, and preloads its counts.
+A new week's uncounted products stay unknown rather than inheriting old counts.
 
-La regla significa **como máximo una instancia por semana**, creada al iniciarla
-o registrar el primer conteo. No existe un proceso programado que cree un
-inventario para cada semana del calendario. Exigir que el personal termine un
-inventario cada semana es un requisito operativo distinto; actualmente no hay
-un control que obligue a completarlo.
+The rule means **at most one instance per week**, with an instance created when
+started or first counted. There is no scheduled process that creates an inventory
+for every calendar week. Whether staff must finish an inventory each week is a
+separate operational requirement, without completion enforcement today.
 
-Fuentes: [migración semanal y disparador de conteos](../drizzle/0017_weekly_inventory.sql),
-[acciones de inicio y edición](../src/lib/actions/inventory.ts),
-[cálculo de la semana y formato de etiquetas](../src/lib/inventory/run-display.ts),
-[página del asistente](../src/app/inventory/new/page.tsx),
-[interacción del asistente](../src/app/inventory/new/wizard.tsx).
+Sources: [weekly migration and count trigger](../drizzle/0017_weekly_inventory.sql),
+[start/edit actions](../src/lib/actions/inventory.ts),
+[week and label formatting](../src/lib/inventory/run-display.ts),
+[wizard page](../src/app/inventory/new/page.tsx),
+[wizard interaction](../src/app/inventory/new/wizard.tsx).
 
-## Historial de inventario e historial de existencias previstas
+## Inventory history versus target-stock history
 
-Responden preguntas diferentes y deben mantenerse separados:
+These answer different questions and must remain separate:
 
-| Historial | Pregunta que responde | Estado |
+| History | Question answered | Status |
 | --- | --- | --- |
-| Historial de inventarios semanales | ¿Cuánto se registró para cada heladera y producto en cada semana de inventario? | Implementado mediante `inventarios` e `inventario_items`; la pantalla de historial muestra el último resumen de cada semana. |
-| Historial de auditoría de conteos | ¿Quién registró qué cantidad y cuándo, incluidas las correcciones dentro de una semana? | Las filas inmutables de `observaciones_inventario` conservan cantidad, unidad, usuario y fecha y hora. La pantalla de historial semanal no muestra todas las correcciones de auditoría. |
-| Historial de existencias previstas | ¿Qué cantidad se pretendía mantener y cómo cambió ese objetivo? | Requerido, pero no implementado. Necesita sus propios registros históricos y un único objetivo activo a la vez para el alcance elegido. |
+| Weekly inventory history | How much was recorded for each fridge/product in each inventory week? | Implemented through `inventarios` and `inventario_items`; the history screen displays the latest summary for each week. |
+| Count audit history | Who recorded which quantity, and when, including corrections within a week? | Immutable `observaciones_inventario` rows retain the quantity, unit, user, and timestamp. The weekly history screen does not expose every audit correction. |
+| Target-stock history | What quantity did we intend to maintain, and how did that target change? | Required but unimplemented. It needs its own historical records and one active target at a time for the chosen scope. |
 
-Una corrección del viernes reemplaza la cantidad semanal mostrada y agrega una
-observación de conteo, conservando la medición anterior en el historial de
-auditoría. Esto no crea un segundo inventario semanal. Editar una nota sin
-actualizar la cantidad no crea una observación ni una nueva instantánea histórica
-semanal; las notas compartidas y los comentarios de heladera no constituyen una
-auditoría completa de todas las ediciones.
+A Friday correction replaces the displayed weekly quantity but appends a count
+observation, preserving the earlier measurement in the audit history. This does
+not create a second weekly inventory. Notes edited without a quantity update do
+not create an observation or a new historical weekly snapshot; shared notes and
+fridge commentary are not a complete audit of all edits.
 
-Actualmente, `cambio` es el stock observado menos el stock comparable del
-inventario anterior. Puede ser positivo, negativo o cero. Si falta el producto
-en el inventario anterior o cambia la unidad, no se puede comparar. El inventario
-inicial no tiene comparación previa. Esta diferencia no mide consumo ni calcula
-qué comprar.
+Current `cambio` is observed stock minus the comparable stock in the previous
+inventory. It can be positive, negative, or zero. A missing previous item or a
+changed unit prevents comparison. The initial inventory has no prior comparison.
+This difference neither measures consumption nor calculates what to purchase.
 
-Fuentes: [observaciones inmutables](../drizzle/0012_inventory.sql),
-[instantáneas semanales](../drizzle/0017_weekly_inventory.sql),
-[consultas de inventarios](../src/lib/queries/inventory-runs.ts),
-[interfaz del historial](../src/app/inventory/history/page.tsx).
+Sources: [append-only observations](../drizzle/0012_inventory.sql),
+[weekly snapshots](../drizzle/0017_weekly_inventory.sql),
+[run queries](../src/lib/queries/inventory-runs.ts),
+[history UI](../src/app/inventory/history/page.tsx).
 
-## Cantidades previstas y necesidades de compra: comportamiento deseado
+## Target quantities and purchase needs — intended behavior
 
-Cada producto de inventario debería tener una cantidad de stock objetivo y una
-unidad. Cambiar ese plan debería conservar el objetivo anterior en su propio
-historial, dejando un único objetivo activo a la vez. Ese historial no debe
-deducirse de los conteos observados, las cantidades por paquete del proveedor ni
-las compras anteriores.
+Each inventory product should have a target stock quantity and unit. Changing
+that plan should preserve the prior target in its own history, while leaving
+only one target active at a time. This history must not be inferred from observed
+counts, supplier package quantities, or previous purchases.
 
-Para una cantidad observada conocida y un objetivo aplicable en unidades
-compatibles:
+For a known observed quantity and applicable target in compatible units:
 
 ```text
-faltante a comprar = max(stock objetivo - stock observado, 0)
+purchase shortage = max(target stock - observed stock, 0)
 ```
 
-Por ejemplo, un objetivo de 12 kg y un stock observado de 8 kg dan un faltante
-de 4 kg. Un stock observado de 15 kg da un faltante de cero. Ese faltante es
-distinto del cambio, con signo positivo o negativo, respecto del inventario anterior.
+For example, a target of 12 kg and observed stock of 8 kg gives a 4 kg shortage.
+Observed stock of 15 kg gives a zero shortage. That shortage is distinct from the
+signed change since the preceding inventory.
 
-Antes de implementar este cálculo, hay que definir el alcance del objetivo:
+Before implementing this calculation, settle the target scope:
 
-- **Objetivo global por producto:** comparar con la suma completa de sus
-  existencias en todas las heladeras. Una suma parcial no representa un conteo
-  completo.
-- **Objetivo por producto y heladera:** comparar cada ubicación con su propio
-  objetivo activo. Decidir si el excedente de una heladera puede compensar el
-  faltante de otra antes de sumar las compras; trasladar stock puede ser distinto
-  de comprarlo.
+- **Global product target:** compare against the complete sum across its fridge
+  placements. A partial sum cannot stand for a complete count.
+- **Product/fridge target:** compare each location with its own active target.
+  Decide whether excess in one fridge can offset a shortage in another before
+  aggregating purchases; moving stock may be different from buying it.
 
-El requisito del usuario es un único objetivo activo a la vez. El alcance anterior
-determina si esa unicidad se aplica a un producto o a un par producto y heladera.
-El esquema actual no establece ninguna de las dos opciones.
+The user requirement is one active target at a time. The scope above determines
+whether that uniqueness applies to a product or to a product/fridge pair. Neither
+choice is established by the current schema.
 
-## De los faltantes a las compras por proveedor: comportamiento deseado
+## From shortages to supplier groups — intended behavior
 
-Las asociaciones existentes en `proveedor_productos` vinculan productos con
-proveedores y contienen precio y cantidad por paquete. Un producto puede no tener
-proveedor o tener varios. Actualmente el inventario muestra esas asociaciones;
-no selecciona un proveedor ni genera grupos de compra.
+Existing `proveedor_productos` links associate products with suppliers and carry
+price and package quantity. Products may have no supplier or several suppliers.
+The inventory currently displays those links; it does not select a supplier or
+produce purchase groups.
 
-Después de calcular faltantes válidos, se asigna cada faltante al proveedor
-elegido y se agrupan las líneas de compra por proveedor. Cada grupo debe conservar
-la identidad y unidad de los productos; cantidades de unidades diferentes no se
-pueden sumar en un único total por proveedor. Una asociación identifica una
-opción de compra, no demuestra quién suministró el stock observado.
+After calculating valid shortages, assign each shortage to the selected supplier
+and group the purchase lines by supplier. Retain product identities and units in
+each group; quantities in different units cannot be combined into a single
+supplier total. A supplier link identifies a purchasing option, not proof of who
+supplied the observed stock.
 
-| Situación | Qué se sabe | Regla pendiente |
+| Situation | What is known | Rule still required |
 | --- | --- | --- |
-| Falta un conteo | El stock es desconocido; vacío no significa cero. | Cómo tratar un inventario incompleto al preparar una lista de compras. No presentar un faltante como definitivo a partir de stock desconocido. |
-| Falta un objetivo | Puede conocerse el stock observado, pero no está definido el nivel deseado. | Cómo mostrar y resolver el objetivo faltante; no asumir un objetivo de cero. |
-| Unidades incompatibles | Todavía no se pueden comparar stock y objetivo. | Qué conversiones se admiten y cuál es su fuente; no está establecida una conversión automática entre kg y unidades. |
-| Sin proveedor | Puede existir un faltante sin asociación a un proveedor. | Cómo mostrar o asignar las líneas de compra sin resolver. |
-| Varios proveedores | Hay varias asociaciones válidas. | Elección manual, proveedor preferido, reparto de la compra u otra política explícita. No duplicar el faltante entre proveedores. |
-| Cantidades por paquete | Las asociaciones con proveedores tienen una cantidad por paquete. | Su significado y compatibilidad de unidades, el redondeo a paquetes enteros y si la cantidad mostrada corresponde a unidades de stock o a paquetes. |
-| Cambios de objetivo durante o después de una semana | Se requiere un historial de objetivos. | Si el cálculo de compra usa el objetivo actualmente activo o el vigente al momento del inventario; cómo reproducir cálculos anteriores. |
+| Missing count | Stock is unknown; blank is not zero. | How to handle incomplete inventory when preparing a purchase list. Do not present a shortage as final from unknown stock. |
+| Missing target | Observed stock may be known, but no desired level is defined. | How to surface and resolve the missing target; do not assume a zero target. |
+| Incompatible units | Stock and target cannot yet be compared. | Supported conversions and their source; no automatic kg/unit conversion is established. |
+| No supplier | A shortage can exist without a supplier link. | How unresolved purchase lines are shown or assigned. |
+| Multiple suppliers | Several links are valid. | Manual choice, preferred supplier, split purchase, or another explicit policy. Do not duplicate the shortage across suppliers. |
+| Package quantities | Supplier links have a package quantity. | Meaning/unit compatibility, whole-package rounding, and whether the displayed amount is stock units or packages. |
+| Target changes during/after a week | A target history is required. | Whether a purchase calculation uses the currently active target or the target effective at inventory time; how past calculations are reproduced. |
 
-Fuentes: [relación entre proveedores y productos](../src/db/schema/provider-products.ts),
-[consultas de detalle de productos](../src/lib/queries/inventory-items.ts),
-[visualización de stock y proveedores](../src/app/inventory/items/[id]/page.tsx).
+Sources: [supplier/product relationship](../src/db/schema/provider-products.ts),
+[item detail queries](../src/lib/queries/inventory-items.ts),
+[item stock and supplier display](../src/app/inventory/items/[id]/page.tsx).
 
-## Aspectos por pulir verificados en el repositorio
+## Polishing gaps verified in the repository
 
-1. Falta implementar las cantidades previstas, su historial y la garantía de un
-   único objetivo activo. También faltan el cálculo de faltantes a comprar y la
-   agrupación por proveedor.
-2. La pantalla de historial todavía dice “Un inventario por día”, aunque sus
-   tarjetas de fecha y el comportamiento de la base de datos son semanales. Este
-   documento registra la discrepancia sin modificar la pantalla.
-3. Las [notas anteriores de implementación del inventario](inventory.md) contienen
-   descripciones ya reemplazadas sobre inventarios diarios y comparaciones de
-   168 horas. Su último párrafo semanal reemplaza la regla diaria; las pantallas
-   actuales de inventario usan instantáneas semanales.
-4. El asistente informa campos sin revisar, pero no guarda un estado de completado,
-   revisado o aprobado. Hay que definir qué significa operativamente “estado del
-   inventario”.
-5. Cocina puede contar y agregar productos al inventario; la gestión de asociaciones
-   con proveedores pertenece a la aplicación principal, restringida a Admin.
-   Siguen pendientes los permisos para editar objetivos y resolver proveedores.
+1. Target quantities, their history and active-target enforcement still need
+   implementation. Purchase shortages and supplier grouping also need implementation.
+2. The history screen still says “Un inventario por día” (“One inventory per day”)
+   even though its date cards and database behavior are weekly. This document
+   records the mismatch without changing the screen.
+3. The older [inventory implementation notes](inventory.md) contain superseded
+   daily-run and 168-hour comparison descriptions. Their final weekly paragraph
+   supersedes the daily rule; current inventory screens use weekly run snapshots.
+4. The wizard reports unreviewed fields but does not persist a completed, reviewed,
+   or approved status. Define what “inventory status” must mean operationally.
+5. Kitchen users can count and add inventory products; supplier link management
+   is in the main application, which is restricted to Admin. Permissions for
+   editing targets and resolving suppliers remain undecided.
 
-Fuentes de acceso: [política de grupos](../src/lib/auth/policy.ts),
-[autorización de cambios en inventario](../src/lib/actions/inventory.ts).
+Access sources: [group policy](../src/lib/auth/policy.ts),
+[inventory mutation authorization](../src/lib/actions/inventory.ts).
 
-La verificación de este documento consiste en leer los esquemas, migraciones,
-acciones, consultas y pantallas enlazadas, y comprobar las referencias locales
-del Markdown. No confirma el contenido actual de producción ni su comportamiento
-en ejecución.
+Verification for this document consists of reading the schema, migrations,
+actions, queries, and screens linked above and checking the Markdown's local
+references. It does not establish current production contents or runtime behavior.
