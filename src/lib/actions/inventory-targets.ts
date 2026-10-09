@@ -22,6 +22,7 @@ export async function setInventoryTarget(input: unknown): Promise<ActionResult> 
     revalidatePath(`/inventory/items/${product.id}`);
     revalidatePath(`/inventory/items/${product.id}/targets`);
     revalidatePath("/inventory/purchases");
+    revalidatePath("/inventory-plan");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
 }

@@ -115,6 +115,19 @@ const sections: {
     ],
   },
   {
+    title: "Plan de Inventario",
+    groups: [{
+      title: "Lo que debería haber",
+      apps: [{
+        name: "Cantidades objetivo",
+        description: "Definí cuánto debería haber de cada producto.",
+        href: "/inventory-plan",
+        icon: ClipboardDocumentListIcon,
+        bg: "bg-[linear-gradient(145deg,#79b3e8,#426fa8)]",
+      }],
+    }],
+  },
+  {
     title: "Relleno de Datos",
     groups: [{
       title: "Un poquito cada día",

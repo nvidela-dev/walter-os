@@ -130,3 +130,24 @@ it("calculates purchases from the latest run, the active target, and active frid
   vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
   await expect(getInventoryPurchases()).rejects.toThrow("Denied");
 });
+
+it("lists one plan per product across active fridges, preserving unknown quantities and changed units", async () => {
+  const { getInventoryPlan } = await import("@/lib/queries/inventory-plan");
+  const newProduct = randomUUID();
+  const extraFridge = randomUUID();
+  await client.query("INSERT INTO productos(id,nombre,unidad) VALUES ($1,'Plan test','kg')", [newProduct]);
+  await client.query("INSERT INTO heladeras(id,numero) VALUES ($1,99)", [extraFridge]);
+  await client.query("INSERT INTO heladera_productos(heladera_id,producto_id) VALUES ($1,$3),($2,$3)", [fridgeId, extraFridge, newProduct]);
+  expect((await getInventoryPlan()).filter((row) => row.id === newProduct)).toEqual([
+    { id: newProduct, name: "Plan test", unit: "kg", quantity: null, targetUnit: null, targetId: null },
+  ]);
+  await setInventoryTarget({ productId: newProduct, quantity: "0" });
+  expect((await getInventoryPlan()).find((row) => row.id === newProduct)).toMatchObject({ quantity: "0.00", targetUnit: "kg" });
+  await client.query("UPDATE productos SET unidad='pack' WHERE id=$1", [newProduct]);
+  expect((await getInventoryPlan()).find((row) => row.id === newProduct)).toMatchObject({ unit: "pack", targetUnit: "kg" });
+  await client.query("UPDATE heladeras SET activa=false WHERE id=$1", [extraFridge]);
+  await client.query("UPDATE heladera_productos SET activo=false WHERE heladera_id=$1 AND producto_id=$2", [fridgeId, newProduct]);
+  expect((await getInventoryPlan()).some((row) => row.id === newProduct)).toBe(false);
+  vi.mocked(requireAccess).mockRejectedValueOnce(expectedActionError("Denied"));
+  await expect(getInventoryPlan()).rejects.toThrow("Denied");
+});
