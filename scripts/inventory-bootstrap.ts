@@ -9,6 +9,7 @@ export function inventoryBootstrapSql(): string {
   const runMigration = readFileSync("drizzle/0016_zippy_leper_queen.sql", "utf8");
   const weeklyMigration = readFileSync("drizzle/0017_weekly_inventory.sql", "utf8");
   const targetMigration = readFileSync("drizzle/0018_inventory_stock_targets.sql", "utf8");
+  const providerLinkMigration = readFileSync("drizzle/0019_true_unicorn.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -79,6 +80,18 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.historial_objetivos_inventario'::regclass AND tgname='objetivos_inmutables' AND tgenabled='O')
     OR NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.historial_objetivos_inventario'::regclass AND tgname='objetivos_actualizar' AND tgenabled='O') THEN
     RAISE EXCEPTION 'Inventory target triggers are missing or disabled';
+  END IF;
+
+  -- Provider matching can be saved before its price is known.
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'proveedor_productos'
+      AND column_name = 'precio' AND is_nullable = 'NO') THEN
+    ${providerLinkMigration}
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'proveedor_productos'
+      AND column_name = 'precio' AND is_nullable = 'YES') THEN
+    RAISE EXCEPTION 'Provider catalogue price must allow unknown values';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
