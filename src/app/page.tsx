@@ -88,6 +88,13 @@ const sections: {
             icon: ArchiveBoxIcon,
             bg: "bg-[linear-gradient(145deg,#a8b3bd,#6f7b86)]",
           },
+          {
+            name: "Bebidas",
+            description: "Inventario semanal de bebidas",
+            href: "/drinks",
+            icon: ArchiveBoxIcon,
+            bg: "bg-[linear-gradient(145deg,#67bde0,#357ba7)]",
+          },
         ],
       },
     ],

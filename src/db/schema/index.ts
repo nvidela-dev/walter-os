@@ -39,5 +39,6 @@ export * from "./price-history";
 
 // Access-control allowlist (the only authorization policy)
 export * from "./allowed-emails";
+export * from "./drinks";
 export * from "./inventory";
 export * from "./inventory-targets";

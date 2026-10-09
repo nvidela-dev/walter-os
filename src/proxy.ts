@@ -30,7 +30,7 @@ export const proxy = clerkMiddleware(async (auth, request) => {
   const decision = routeDecision(group, request.nextUrl.pathname, request.method);
   if (decision === "forbidden") return new NextResponse(null, { status: 403 });
   if (decision !== "allow") {
-    const destination = decision === "inventory" ? "/inventory" : "/not-authorized";
+    const destination = decision === "inventory" ? "/inventory" : decision === "drinks" ? "/drinks" : "/not-authorized";
     return NextResponse.redirect(new URL(destination, request.url));
   }
 });

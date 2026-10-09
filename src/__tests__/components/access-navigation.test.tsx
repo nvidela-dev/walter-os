@@ -1,13 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import DrinksLayout from "@/app/drinks/layout";
 import InventoryLayout from "@/app/inventory/layout";
 import NotAuthorizedPage from "@/app/not-authorized/page";
 import Home from "@/app/page";
 import { t } from "@/i18n";
 import { getCurrentGroup } from "@/lib/auth/access";
 
-vi.mock("@/lib/auth/access", () => ({ getCurrentGroup: vi.fn() }));
+vi.mock("@/lib/auth/access", () => ({ getCurrentGroup: vi.fn(), requireAccess: vi.fn(() => Promise.resolve("staff")) }));
 vi.mock("@clerk/nextjs", () => ({ UserButton: () => null, useClerk: () => ({ signOut: vi.fn() }) }));
 vi.mock("next/navigation", () => ({ redirect: (path: string) => { throw new Error(`redirect:${path}`); } }));
 
@@ -44,4 +45,13 @@ describe("group-specific navigation", () => {
     vi.mocked(getCurrentGroup).mockResolvedValue("admin");
     await expect(NotAuthorizedPage()).rejects.toThrow("redirect:/");
   });
+});
+
+it("Waitress lands on drinks and sees no administrative or kitchen navigation", async () => {
+  vi.mocked(getCurrentGroup).mockResolvedValue("waitress");
+  await expect(Home()).rejects.toThrow("redirect:/drinks");
+  render(await DrinksLayout({ children: <p>Drink counts</p> }));
+  expect(screen.getByRole("link", { name: "Contar" })).toHaveAttribute("href", "/drinks");
+  expect(screen.queryByRole("link", { name: "Bebidas y objetivos" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Inicio" })).not.toBeInTheDocument();
 });

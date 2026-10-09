@@ -35,3 +35,22 @@ describe("Admin and Kitchen policy", () => {
     expect(routeDecision("kitchen", "/inventory/fridge-id", "POST")).toBe("allow");
   });
 });
+
+it("restricts Waitress to drinks counting and history, including route prefix traps and mutations", () => {
+  expect(landingPath("waitress")).toBe("/drinks");
+  expect(canAccess("waitress", "drinks")).toBe(true);
+  expect(canAccess("admin", "drinks")).toBe(true);
+  expect(canAccess("kitchen", "drinks")).toBe(false);
+  expect(canAccess("waitress", "inventory")).toBe(false);
+  expect(canAccess("waitress", "main")).toBe(false);
+  for (const route of ["/", "/inventory", "/inventory/new", "/providers", "/access", "/drinks-other", "/drinks/manage", "/drinks/manage/new", "/data-fill", "/inventory-plan"]) {
+    expect(routeDecision("waitress", route, "GET")).toBe("drinks");
+    expect(routeDecision("waitress", route, "POST")).toBe("forbidden");
+  }
+  for (const route of ["/drinks", "/drinks/history"]) {
+    expect(routeDecision("waitress", route, "GET")).toBe("allow");
+    expect(routeDecision("waitress", route, "POST")).toBe("allow");
+    expect(routeDecision("kitchen", route, "GET")).toBe("inventory");
+    expect(routeDecision(null, route, "GET")).toBe("request-access");
+  }
+});

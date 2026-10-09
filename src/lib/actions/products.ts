@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
 import {
+  drinkItems,
   fridgeProducts,
   invoiceLines,
   priceHistory,
@@ -209,7 +210,8 @@ export async function removeProductFromProvider(
 
   try {
     const inventoryUses = await countRows(fridgeProducts, eq(fridgeProducts.productId, parsed.data.productId));
-    if (inventoryUses > 0) return actionError(t.inventory.productTracked);
+    const drinkUses = await countRows(drinkItems, eq(drinkItems.productId, parsed.data.productId));
+    if (inventoryUses > 0 || drinkUses > 0) return actionError(t.inventory.productTracked);
     const [invoiceLineCount, priceHistoryCount, recipeUses] = await Promise.all([
       countRows(invoiceLines, eq(invoiceLines.productId, parsed.data.productId)),
       countRows(priceHistory, eq(priceHistory.productId, parsed.data.productId)),

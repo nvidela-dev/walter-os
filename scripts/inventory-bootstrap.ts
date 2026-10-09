@@ -10,6 +10,7 @@ export function inventoryBootstrapSql(): string {
   const weeklyMigration = readFileSync("drizzle/0017_weekly_inventory.sql", "utf8");
   const targetMigration = readFileSync("drizzle/0018_inventory_stock_targets.sql", "utf8");
   const providerLinkMigration = readFileSync("drizzle/0019_true_unicorn.sql", "utf8");
+  const drinksMigration = readFileSync("drizzle/0020_polite_nico_minoru.sql", "utf8");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -92,6 +93,21 @@ BEGIN
     WHERE table_schema = 'public' AND table_name = 'proveedor_productos'
       AND column_name = 'precio' AND is_nullable = 'YES') THEN
     RAISE EXCEPTION 'Provider catalogue price must allow unknown values';
+  END IF;
+
+  SELECT count(*) INTO existing_count FROM pg_tables
+    WHERE schemaname='public' AND tablename IN ('usuarios_bebidas','inventario_bebidas_productos','observaciones_bebidas');
+  IF existing_count = 0 THEN
+    ${drinksMigration}
+  ELSIF existing_count <> 3 THEN
+    RAISE EXCEPTION 'Partial drinks schema: refusing automatic repair';
+  END IF;
+  PERFORM id, email FROM public.usuarios_bebidas LIMIT 0;
+  PERFORM id, producto_id, ubicacion, cantidad_objetivo, unidad_objetivo, activo FROM public.inventario_bebidas_productos LIMIT 0;
+  PERFORM id, item_id, semana, nombre, ubicacion, cantidad, unidad, registrado_at, registrado_por FROM public.observaciones_bebidas LIMIT 0;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_bebidas'::regclass AND tgname='bebidas_observaciones_inmutables' AND tgenabled='O')
+    OR NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_bebidas'::regclass AND tgname='bebidas_snapshot_insert' AND tgenabled='O') THEN
+    RAISE EXCEPTION 'Drinks inventory triggers are missing or disabled';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

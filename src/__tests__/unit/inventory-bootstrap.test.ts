@@ -21,6 +21,7 @@ describe("Vercel inventory setup", () => {
       await db.exec(inventoryBootstrapSql());
       expect((await db.query("SELECT activo FROM heladera_productos")).rows).toEqual([{ activo: false }]);
       expect((await db.query("SELECT email FROM usuarios_inventario")).rows).toEqual([]);
+      expect((await db.query("SELECT email FROM usuarios_bebidas")).rows).toEqual([]);
       expect((await db.query("SELECT numero FROM heladeras")).rows).toEqual([{ numero: 3 }]);
       expect((await db.query("SELECT * FROM productos")).rows).toEqual(before);
       expect((await db.query("SELECT * FROM drizzle.__drizzle_migrations")).rows).toEqual(ledger);
@@ -69,5 +70,17 @@ it("upgrades existing provider links for price-free matching without changing kn
     expect((await db.query("SELECT precio FROM proveedor_productos WHERE producto_id='00000000-0000-4000-8000-000000000002'")).rows).toEqual([{ precio: null }]);
     expect((await db.query("SELECT precio FROM proveedor_productos WHERE producto_id='00000000-0000-4000-8000-000000000003'")).rows).toEqual([{ precio: "25.00" }]);
     await expect(db.exec("UPDATE proveedor_productos SET precio=0")).rejects.toThrow();
+  } finally { await db.close(); }
+});
+
+it("refuses partial drinks installations and disabled drink audit triggers", async () => {
+  const db = new PGlite();
+  try {
+    await db.exec("CREATE TABLE productos(id uuid PRIMARY KEY,nombre text); CREATE TABLE proveedor_productos(precio numeric); CREATE TABLE usuarios_bebidas(email text)");
+    await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Partial drinks schema");
+    await db.exec("DROP TABLE usuarios_bebidas");
+    await db.exec(inventoryBootstrapSql());
+    await db.exec("DROP TRIGGER bebidas_observaciones_inmutables ON observaciones_bebidas");
+    await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Drinks inventory triggers are missing or disabled");
   } finally { await db.close(); }
 });

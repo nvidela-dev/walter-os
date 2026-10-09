@@ -11,7 +11,7 @@
 export const t = {
   access: {
     title: "Accesos", mainApp: "Inicio", email: "Correo electrónico", group: "Grupo",
-    admin: "Administrador", kitchen: "Cocina", none: "Sin acceso", save: "Guardar acceso",
+    admin: "Administrador", kitchen: "Cocina", waitress: "Moza · Solo inventario de bebidas", none: "Sin acceso", save: "Guardar acceso",
     saved: "Acceso actualizado", selfProtection: "No podés quitarte tu propio acceso de administrador.",
     description: "Administradores: acceso a toda la aplicación. Cocina: solo inventario. Sin grupo: sin acceso.",
     hint: "Ingresá el correo que la persona usa para iniciar sesión. No se envían invitaciones automáticamente.",

@@ -36,6 +36,7 @@ export function AccessForm({ members }: { members: AccessMember[] }): ReactEleme
         <label className="block">{t.access.group}
           <Select name="group" value={group} onChange={(event) => { setGroup(event.target.value); }}>
             <option value="kitchen">{t.access.kitchen}</option>
+            <option value="waitress">{t.access.waitress}</option>
             <option value="admin">{t.access.admin}</option>
             <option value="none">{t.access.none}</option>
           </Select>
@@ -49,7 +50,7 @@ export function AccessForm({ members }: { members: AccessMember[] }): ReactEleme
       {members.map((member) => <li key={member.email}>
         <button type="button" disabled={isSubmitting} onClick={() => { setEmail(member.email); setGroup(member.group); setSaved(false); }} className="app-card flex w-full flex-wrap justify-between gap-2 rounded-2xl p-4 text-left">
           <span className="break-all">{member.email}</span>
-          <span className="text-sm text-muted">{member.group === "admin" ? t.access.admin : t.access.kitchen}</span>
+          <span className="text-sm text-muted">{member.group === "admin" ? t.access.admin : member.group === "waitress" ? t.access.waitress : t.access.kitchen}</span>
         </button>
       </li>)}
     </ul>

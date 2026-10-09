@@ -2,13 +2,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  auth: vi.fn(), user: vi.fn(), main: vi.fn(), query: vi.fn(),
+  auth: vi.fn(), user: vi.fn(), main: vi.fn(), query: vi.fn(), waitress: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@clerk/nextjs/server", () => ({ auth: mocks.auth, currentUser: mocks.user }));
 vi.mock("@/lib/auth/allowlist", () => ({ isAllowedEmail: mocks.main, normalizeEmail: (email: string) => email.trim().toLowerCase() }));
-vi.mock("@/db", () => ({ db: { select: () => ({ from: () => ({ where: () => ({ limit: mocks.query }) }) }) } }));
+vi.mock("@/db", async () => {
+  const { waitressEmails } = await import("@/db/schema");
+  return { db: { select: () => ({ from: (table: unknown) => ({ where: () => ({ limit: table === waitressEmails ? mocks.waitress : mocks.query }) }) }) } };
+});
 
 import { isInventoryEmail, requireAccess } from "@/lib/auth/access";
 
@@ -17,6 +20,7 @@ beforeEach(() => {
   mocks.auth.mockResolvedValue({ userId: "user_inventory" });
   mocks.user.mockResolvedValue({ primaryEmailAddress: { emailAddress: "Inventory@example.com", verification: { status: "verified" } } });
   mocks.query.mockResolvedValue([{ id: "inventory_membership" }]);
+  mocks.waitress.mockResolvedValue([]);
   mocks.main.mockResolvedValue(false);
 });
 

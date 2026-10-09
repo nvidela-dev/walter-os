@@ -34,6 +34,7 @@ beforeAll(async () => {
   await client.exec(`
     CREATE TABLE usuarios_autorizados (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text UNIQUE NOT NULL, created_at timestamp DEFAULT now());
     CREATE TABLE usuarios_inventario (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text UNIQUE NOT NULL, created_at timestamptz DEFAULT now());
+    CREATE TABLE usuarios_bebidas (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text UNIQUE NOT NULL, created_at timestamptz DEFAULT now());
     INSERT INTO usuarios_autorizados(email) VALUES ('admin@example.com');
   `);
 });
@@ -84,4 +85,21 @@ describe("group management against PostgreSQL", () => {
     expect((await setAccessGroup({ email: "oops@example.com", group: "superuser" })).ok).toBe(false);
     expect(await getAccessGroup("oops@example.com")).toBeNull();
   });
+});
+
+it("assigns Waitress exclusively, denies other areas and role escalation, and revokes drinks access", async () => {
+  await setAccessGroup({ email: "waitress@example.com", group: "kitchen" });
+  expect((await setAccessGroup({ email: "waitress@example.com", group: "waitress" })).ok).toBe(true);
+  expect(await getAccessGroup("waitress@example.com")).toBe("waitress");
+  expect((await client.query("SELECT * FROM usuarios_inventario WHERE email='waitress@example.com'")).rows).toHaveLength(0);
+  actor.email = "waitress@example.com";
+  await expect(requireAccess("drinks")).resolves.toBe("actor");
+  await expect(requireAccess("inventory")).rejects.toThrow();
+  await expect(requireAccess("main")).rejects.toThrow();
+  await expect(setAccessGroup({ email: actor.email, group: "admin" })).rejects.toThrow();
+  await expect(getAccessMembers()).rejects.toThrow();
+  actor.email = "admin@example.com";
+  expect((await getAccessMembers()).find((member) => member.email === "waitress@example.com")?.group).toBe("waitress");
+  await setAccessGroup({ email: "waitress@example.com", group: "none" });
+  expect(await getAccessGroup("waitress@example.com")).toBeNull();
 });

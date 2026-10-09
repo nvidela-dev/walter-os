@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { allowedEmails, inventoryEmails } from "@/db/schema";
+import { allowedEmails, inventoryEmails, waitressEmails } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
@@ -22,19 +22,19 @@ export async function setAccessGroup(input: unknown): Promise<ActionResult> {
     if (normalizeEmail(actorEmail) === email && group !== "admin") {
       return actionError(t.access.selfProtection);
     }
-    if (group === "none") {
-      await db.batch([
-        db.delete(allowedEmails).where(eq(allowedEmails.email, email)),
-        db.delete(inventoryEmails).where(eq(inventoryEmails.email, email)),
-      ]);
-    } else {
-      const target = group === "admin" ? allowedEmails : inventoryEmails;
-      const other = group === "admin" ? inventoryEmails : allowedEmails;
-      await db.batch([
-        db.delete(other).where(eq(other.email, email)),
-        db.insert(target).values({ email }).onConflictDoNothing(),
-      ]);
-    }
+    const memberships = { admin: allowedEmails, kitchen: inventoryEmails, waitress: waitressEmails };
+    const removals = Object.entries(memberships)
+      .filter(([name]) => name !== group)
+      .map(([, table]) => db.delete(table).where(eq(table.email, email)));
+    if (group === "none") await db.batch([
+      db.delete(allowedEmails).where(eq(allowedEmails.email, email)),
+      db.delete(inventoryEmails).where(eq(inventoryEmails.email, email)),
+      db.delete(waitressEmails).where(eq(waitressEmails.email, email)),
+    ]);
+    else await db.batch([
+      db.insert(memberships[group]).values({ email }).onConflictDoNothing(),
+      ...removals,
+    ]);
     revalidatePath("/", "layout");
     return actionOk(undefined);
   } catch (error) { return unknownActionError(error); }
