@@ -9,9 +9,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock("@/lib/actions/inventory-targets", () => ({ setInventoryTarget: vi.fn() }));
 
 const items = [
-  { id: "a", name: "Arroz", unit: "kg", quantity: null, targetUnit: null, targetId: null },
-  { id: "b", name: "Atún", unit: "unidad", quantity: "0.00", targetUnit: "unidad", targetId: 1 },
-  { id: "c", name: "Sal", unit: "pack", quantity: "3.00", targetUnit: "kg", targetId: 2 },
+  { id: "a", name: "Arroz", unit: "kg", quantity: null, targetUnit: null, targetId: null, locations: [{ id: "f1", number: 1, name: "Secos" }] },
+  { id: "b", name: "Atún", unit: "unidad", quantity: "0.00", targetUnit: "unidad", targetId: 1, locations: [{ id: "f2", number: 2, name: "Conservas" }] },
+  { id: "c", name: "Sal", unit: "pack", quantity: "3.00", targetUnit: "kg", targetId: 2, locations: [{ id: "f1", number: 1, name: "Secos" }] },
 ];
 
 beforeEach(() => { vi.clearAllMocks(); });
@@ -43,4 +43,12 @@ it("saves the entered target and retains unsaved input on failure", async () => 
   vi.mocked(setInventoryTarget).mockResolvedValue({ ok: true, data: undefined });
   await user.click(row.getByRole("button"));
   expect(await row.findByRole("status")).toBeInTheDocument();
+});
+
+it("groups products by fridge and keeps a shared product target visible in each location", () => {
+  render(<PlanList items={[{ id: "a", name: "Arroz", unit: "kg", quantity: null, targetUnit: null, targetId: null, locations: [{ id: "f2", number: 2, name: "Conservas" }, { id: "f1", number: 1, name: "Secos" }] }]} />);
+  expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual(["Heladera 1 · Secos", "Heladera 2 · Conservas"]);
+  expect(screen.getAllByRole("region", { name: "Arroz" })).toHaveLength(2);
+  expect(screen.getByRole("status")).toHaveTextContent("0 de 1 productos");
+  expect(screen.getAllByText(/El objetivo es compartido/)).toHaveLength(2);
 });

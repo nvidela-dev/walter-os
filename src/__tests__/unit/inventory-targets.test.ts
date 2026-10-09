@@ -138,9 +138,10 @@ it("lists one plan per product across active fridges, preserving unknown quantit
   await client.query("INSERT INTO productos(id,nombre,unidad) VALUES ($1,'Plan test','kg')", [newProduct]);
   await client.query("INSERT INTO heladeras(id,numero) VALUES ($1,99)", [extraFridge]);
   await client.query("INSERT INTO heladera_productos(heladera_id,producto_id) VALUES ($1,$3),($2,$3)", [fridgeId, extraFridge, newProduct]);
-  expect((await getInventoryPlan()).filter((row) => row.id === newProduct)).toEqual([
+  expect((await getInventoryPlan()).filter((row) => row.id === newProduct)).toMatchObject([
     { id: newProduct, name: "Plan test", unit: "kg", quantity: null, targetUnit: null, targetId: null },
   ]);
+  expect((await getInventoryPlan()).find((row) => row.id === newProduct)?.locations.map((location) => location.id)).toEqual([fridgeId, extraFridge]);
   await setInventoryTarget({ productId: newProduct, quantity: "0" });
   expect((await getInventoryPlan()).find((row) => row.id === newProduct)).toMatchObject({ quantity: "0.00", targetUnit: "kg" });
   await client.query("UPDATE productos SET unidad='pack' WHERE id=$1", [newProduct]);
