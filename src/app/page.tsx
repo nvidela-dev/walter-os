@@ -189,9 +189,6 @@ export default async function Home(): Promise<ReactElement> {
                     key={group.title}
                     className="ios-glass rounded-[2rem] border-white/[0.34] bg-white/[0.18] px-5 py-5 shadow-[0_16px_44px_rgba(31,45,53,0.07)]"
                   >
-                    <h2 className="mb-5 px-1 text-[15px] font-semibold text-[#53656d] drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">
-                      {group.title}
-                    </h2>
                     <div className="flex flex-wrap justify-center gap-x-10 gap-y-7">
                       {group.apps.map((app) => (
                         <HomeTile key={`${group.title}-${app.name}`} app={app} />
