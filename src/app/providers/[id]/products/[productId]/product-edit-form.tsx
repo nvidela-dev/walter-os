@@ -83,7 +83,7 @@ export function ProductEditForm({
           name="price"
           step="0.01"
           required
-          defaultValue={product.price}
+          defaultValue={product.price ?? ""}
         />
       </FormField>
 

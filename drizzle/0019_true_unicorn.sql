@@ -1,0 +1,1 @@
+ALTER TABLE "proveedor_productos" ALTER COLUMN "precio" DROP NOT NULL;

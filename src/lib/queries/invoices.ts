@@ -55,8 +55,7 @@ export async function getInvoiceFormData(): Promise<InvoiceFormProvider[]> {
       row.productId == null ||
       row.unitId == null ||
       row.productName == null ||
-      row.unitCode == null ||
-      row.currentPrice === null
+      row.unitCode == null
     ) {
       continue;
     }
@@ -65,7 +64,7 @@ export async function getInvoiceFormData(): Promise<InvoiceFormProvider[]> {
       name: row.productName,
       unitId: row.unitId,
       unitCode: row.unitCode,
-      currentPrice: row.currentPrice,
+      currentPrice: row.currentPrice ?? "",
     });
   }
 
