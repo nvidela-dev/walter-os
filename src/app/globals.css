@@ -177,3 +177,18 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
 html:has(.home-screen)::-webkit-scrollbar { width: 4px; }
 html:has(.home-screen)::-webkit-scrollbar-track { background: transparent; }
 html:has(.home-screen)::-webkit-scrollbar-thumb { background: rgba(102, 121, 130, 0.35); border-radius: 4px; }
+
+@keyframes data-fill-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes data-fill-celebrate {
+  0% { opacity: 0; transform: scale(.94); }
+  65% { transform: scale(1.025); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.data-fill-enter { animation: data-fill-enter 280ms ease-out; }
+.data-fill-celebrate { animation: data-fill-celebrate 420ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .data-fill *, .data-fill-enter, .data-fill-celebrate { animation: none; transition: none; }
+}

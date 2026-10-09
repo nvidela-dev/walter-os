@@ -17,7 +17,7 @@ export interface TreeProduct {
   productId: string;
   name: string;
   unit: string;
-  price: string;
+  price: string | null;
 }
 
 export interface TreeInvoiceLine {

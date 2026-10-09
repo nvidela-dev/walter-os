@@ -6,6 +6,7 @@ import {
   ClipboardDocumentListIcon,
   ClockIcon,
   DocumentTextIcon,
+  SparklesIcon,
   TruckIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
@@ -112,6 +113,19 @@ const sections: {
         ],
       },
     ],
+  },
+  {
+    title: "Relleno de Datos",
+    groups: [{
+      title: "Un poquito cada día",
+      apps: [{
+        name: "¿Quién lo trae?",
+        description: "Elegí el proveedor de cada producto, uno por uno.",
+        href: "/data-fill",
+        icon: SparklesIcon,
+        bg: "bg-[linear-gradient(145deg,#63cdb2,#278b73)]",
+      }],
+    }],
   },
 ];
 

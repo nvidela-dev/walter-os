@@ -13,7 +13,7 @@ export const providerProducts = pgTable(
     productId: uuid("producto_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
-    price: numeric("precio", { precision: 10, scale: 2 }).notNull(),
+    price: numeric("precio", { precision: 10, scale: 2 }),
     quantity: numeric("cantidad", { precision: 10, scale: 2 }).notNull().default("1"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

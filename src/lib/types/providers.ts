@@ -24,7 +24,7 @@ export interface ProviderListRow extends ProviderView {
 export interface ProviderProductView {
   id: string;
   productId: string;
-  price: string;
+  price: string | null;
   quantity: string;
   name: string;
   unitId: string | null;
@@ -44,5 +44,5 @@ export interface ProductForProvider {
   unit: string;
   unitName: string;
   description: string | null;
-  price: string;
+  price: string | null;
 }

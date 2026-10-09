@@ -41,7 +41,7 @@ export function InvoiceLinesEditor({
         const isNewPrice =
           !!product &&
           !!line.unitPrice &&
-          Number(line.unitPrice) !== Number(product.currentPrice);
+          product.currentPrice !== "" && Number(line.unitPrice) !== Number(product.currentPrice);
         const lineTotal = Number(line.unitPrice || 0) * Number(line.quantity || 0);
         const productId = `invoice-product-${idx}`;
         const quantityId = `invoice-quantity-${idx}`;

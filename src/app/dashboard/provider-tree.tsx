@@ -166,8 +166,8 @@ function Row({
   );
 }
 
-function Money({ value }: { value: string }): ReactElement {
-  return <span style={{ color: c.yellow }}>${value}</span>;
+function Money({ value }: { value: string | null }): ReactElement {
+  return <span style={{ color: c.yellow }}>{value === null ? "Precio pendiente" : `$${value}`}</span>;
 }
 
 function EmptyLeaf({ depth, text }: { depth: number; text: string }): ReactElement {
@@ -663,7 +663,7 @@ function AddInvoicePanel({
     const p = providers.find((x) => x.id === id);
     const next: Record<string, { qty: string; price: string }> = {};
     if (p != null) {
-      for (const prod of p.products) next[prod.productId] = { qty: "", price: prod.price };
+      for (const prod of p.products) next[prod.productId] = { qty: "", price: prod.price ?? "" };
     }
     setLineInputs(next);
   }
@@ -928,9 +928,9 @@ function AddInvoicePanel({
             ) : (
               <div className="space-y-1">
                 {products.map((prod) => {
-                  const li = lineInputs[prod.productId] ?? { qty: "", price: prod.price };
+                  const li = lineInputs[prod.productId] ?? { qty: "", price: prod.price ?? "" };
                   const active = num(li.qty) > 0;
-                  const changed = li.price.trim() !== "" && num(li.price) !== num(prod.price);
+                  const changed = prod.price !== null && li.price.trim() !== "" && num(li.price) !== num(prod.price);
                   return (
                     <div
                       key={prod.productId}

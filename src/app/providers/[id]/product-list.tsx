@@ -12,7 +12,7 @@ interface Product {
   productId: string;
   name: string;
   unit: string;
-  price: string;
+  price: string | null;
   quantity: string;
   description: string | null;
 }
@@ -64,7 +64,7 @@ export function ProductList({
           <div className="flex-1">
             <p className="font-medium text-foreground">{product.name}</p>
             <p className="text-sm text-muted">
-              ${product.price} / {product.unit}
+              {product.price === null ? "Precio pendiente" : `$${product.price} / ${product.unit}`}
             </p>
           </div>
           <button
