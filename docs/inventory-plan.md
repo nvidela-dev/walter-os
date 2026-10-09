@@ -1,6 +1,6 @@
 # Plan de Inventario
 
-La sección «Plan de Inventario» de Inicio permite definir cuánto debería haber de cada producto de las heladeras activas. Los productos se agrupan por número y nombre de heladera. Si un producto está en varias heladeras, aparece en cada grupo y se indica que su objetivo es compartido: el total entre todas las heladeras. El contador general cuenta cada producto una sola vez.
+El acceso «Plan de Inventario», dentro de la sección «Relleno de Datos» de Inicio, permite definir cuánto debería haber de cada producto de las heladeras activas. Los productos se agrupan por número y nombre de heladera. Si un producto está en varias heladeras, aparece en cada grupo y se indica que su objetivo es compartido: el total entre todas las heladeras. El contador general cuenta cada producto una sola vez.
 
 Se puede buscar por nombre, mostrar solo productos sin planificar y guardar cada cantidad por separado. Vacío significa pendiente; cero es un objetivo explícito. Si cambia la unidad del producto, se muestra el objetivo anterior y se pide confirmar uno en la nueva unidad.
 

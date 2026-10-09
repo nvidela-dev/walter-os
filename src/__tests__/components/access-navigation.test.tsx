@@ -15,7 +15,7 @@ describe("group-specific navigation", () => {
   it("Admin sees the inventory tile and access management", async () => {
     vi.mocked(getCurrentGroup).mockResolvedValue("admin");
     render(await Home());
-    expect(screen.getByRole("link", { name: /Inventario/ })).toHaveAttribute("href", "/inventory");
+    expect(screen.getByRole("link", { name: /^Inventario/ })).toHaveAttribute("href", "/inventory");
     expect(screen.getByRole("link", { name: t.access.title })).toHaveAttribute("href", "/access");
     expect(screen.getByRole("link", { name: /Proveedores/ })).toHaveAttribute("href", "/providers");
   });
