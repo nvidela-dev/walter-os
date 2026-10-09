@@ -11,9 +11,11 @@ export default async function InventoryPlanPage(): Promise<ReactElement> {
   const items = await getInventoryPlan();
   return <div className="app-page max-w-2xl">
     <PageHeader title="Plan de Inventario" backHref="/" backLabel="Inicio" />
-    <main className="space-y-6 py-6">
-      <p className="text-muted">Planificá los productos por heladera. Cada cantidad es el objetivo total del producto, sumando todas las heladeras.</p>
-      <p className="rounded-2xl bg-amber-50 p-4 text-sm">Vacío significa que todavía no lo planificaste. Poné 0 si no necesitás tener ese producto.</p>
+    <main className="space-y-4 py-4">
+      <details className="text-sm text-muted">
+        <summary>Cómo completar el plan</summary>
+        <p className="py-2">Cada cantidad es el objetivo total del producto entre todas las heladeras. Vacío significa pendiente; 0 significa que no necesitás tener ese producto.</p>
+      </details>
       <PlanList items={items} />
     </main>
   </div>;

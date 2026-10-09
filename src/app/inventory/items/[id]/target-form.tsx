@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { t } from "@/i18n";
 import { setInventoryTarget } from "@/lib/actions/inventory-targets";
 
-export function TargetForm({ productId, unit, quantity }: { productId: string; unit: string; quantity: string | null }): ReactElement {
+export function TargetForm({ productId, unit, quantity, compact = false }: { productId: string; unit: string; quantity: string | null; compact?: boolean }): ReactElement {
   const router = useRouter();
   const [value, setValue] = useState(quantity ?? "");
   const [saved, setSaved] = useState(false);
@@ -20,9 +20,11 @@ export function TargetForm({ productId, unit, quantity }: { productId: string; u
     const result = await runAction(() => setInventoryTarget({ productId, quantity: value }));
     if (result.ok) { setSaved(true); router.refresh(); }
   }
-  return <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); void save(); }}>
-    <label className="block text-sm">{t.inventoryTargets.quantity(unit)}<Input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={value} required disabled={isSubmitting} onChange={(event) => { setValue(event.target.value); setSaved(false); }} /></label>
-    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? t.common.saving : t.inventoryTargets.save}</Button>
+  return <form className={compact ? "space-y-1" : "space-y-3"} onSubmit={(event) => { event.preventDefault(); void save(); }}>
+    <div className={compact ? "flex items-center gap-2" : "space-y-3"}>
+    <label className={compact ? "flex min-w-0 flex-1 items-center gap-2 text-sm" : "block text-sm"}><span className={compact ? "sr-only" : undefined}>{t.inventoryTargets.quantity(unit)}</span><Input className={compact ? "min-w-0 flex-1" : undefined} placeholder={compact ? "Cantidad" : undefined} type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={value} required disabled={isSubmitting} onChange={(event) => { setValue(event.target.value); setSaved(false); }} />{compact && <span className="shrink-0 text-muted">{unit}</span>}</label>
+    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? t.common.saving : compact ? "Guardar" : t.inventoryTargets.save}</Button>
+    </div>
     <FormMessage message={error} />
     {saved && <p role="status" className="text-sm">{t.inventoryTargets.saved}</p>}
   </form>;
