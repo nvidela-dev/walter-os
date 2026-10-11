@@ -84,3 +84,20 @@ it("refuses partial drinks installations and disabled drink audit triggers", asy
     await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Drinks inventory triggers are missing or disabled");
   } finally { await db.close(); }
 });
+
+it("persists conceptual decisions independently and preserves them on repeated bootstrap", async () => {
+  const db = new PGlite();
+  try {
+    await db.exec("CREATE TABLE productos(id uuid PRIMARY KEY,nombre text); CREATE TABLE proveedor_productos(precio numeric NOT NULL CHECK(precio>0)); INSERT INTO productos VALUES ('00000000-0000-4000-8000-000000000001','Nuggets'),('00000000-0000-4000-8000-000000000002','Nuguet')");
+    await db.exec(inventoryBootstrapSql());
+    await db.exec("INSERT INTO equivalencias_productos(inventario_producto_id,catalogo_producto_id,estado,revisado_por) VALUES ('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002','accepted','admin')");
+    const before = (await db.query("SELECT * FROM equivalencias_productos")).rows;
+    await db.exec(inventoryBootstrapSql());
+    expect((await db.query("SELECT * FROM equivalencias_productos")).rows).toEqual(before);
+    expect((await db.query("SELECT count(*) AS n FROM proveedor_productos")).rows).toEqual([{ n: 0 }]);
+    await expect(db.exec("UPDATE equivalencias_productos SET estado='unknown'")).rejects.toThrow();
+    await expect(db.exec("UPDATE equivalencias_productos SET catalogo_producto_id='00000000-0000-4000-8000-000000000099'")).rejects.toThrow();
+    await db.exec("UPDATE equivalencias_productos SET estado='rejected'");
+    expect((await db.query("SELECT estado FROM equivalencias_productos")).rows).toEqual([{ estado: "rejected" }]);
+  } finally { await db.close(); }
+});
