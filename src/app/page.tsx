@@ -132,6 +132,12 @@ const sections: {
         icon: SparklesIcon,
         bg: "bg-[linear-gradient(145deg,#63cdb2,#278b73)]",
       }, {
+        name: "Unir nombres",
+        description: "Revisá equivalencias entre inventario y catálogo.",
+        href: "/product-matching",
+        icon: SparklesIcon,
+        bg: "bg-[linear-gradient(145deg,#b99bea,#7751a8)]",
+      }, {
         name: "Plan de Inventario",
         description: "Definí cuánto debería haber de cada producto.",
         href: "/inventory-plan",

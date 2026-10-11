@@ -11,6 +11,7 @@ export function inventoryBootstrapSql(): string {
   const targetMigration = readFileSync("drizzle/0018_inventory_stock_targets.sql", "utf8");
   const providerLinkMigration = readFileSync("drizzle/0019_true_unicorn.sql", "utf8");
   const drinksMigration = readFileSync("drizzle/0020_polite_nico_minoru.sql", "utf8");
+  const matchingMigration = readFileSync("drizzle/0021_neat_jasper_sitwell.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -109,6 +110,11 @@ BEGIN
     OR NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_bebidas'::regclass AND tgname='bebidas_snapshot_insert' AND tgenabled='O') THEN
     RAISE EXCEPTION 'Drinks inventory triggers are missing or disabled';
   END IF;
+
+  IF to_regclass('public.equivalencias_productos') IS NULL THEN
+    ${matchingMigration}
+  END IF;
+  PERFORM inventario_producto_id, catalogo_producto_id, estado, revisado_por, revisado_at FROM public.equivalencias_productos LIMIT 0;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
 END;
