@@ -1,4 +1,4 @@
-export interface MatchProduct { id: string; name: string; unit: string }
+export interface MatchProduct { id: string; name: string; unit: string; deletedAt?: string | null }
 export type CatalogueProduct = MatchProduct & { provider: string };
 export interface MatchDecision { inventoryId: string; catalogueId: string; status: string }
 export function normalizeMatchName(name: string): string {

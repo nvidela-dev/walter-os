@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq, notExists } from "drizzle-orm";
+import { and, eq, isNull,notExists } from "drizzle-orm";
 
 import { db } from "@/db";
 import { products, providerProducts, providers } from "@/db/schema";
@@ -10,7 +10,7 @@ export async function getDataFillQueue(): Promise<{ pending: { id: string; name:
   await requireAccess("main");
   const [pending, suppliers] = await Promise.all([
     db.select({ id: products.id, name: products.name, unit: products.unit }).from(products)
-      .where(notExists(db.select().from(providerProducts).where(eq(providerProducts.productId, products.id))))
+      .where(and(isNull(products.deletedAt), notExists(db.select().from(providerProducts).where(eq(providerProducts.productId, products.id)))))
       .orderBy(products.name),
     db.select({ id: providers.id, name: providers.name }).from(providers)
       .where(eq(providers.type, "producto")).orderBy(providers.name),

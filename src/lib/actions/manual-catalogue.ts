@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -30,7 +30,7 @@ export async function addManualCatalogue(input: unknown): Promise<ActionResult> 
     const available = await db.select().from(fridges).where(and(inArray(fridges.id, fridgeIds), eq(fridges.active, true)));
     if (available.length !== fridgeIds.length) return actionError("Seleccioná una heladera activa.");
     const unitRows = await db.select().from(units);
-    const catalogue = await db.select().from(products);
+    const catalogue = await db.select().from(products).where(isNull(products.deletedAt));
     const created = new Map<string, { id: string; name: string; unitId: string; unit: string }>();
     const links = new Map<string, { fridgeId: string; productId: string }>();
     for (const row of rows) {

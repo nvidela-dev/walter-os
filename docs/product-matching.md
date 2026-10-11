@@ -1,17 +1,27 @@
-# Unir nombres
+# Back office / equivalencias
 
-La app `/product-matching` compara los productos de heladeras activas con el catálogo de proveedores. Está disponible para Admin desde Inicio.
+`/product-matching` es una consola compacta para Admin, accesible desde Inicio. Conserva la app de asignación manual de proveedores (`/data-fill`) y los inventarios existentes.
 
-- **Sugerencias:** hipótesis preparadas al revisar los nombres reales del catálogo en octubre de 2026. Cada par explica la posible equivalencia. No se confirma automáticamente.
-- **Automáticos:** mismo producto o mismo nombre al ignorar tildes, espacios, signos y mayúsculas. Estos vínculos se calculan al abrir la app; siguen pendientes de revisión y se pueden deshacer.
-- **Sin sugerencia:** no hay un par razonable o se descartaron las propuestas. Usar **Buscar / cambiar** para buscar por nombre o proveedor en todo el catálogo.
-- **Revisados:** productos con al menos una equivalencia confirmada. Se pueden agregar alternativas o deshacer vínculos.
-- **Todos:** permite revisar cualquier producto, incluyendo otras sugerencias de un producto ya confirmado.
+## Revisar
 
-Los productos de igual nombre conservan sus identidades individuales. Varias alternativas pueden ser válidas: confirmar una no descarta las demás. Las decisiones se guardan por par, con usuario y fecha, y se comparten entre administradores. La última revisión guardada prevalece. Los descartes evitan que el mismo vínculo automático reaparezca; se pueden recuperar desde la búsqueda manual.
+Alternar **inventario → catálogo** o **catálogo → inventario**. La tabla izquierda permite buscar por nombre, proveedor o ID. Seleccionar un producto para ver sus coincidencias a la derecha. Los filtros son: todos, auto, sugeridos, sin vínculo, revisados y archivados.
 
-Estas equivalencias no fusionan productos, asignan proveedores, cambian precios o cantidades, ni convierten unidades. Tampoco identifican el proveedor del stock observado. Se guardan aparte en `equivalencias_productos`; las otras aplicaciones todavía no las usan.
+- `match`: confirmar la equivalencia.
+- `reject`: descartar el par; también deshace una confirmación o vínculo automático.
+- **catálogo completo** o el campo de búsqueda: buscar manualmente más allá de las recomendaciones. También permite recuperar un par descartado.
+- `archive`: archivar el producto **globalmente**, no solo ocultar esta fila ni rechazar el par.
+- `restore`: recuperar el producto desde **archivados**. El último archivo también se puede deshacer con el comando mostrado tras guardarlo.
 
-Las hipótesis actuales fueron preparadas por Codex leyendo el catálogo; la aplicación no llama a un servicio de IA. Para nombres nuevos también ofrece coincidencias de palabras completas. Una variedad que no se puede inferir queda para búsqueda manual. Los nombres genéricos del catálogo, como «Varios», no justifican una equivalencia.
+Los nombres idénticos normalizados forman vínculos automáticos revisables. Las demás recomendaciones son hipótesis preparadas por Codex al leer el catálogo de octubre de 2026, más coincidencias por palabras completas para nombres nuevos. No hay llamadas a un servicio de IA. Variantes inciertas mantienen alternativas y requieren confirmación. Varias equivalencias por producto siguen permitidas; el sentido de la pantalla no cambia las identidades del par.
 
-Validación: pruebas de normalización, variantes incompatibles, hipótesis, confirmación, rechazo persistido, deshacer, fallos de guardado y migración repetible. El bootstrap de Vercel instala la nueva tabla sin cambiar los productos históricos.
+Las decisiones se guardan en `equivalencias_productos` por par, con usuario y fecha; la última revisión prevalece. No fusionan productos ni cambian proveedores, precios, cantidades o unidades. Tampoco prueban de dónde vino el stock. Las otras apps todavía no utilizan las equivalencias.
+
+## Archivo reversible
+
+`productos.eliminado_at` y `eliminado_por` registran el archivo. Los registros, relaciones, ubicaciones, equivalencias, precios históricos, observaciones y facturas se conservan. Las listas activas de inventario, planificación, bebidas, proveedores y selección para nuevas operaciones excluyen productos archivados. Las acciones rechazan selecciones obsoletas de esos productos. Los históricos y las referencias de recetas ya existentes conservan el producto para no alterar registros anteriores.
+
+Restaurar limpia la marca sin recrear el producto ni asignaciones. Solo Admin puede archivar/restaurar. La migración añade columnas nulas: no archiva ningún producto existente. El bootstrap de Vercel la aplica y rechaza una instalación parcial.
+
+## Snapshot previo
+
+Antes de estos cambios se guardó y verificó el snapshot indicado en `docs/database-baselines/README.md`. El archivo privado contiene 26 tablas y 1.187 filas. La nueva migración fue probada sobre esa copia restaurada: preservó todos los valores originales. No se ejecuta ni reemplaza el historial de migraciones existente con la línea base.

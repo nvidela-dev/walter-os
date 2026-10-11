@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull,sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
@@ -18,7 +18,7 @@ export async function createDrinkItem(input: unknown): Promise<ActionResult> {
     const [unit] = await db.select().from(units).where(eq(units.id, data.unitId));
     if (unit === undefined) return actionError("Elegí una unidad válida.");
     const matches = await db.select({ id: products.id, unit: products.unit, unitId: products.unitId }).from(products)
-      .where(sql`lower(trim(${products.name})) = lower(${data.name})`);
+      .where(and(isNull(products.deletedAt), sql`lower(trim(${products.name})) = lower(${data.name})`));
     if (matches.length > 1) return actionError("Hay varios productos con ese nombre. Revisá el catálogo antes de agregarlo.");
     const existing = matches[0];
     if (existing !== undefined && existing.unitId !== unit.id) return actionError("Ese producto ya existe con otra unidad. Usá su unidad actual.");
@@ -41,7 +41,7 @@ export async function setDrinkTarget(input: unknown): Promise<ActionResult> {
   try {
     const data = drinkTargetSchema.parse(input);
     const [item] = await db.select({ unit: products.unit }).from(drinkItems)
-      .innerJoin(products, eq(products.id, drinkItems.productId))
+      .innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
       .where(and(eq(drinkItems.id, data.itemId), eq(drinkItems.active, true)));
     if (item === undefined) return actionError("Esta bebida ya no está disponible.");
     await db.update(drinkItems).set({ targetQuantity: data.quantity, targetUnit: data.quantity === null ? null : item.unit })
@@ -67,7 +67,7 @@ export async function saveDrinkCounts(input: unknown): Promise<ActionResult> {
   try {
     const data = drinkCountsSchema.parse(input);
     const rows = await db.select({ id: drinkItems.id, location: drinkItems.location, name: products.name, unit: products.unit })
-      .from(drinkItems).innerJoin(products, eq(products.id, drinkItems.productId))
+      .from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
       .where(and(eq(drinkItems.active, true), inArray(drinkItems.id, data.map((row) => row.itemId))));
     if (rows.length !== data.length) return actionError("Hay bebidas que ya no están disponibles. Volvé a cargar la lista.");
     if (data.some((count) => rows.find((row) => row.id === count.itemId)?.unit !== count.unit)) {

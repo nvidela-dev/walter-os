@@ -1,6 +1,6 @@
 import "server-only";
 
-import { desc, eq, lt, sql } from "drizzle-orm";
+import { and, desc, eq, isNull,lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { drinkItems, drinkObservations, products } from "@/db/schema";
@@ -32,7 +32,7 @@ export async function getDrinksInventory(): Promise<{ week: string; items: Drink
     targetQuantity: drinkItems.targetQuantity, targetUnit: drinkItems.targetUnit,
     quantity: current.quantity, countedUnit: current.unit, countedAt: current.recordedAt,
     previousQuantity: previous.quantity, previousUnit: previous.unit,
-  }).from(drinkItems).innerJoin(products, eq(products.id, drinkItems.productId))
+  }).from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
     .leftJoin(current, eq(current.itemId, drinkItems.id)).leftJoin(previous, eq(previous.itemId, drinkItems.id))
     .where(eq(drinkItems.active, true)).orderBy(drinkItems.location, products.name, drinkItems.id);
   return { week, items };
@@ -56,5 +56,5 @@ export async function getDrinkManagement(): Promise<{ id: string; name: string; 
   await requireAccess("main");
   return db.select({ id: drinkItems.id, name: products.name, unit: products.unit, location: drinkItems.location,
     targetQuantity: drinkItems.targetQuantity, targetUnit: drinkItems.targetUnit, active: drinkItems.active,
-  }).from(drinkItems).innerJoin(products, eq(products.id, drinkItems.productId)).orderBy(drinkItems.location, products.name);
+  }).from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt))).orderBy(drinkItems.location, products.name);
 }

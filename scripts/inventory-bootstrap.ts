@@ -12,6 +12,7 @@ export function inventoryBootstrapSql(): string {
   const providerLinkMigration = readFileSync("drizzle/0019_true_unicorn.sql", "utf8");
   const drinksMigration = readFileSync("drizzle/0020_polite_nico_minoru.sql", "utf8");
   const matchingMigration = readFileSync("drizzle/0021_neat_jasper_sitwell.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const archiveMigration = readFileSync("drizzle/0022_daffy_smiling_tiger.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -115,6 +116,15 @@ BEGIN
     ${matchingMigration}
   END IF;
   PERFORM inventario_producto_id, catalogo_producto_id, estado, revisado_por, revisado_at FROM public.equivalencias_productos LIMIT 0;
+
+  SELECT count(*) INTO existing_count FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='productos' AND column_name IN ('eliminado_at','eliminado_por');
+  IF existing_count = 0 THEN
+    ${archiveMigration}
+  ELSIF existing_count <> 2 THEN
+    RAISE EXCEPTION 'Partial product archive schema: refusing automatic repair';
+  END IF;
+  PERFORM eliminado_at, eliminado_por FROM public.productos LIMIT 0;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
 END;

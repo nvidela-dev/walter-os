@@ -8,7 +8,7 @@ import { config } from "dotenv";
 config({ path: ".env.local", quiet: true });
 config({ path: ".env", quiet: true });
 const connection = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
-if (!connection) throw new Error("DATABASE_URL is required.");
+if (connection === undefined || connection === "") throw new Error("DATABASE_URL is required.");
 const url = new URL(connection);
 // Dump requires a direct connection; retain the supplied database and role.
 const host = url.hostname.replace("-pooler.", ".");
