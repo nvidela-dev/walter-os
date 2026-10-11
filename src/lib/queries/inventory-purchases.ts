@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { fridgeProducts, fridges, inventoryRunEntries, inventoryRuns, inventoryTargetHistory, inventoryTargets, products, providerProducts, providers } from "@/db/schema";
@@ -23,7 +23,7 @@ export async function getInventoryPurchases(): Promise<PurchaseInventory> {
       .leftJoin(inventoryRunEntries, and(eq(inventoryRunEntries.runId, run?.id ?? -1), eq(inventoryRunEntries.fridgeId, fridgeProducts.fridgeId), eq(inventoryRunEntries.productId, products.id)))
       .leftJoin(inventoryTargets, eq(inventoryTargets.productId, products.id))
       .leftJoin(inventoryTargetHistory, eq(inventoryTargetHistory.id, inventoryTargets.targetId))
-      .where(eq(fridgeProducts.active, true)).orderBy(products.name, products.id, fridges.number),
+      .where(and(eq(fridgeProducts.active, true), isNull(products.deletedAt))).orderBy(products.name, products.id, fridges.number),
     db.selectDistinct({ productId: providerProducts.productId, id: providers.id, name: providers.name }).from(providerProducts)
       .innerJoin(providers, eq(providers.id, providerProducts.providerId))
       .innerJoin(fridgeProducts, and(eq(fridgeProducts.productId, providerProducts.productId), eq(fridgeProducts.active, true)))

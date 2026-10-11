@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -34,7 +34,7 @@ export async function getInvoiceFormData(): Promise<InvoiceFormProvider[]> {
     })
     .from(providers)
     .leftJoin(providerProducts, eq(providerProducts.providerId, providers.id))
-    .leftJoin(products, eq(providerProducts.productId, products.id))
+    .leftJoin(products, and(eq(providerProducts.productId, products.id), isNull(products.deletedAt)))
     .leftJoin(units, eq(products.unitId, units.id))
     .orderBy(asc(providers.name), asc(products.name));
 

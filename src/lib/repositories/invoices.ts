@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gt, inArray, ne, notExists, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull,ne, notExists, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { invoiceLines, invoices, priceHistory, products, providerProducts, providers } from "@/db/schema";
@@ -76,7 +76,8 @@ async function getCatalogProducts(
     .where(
       and(
         eq(providerProducts.providerId, providerId),
-        inArray(providerProducts.productId, productIds)
+        inArray(providerProducts.productId, productIds),
+        isNull(products.deletedAt)
       )
     );
 }

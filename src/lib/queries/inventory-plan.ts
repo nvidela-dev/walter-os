@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { fridgeProducts, fridges, inventoryTargetHistory, inventoryTargets, products } from "@/db/schema";
@@ -25,7 +25,7 @@ export async function getInventoryPlan(): Promise<InventoryPlanItem[]> {
     targetUnit: inventoryTargetHistory.unit,
     targetId: inventoryTargetHistory.id,
   }).from(products)
-    .innerJoin(fridgeProducts, and(eq(fridgeProducts.productId, products.id), eq(fridgeProducts.active, true)))
+    .innerJoin(fridgeProducts, and(eq(fridgeProducts.productId, products.id), eq(fridgeProducts.active, true), isNull(products.deletedAt)))
     .innerJoin(fridges, and(eq(fridges.id, fridgeProducts.fridgeId), eq(fridges.active, true)))
     .leftJoin(inventoryTargets, eq(inventoryTargets.productId, products.id))
     .leftJoin(inventoryTargetHistory, eq(inventoryTargetHistory.id, inventoryTargets.targetId))

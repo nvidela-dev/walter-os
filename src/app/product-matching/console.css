@@ -1,0 +1,29 @@
+.matching-page { padding: 16px; min-height: 100dvh; background: #101419; color: #c5ced8; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.matching-page header { display: flex; align-items: center; gap: 18px; margin-bottom: 10px; }
+.matching-page h1 { font-size: 14px; color: #76e4a3; font-weight: 600; }
+.matching-page a { color: #a0afbf; }
+.matching-page p { margin: 0; }
+.matching-console { border: 1px solid #34404d; }
+.mc-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 6px 8px; border-bottom: 1px solid #293440; }
+.matching-console button { border: 1px solid #3c4c5e; padding: 2px 6px; background: #17212b; color: #bacbdc; border-radius: 0; font: inherit; cursor: pointer; }
+.matching-console button:hover { background: #263748; }
+.matching-console button[aria-pressed="true"] { border-color: #76e4a3; color: #76e4a3; }
+.matching-console button:disabled { opacity: .4; cursor: default; }
+.matching-console button:focus-visible, .matching-console input:focus-visible { outline: 2px solid #76e4a3; outline-offset: 2px; }
+.matching-console input { min-width: 160px; flex: 1; color: #e0e8f0; border: 1px solid #3c4c5e; background: #0d1116; padding: 3px 6px; border-radius: 0; font: inherit; }
+.mc-panels { display: grid; grid-template-columns: minmax(330px, .9fr) minmax(480px, 1.3fr); }
+.mc-list, .mc-candidates { overflow: auto; max-height: calc(100dvh - 215px); }
+.mc-detail { min-width: 0; border-left: 1px solid #34404d; }
+.matching-console table { width: 100%; color: inherit; font: inherit; border-collapse: collapse; text-align: left; }
+.matching-console th { position: sticky; top: 0; background: #17212b; color: #8fa3b8; font-weight: 400; z-index: 1; }
+.matching-console td, .matching-console th { padding: 4px 7px; border-bottom: 1px solid #26313d; vertical-align: top; }
+.matching-console tr[aria-selected="true"] { background: #203347; }
+.matching-console small { display: block; font-size: 10px; color: #8498ad; margin-top: 2px; }
+.matching-console .mc-name { background: none; border: 0; padding: 0; color: #dce6ef; text-align: left; }
+.mc-muted { color: #8498ad; }
+.mc-ok { color: #76e4a3; }
+.mc-commands { display: flex; flex-wrap: wrap; gap: 4px; }
+.mc-error { padding: 6px 8px; color: #ff9c9c; border-bottom: 1px solid #34404d; }
+.mc-footer { color: #8498ad; padding: 6px 8px; border-top: 1px solid #34404d; font-size: 10px; }
+.matching-console .mc-empty { padding: 12px 8px; }
+@media (max-width: 850px) { .matching-page { padding: 8px; } .mc-panels { grid-template-columns: minmax(0, 1fr); } .mc-list { max-height: 260px; } .mc-detail { border-left: 0; border-top: 1px solid #34404d; } .mc-candidates { max-height: 480px; } }

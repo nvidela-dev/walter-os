@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, ilike, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNull,lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/db";
@@ -61,7 +61,7 @@ function buildInventoryQuery(fridgeId: string) {
     providers: sql<string[]>`ARRAY(SELECT p.nombre FROM proveedor_productos pp JOIN proveedores p ON p.id = pp.proveedor_id WHERE pp.producto_id = ${products.id} ORDER BY p.nombre)`,
   }).from(fridgeProducts).innerJoin(products, eq(products.id, fridgeProducts.productId))
     .leftJoinLateral(latest, sql`true`).leftJoinLateral(previous, sql`true`)
-    .where(and(eq(fridgeProducts.fridgeId, fridgeId), eq(fridgeProducts.active, true))).orderBy(asc(products.name), asc(products.id));
+    .where(and(eq(fridgeProducts.fridgeId, fridgeId), eq(fridgeProducts.active, true), isNull(products.deletedAt))).orderBy(asc(products.name), asc(products.id));
 }
 
 export async function getFridgeInventory(fridgeId: string): Promise<InventoryRow[]> {
@@ -84,7 +84,7 @@ export async function searchInventoryProducts(query: string): Promise<{ id: stri
   const term = query.trim().slice(0, 200).replace(/[\\%_]/g, "\\$&");
   if (term.length === 0) return [];
   return db.select({ id: products.id, name: products.name, unit: products.unit }).from(products)
-    .where(ilike(products.name, `%${term}%`)).orderBy(products.name, products.id).limit(30);
+    .where(and(isNull(products.deletedAt), ilike(products.name, `%${term}%`))).orderBy(products.name, products.id).limit(30);
 }
 
 export interface InventoryHistoryRow {

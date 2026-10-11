@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull,ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
@@ -33,6 +33,8 @@ export async function addFridgeProduct(input: unknown): Promise<ActionResult> {
     await requireAccess("inventory");
     const data = fridgeProductInputSchema.parse(input);
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
+    const [product] = await db.select({ id: products.id }).from(products).where(and(eq(products.id, data.productId), isNull(products.deletedAt)));
+    if (product === undefined) return actionError(t.inventory.invalidItems);
     await db.insert(fridgeProducts).values(data).onConflictDoUpdate({ target: [fridgeProducts.fridgeId, fridgeProducts.productId], set: { active: true } });
     revalidatePath("/inventory", "layout");
     return actionOk(undefined);
@@ -62,7 +64,7 @@ export async function saveInventory(input: unknown): Promise<ActionResult> {
     const data = inventoryCountSchema.parse(input);
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     const tracked = await db.select({ id: products.id, unit: products.unit }).from(fridgeProducts)
-      .innerJoin(products, eq(products.id, fridgeProducts.productId))
+      .innerJoin(products, and(eq(products.id, fridgeProducts.productId), isNull(products.deletedAt)))
       .where(and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.active, true), inArray(products.id, data.counts.map((count) => count.productId))));
     if (tracked.length !== data.counts.length) return actionError(t.inventory.invalidItems);
     const observations = data.counts.map((count) => ({
@@ -98,7 +100,7 @@ export async function editInventoryEntry(input: unknown): Promise<ActionResult> 
     }
     if (!(await activeFridge(data.fridgeId))) return actionError(t.inventory.invalidFridge);
     const condition = and(eq(fridgeProducts.fridgeId, data.fridgeId), eq(fridgeProducts.productId, data.productId), eq(fridgeProducts.active, true));
-    const [product] = await db.select({ unit: products.unit }).from(fridgeProducts).innerJoin(products, eq(products.id, fridgeProducts.productId)).where(condition);
+    const [product] = await db.select({ unit: products.unit }).from(fridgeProducts).innerJoin(products, and(eq(products.id, fridgeProducts.productId), isNull(products.deletedAt))).where(condition);
     if (product == null) return actionError(t.inventory.invalidItems);
     const update = db.update(fridgeProducts).set({ note: data.note }).where(condition);
     if (data.quantity === null) await update;

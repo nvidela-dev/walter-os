@@ -49,7 +49,7 @@ beforeAll(async () => {
   await client.query("INSERT INTO productos (id, nombre, unidad_id) VALUES ($1, 'Cola', $3), ($2, 'Water', $3)", [fixture.product, fixture.unlinked, unitId]);
   await client.query("INSERT INTO proveedores (id, nombre) VALUES ($1, 'Provider')", [fixture.provider]);
   await client.query("INSERT INTO proveedor_productos (proveedor_id, producto_id, precio) VALUES ($1, $2, 50)", [fixture.provider, fixture.product]);
-  const before = await client.query("SELECT * FROM productos ORDER BY id");
+  const before = await client.query<Record<string, unknown>>("SELECT * FROM productos ORDER BY id");
   await client.exec(readFileSync("drizzle/0012_inventory.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0013_soft_valkyrie.sql", "utf8"));
   await client.exec(readFileSync("drizzle/0014_concerned_nemesis.sql", "utf8"));
@@ -57,7 +57,7 @@ beforeAll(async () => {
   await client.exec(readFileSync("drizzle/0016_zippy_leper_queen.sql", "utf8"));
   await client.exec(`BEGIN;${  readFileSync("drizzle/0017_weekly_inventory.sql", "utf8")  };COMMIT;`);
   for (const migration of migrations.filter((name) => Number(name.slice(0, 4)) >= 18)) await client.exec(`BEGIN;${readFileSync(`drizzle/${migration}`, "utf8")};COMMIT;`);
-  expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows);
+  expect((await client.query("SELECT * FROM productos ORDER BY id")).rows).toEqual(before.rows.map(row => ({ ...row, eliminado_at: null, eliminado_por: null })));
   await client.query("INSERT INTO heladeras (id, numero) VALUES ($1, 1), ($2, 2)", [fixture.fridge, fixture.secondFridge]);
 }, 30000);
 afterAll(async () => { await client.close(); });

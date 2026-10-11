@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, notExists } from "drizzle-orm";
+import { and, eq, isNull,notExists } from "drizzle-orm";
 
 import { db } from "@/db";
 import { products, providerProducts, units } from "@/db/schema";
@@ -27,7 +27,7 @@ export async function getProductForProvider(
       price: providerProducts.price,
     })
     .from(providerProducts)
-    .innerJoin(products, eq(providerProducts.productId, products.id))
+    .innerJoin(products, and(eq(providerProducts.productId, products.id), isNull(products.deletedAt)))
     .innerJoin(units, eq(products.unitId, units.id))
     .where(
       and(
@@ -44,7 +44,7 @@ export async function getUnlinkedProducts(providerId: string): Promise<{ id: str
   const parsedProviderId = parseUuidOrNull(providerId);
   if (parsedProviderId === null) return [];
   return db.select({ id: products.id, name: products.name, unit: products.unit }).from(products)
-    .where(notExists(db.select().from(providerProducts).where(and(
+    .where(and(isNull(products.deletedAt), notExists(db.select().from(providerProducts).where(and(
       eq(providerProducts.providerId, parsedProviderId), eq(providerProducts.productId, products.id),
-    )))).orderBy(products.name);
+    ))))).orderBy(products.name);
 }

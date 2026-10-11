@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
@@ -109,7 +109,7 @@ export async function updateProductPrice(
     const [product] = await db
       .select({ unitId: products.unitId })
       .from(products)
-      .where(eq(products.id, parsed.data.productId));
+      .where(and(eq(products.id, parsed.data.productId), isNull(products.deletedAt)));
 
     if (product?.unitId == null) return actionError(t.errors.product.notFound);
 
@@ -155,6 +155,7 @@ export async function updateProduct(
     const [existing] = await db
       .select({ productId: providerProducts.productId })
       .from(providerProducts)
+      .innerJoin(products, and(eq(products.id, providerProducts.productId), isNull(products.deletedAt)))
       .where(
         and(
           eq(providerProducts.providerId, parsed.data.providerId),
@@ -173,7 +174,7 @@ export async function updateProduct(
           unit: unit.code,
           updatedAt: new Date(),
         })
-        .where(eq(products.id, parsed.data.productId)),
+        .where(and(eq(products.id, parsed.data.productId), isNull(products.deletedAt))),
       db
         .update(providerProducts)
         .set({ price: parsed.data.data.price, updatedAt: new Date() })
@@ -209,6 +210,8 @@ export async function removeProductFromProvider(
   if (!parsed.success) return unknownActionError(parsed.error);
 
   try {
+    const [activeProduct] = await db.select({ id: products.id }).from(products).where(and(eq(products.id, parsed.data.productId), isNull(products.deletedAt)));
+    if (activeProduct === undefined) return actionError(t.errors.product.notFound);
     const inventoryUses = await countRows(fridgeProducts, eq(fridgeProducts.productId, parsed.data.productId));
     const drinkUses = await countRows(drinkItems, eq(drinkItems.productId, parsed.data.productId));
     if (inventoryUses > 0 || drinkUses > 0) return actionError(t.inventory.productTracked);
@@ -234,7 +237,7 @@ export async function removeProductFromProvider(
             eq(providerProducts.productId, parsed.data.productId)
           )
         ),
-      db.delete(products).where(eq(products.id, parsed.data.productId)),
+      db.delete(products).where(and(eq(products.id, parsed.data.productId), isNull(products.deletedAt))),
     ]);
 
     revalidatePath(`/providers/${parsed.data.providerId}`);
@@ -269,7 +272,7 @@ export async function linkExistingProduct(input: unknown): Promise<ActionResult>
     const data = linkExistingProductSchema.parse(input);
     const provider = await getProvider(data.providerId);
     if (provider?.type !== "producto") return actionError(t.errors.provider.onlyProductProviders);
-    const [product] = await db.select().from(products).where(eq(products.id, data.productId));
+    const [product] = await db.select().from(products).where(and(eq(products.id, data.productId), isNull(products.deletedAt)));
     if (product?.unitId == null) return actionError(t.errors.product.selectValidUnit);
     const [existing] = await db.select().from(providerProducts).where(and(
       eq(providerProducts.providerId, data.providerId), eq(providerProducts.productId, data.productId),

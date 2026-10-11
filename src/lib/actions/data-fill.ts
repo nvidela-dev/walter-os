@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, notExists, sql } from "drizzle-orm";
+import { and, eq, isNull,notExists, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -24,7 +24,7 @@ export async function assignProductProvider(input: unknown): Promise<ActionResul
         createdAt: sql<Date>`now()`.as("created_at"),
         updatedAt: sql<Date>`now()`.as("updated_at"),
       }).from(products).innerJoin(providers, and(eq(providers.id, data.providerId), eq(providers.type, "producto")))
-        .where(and(eq(products.id, data.productId),
+        .where(and(eq(products.id, data.productId), isNull(products.deletedAt),
           notExists(db.select().from(providerProducts).where(eq(providerProducts.productId, products.id)))))
     ).onConflictDoNothing().returning({ productId: providerProducts.productId });
     if (inserted.length === 0) return actionError("Este producto ya tiene proveedor o la selección ya no está disponible. Volvé a cargar para actualizar.");

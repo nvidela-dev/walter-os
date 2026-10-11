@@ -11,7 +11,7 @@ describe("Vercel inventory setup", () => {
     try {
       await db.exec("CREATE TABLE productos (id uuid PRIMARY KEY, nombre text); INSERT INTO productos VALUES ('00000000-0000-4000-8000-000000000001', 'Existing product'); CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (id integer, created_at bigint); INSERT INTO drizzle.__drizzle_migrations VALUES (5,1778295006907)");
       await db.exec("CREATE TABLE proveedor_productos(precio numeric NOT NULL CHECK(precio > 0))");
-      const before = (await db.query("SELECT * FROM productos")).rows;
+      const before = (await db.query<Record<string, unknown>>("SELECT * FROM productos")).rows;
       const ledger = (await db.query("SELECT * FROM drizzle.__drizzle_migrations")).rows;
       await db.exec(inventoryBootstrapSql());
       await db.exec("INSERT INTO heladeras(numero) VALUES (3)");
@@ -23,7 +23,7 @@ describe("Vercel inventory setup", () => {
       expect((await db.query("SELECT email FROM usuarios_inventario")).rows).toEqual([]);
       expect((await db.query("SELECT email FROM usuarios_bebidas")).rows).toEqual([]);
       expect((await db.query("SELECT numero FROM heladeras")).rows).toEqual([{ numero: 3 }]);
-      expect((await db.query("SELECT * FROM productos")).rows).toEqual(before);
+      expect((await db.query("SELECT * FROM productos")).rows).toEqual(before.map(row => ({ ...row, eliminado_at: null, eliminado_por: null })));
       expect((await db.query("SELECT * FROM drizzle.__drizzle_migrations")).rows).toEqual(ledger);
     } finally { await db.close(); }
   });
@@ -91,7 +91,7 @@ it("persists conceptual decisions independently and preserves them on repeated b
     await db.exec("CREATE TABLE productos(id uuid PRIMARY KEY,nombre text); CREATE TABLE proveedor_productos(precio numeric NOT NULL CHECK(precio>0)); INSERT INTO productos VALUES ('00000000-0000-4000-8000-000000000001','Nuggets'),('00000000-0000-4000-8000-000000000002','Nuguet')");
     await db.exec(inventoryBootstrapSql());
     await db.exec("INSERT INTO equivalencias_productos(inventario_producto_id,catalogo_producto_id,estado,revisado_por) VALUES ('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002','accepted','admin')");
-    const before = (await db.query("SELECT * FROM equivalencias_productos")).rows;
+    const before = (await db.query<Record<string, unknown>>("SELECT * FROM equivalencias_productos")).rows;
     await db.exec(inventoryBootstrapSql());
     expect((await db.query("SELECT * FROM equivalencias_productos")).rows).toEqual(before);
     expect((await db.query("SELECT count(*) AS n FROM proveedor_productos")).rows).toEqual([{ n: 0 }]);
@@ -99,5 +99,15 @@ it("persists conceptual decisions independently and preserves them on repeated b
     await expect(db.exec("UPDATE equivalencias_productos SET catalogo_producto_id='00000000-0000-4000-8000-000000000099'")).rejects.toThrow();
     await db.exec("UPDATE equivalencias_productos SET estado='rejected'");
     expect((await db.query("SELECT estado FROM equivalencias_productos")).rows).toEqual([{ estado: "rejected" }]);
+  } finally { await db.close(); }
+});
+
+it("refuses a partially installed soft-delete schema", async () => {
+  const db = new PGlite();
+  try {
+    await db.exec("CREATE TABLE productos(id uuid PRIMARY KEY,nombre text); CREATE TABLE proveedor_productos(precio numeric NOT NULL CHECK(precio>0))");
+    await db.exec(inventoryBootstrapSql());
+    await db.exec("ALTER TABLE productos DROP COLUMN eliminado_por");
+    await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Partial product archive schema");
   } finally { await db.close(); }
 });

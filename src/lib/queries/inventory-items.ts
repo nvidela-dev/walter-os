@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { fridgeProducts, fridges, products, providerProducts, providers } from "@/db/schema";
@@ -15,7 +15,7 @@ export async function getInventoryItemSuggestions(): Promise<ItemSuggestion[]> {
   return db.selectDistinct({ id: products.id, name: products.name }).from(products)
     .innerJoin(fridgeProducts, eq(fridgeProducts.productId, products.id))
     .innerJoin(fridges, eq(fridges.id, fridgeProducts.fridgeId))
-    .where(and(eq(fridgeProducts.active, true), eq(fridges.active, true))).orderBy(products.name);
+    .where(and(eq(fridgeProducts.active, true), eq(fridges.active, true), isNull(products.deletedAt))).orderBy(products.name);
 }
 
 export interface InventoryItemDetail {
@@ -25,7 +25,7 @@ export interface InventoryItemDetail {
 export async function getInventoryItemDetail(id: string): Promise<InventoryItemDetail | null> {
   await requireAccess("inventory");
   if (!uuidSchema.safeParse(id).success) return null;
-  const [product] = await db.select({ name: products.name }).from(products).where(eq(products.id, id));
+  const [product] = await db.select({ name: products.name }).from(products).where(and(eq(products.id, id), isNull(products.deletedAt)));
   if (product == null) return null;
   const [locations, suppliers, run] = await Promise.all([
     db.select({ id: fridges.id, number: fridges.number, name: fridges.name }).from(fridges)

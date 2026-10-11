@@ -10,6 +10,8 @@ export const products = pgTable("productos", {
   // populate it alongside unidad_id so a rollback can read the old field.
   unit: text("unidad").notNull().default("unidad"),
   unitId: uuid("unidad_id").references(() => units.id),
+  deletedAt: timestamp("eliminado_at", { withTimezone: true }),
+  deletedBy: text("eliminado_por"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

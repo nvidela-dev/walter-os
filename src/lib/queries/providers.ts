@@ -1,6 +1,6 @@
 import "server-only";
 
-import { count, eq } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { products, providerProducts, providers, units } from "@/db/schema";
@@ -25,10 +25,11 @@ export async function getProviders(): Promise<ProviderListRow[]> {
   return db
     .select({
       ...providerSelection,
-      productCount: count(providerProducts.productId),
+      productCount: count(products.id),
     })
     .from(providers)
     .leftJoin(providerProducts, eq(providers.id, providerProducts.providerId))
+    .leftJoin(products, and(eq(products.id, providerProducts.productId), isNull(products.deletedAt)))
     .groupBy(providers.id)
     .orderBy(providers.name);
 }
@@ -61,7 +62,7 @@ export async function getProviderWithProducts(id: string): Promise<ProviderDetai
       description: products.description,
     })
     .from(providerProducts)
-    .innerJoin(products, eq(providerProducts.productId, products.id))
+    .innerJoin(products, and(eq(providerProducts.productId, products.id), isNull(products.deletedAt)))
     .innerJoin(units, eq(products.unitId, units.id))
     .where(eq(providerProducts.providerId, provider.id));
 
