@@ -7,6 +7,8 @@ export const drinkItemSchema = z.object({
   name: requiredTextSchema,
   unitId: uuidSchema,
   location: requiredTextSchema,
+  category: z.enum(["Alcoholes", "Cervezas", "Refrescos", "Sin categoría"]).default("Sin categoría"),
+  countUnit: z.enum(["botella"]).nullable().default(null),
 });
 export const drinkTargetSchema = z.object({ itemId: uuidSchema, quantity: amount.nullable() });
 export const drinkActiveSchema = z.object({ itemId: uuidSchema, active: z.boolean() });

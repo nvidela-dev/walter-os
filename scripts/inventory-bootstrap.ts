@@ -13,6 +13,7 @@ export function inventoryBootstrapSql(): string {
   const drinksMigration = readFileSync("drizzle/0020_polite_nico_minoru.sql", "utf8");
   const matchingMigration = readFileSync("drizzle/0021_neat_jasper_sitwell.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const archiveMigration = readFileSync("drizzle/0022_daffy_smiling_tiger.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const drinkCategoriesMigration = readFileSync("drizzle/0023_drink_categories.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -125,6 +126,18 @@ BEGIN
     RAISE EXCEPTION 'Partial product archive schema: refusing automatic repair';
   END IF;
   PERFORM eliminado_at, eliminado_por FROM public.productos LIMIT 0;
+
+  SELECT count(*) INTO existing_count FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='inventario_bebidas_productos' AND column_name IN ('categoria','unidad_conteo');
+  IF existing_count = 0 THEN
+    ${drinkCategoriesMigration}
+  ELSIF existing_count <> 2 THEN
+    RAISE EXCEPTION 'Partial drink categories schema: refusing automatic repair';
+  END IF;
+  PERFORM categoria, unidad_conteo FROM public.inventario_bebidas_productos LIMIT 0;
+  IF position('unidad_conteo' in pg_get_functiondef('public.bebidas_snapshot()'::regprocedure)) = 0 THEN
+    RAISE EXCEPTION 'Drinks snapshot must use the counting unit';
+  END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
 END;

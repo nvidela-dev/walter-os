@@ -14,13 +14,14 @@ import type { DrinkRow } from "@/lib/queries/drinks";
 export function DrinksCounter({ week, items }: { week: string; items: DrinkRow[] }): ReactElement {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
   const [pendingOnly, setPendingOnly] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
   const { error, isSubmitting, runAction } = useActionForm();
   const normalize = (value: string): string => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const counted = (item: DrinkRow): boolean => item.quantity !== null && item.countedUnit === item.unit;
-  const visible = items.filter((item) => normalize(item.name).includes(normalize(search)) && (!pendingOnly || !counted(item)));
+  const visible = items.filter((item) => normalize(item.name).includes(normalize(search)) && (!category || item.category === category) && (!pendingOnly || !counted(item)));
   const locations = [...new Set(visible.map((item) => item.location))];
   const entries = Object.entries(values).filter(([, quantity]) => quantity.trim() !== "");
   async function save(): Promise<void> {
@@ -32,6 +33,7 @@ export function DrinksCounter({ week, items }: { week: string; items: DrinkRow[]
     <div><h1 className="font-bold">Semana del {week}</h1><p className="text-sm text-muted">Martes a lunes · {items.filter(counted).length} de {items.length} bebidas contadas</p></div>
     <p className="text-sm text-muted">Completá lo que contaste. Vacío significa sin revisar; 0 significa que no queda nada. Para corregir un conteo, ingresá la cantidad nueva.</p>
     <label className="block"><span className="sr-only">Buscar bebida</span><Input type="search" placeholder="Buscar bebida…" value={search} onChange={(event) => { setSearch(event.target.value); }} /></label>
+    <label className="block text-sm">Categoría<select aria-label="Categoría" value={category} onChange={(event) => { setCategory(event.target.value); }} className="mt-1 w-full rounded-xl border p-3"><option value="">Todas</option>{["Alcoholes", "Cervezas", "Refrescos", "Sin categoría"].map((value) => <option key={value}>{value}</option>)}</select></label>
     <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={pendingOnly} onChange={(event) => { setPendingOnly(event.target.checked); }} className="h-5 w-5" />Solo pendientes</label>
     <form onSubmit={(event) => { event.preventDefault(); void save(); }} className="space-y-4">
       <fieldset disabled={isSubmitting} className="space-y-4">
@@ -44,7 +46,7 @@ export function DrinksCounter({ week, items }: { week: string; items: DrinkRow[]
               ? Decimal.max(0, new Decimal(item.targetQuantity).minus(item.quantity ?? "0")).toString() : null;
             return <div key={item.id} className="space-y-1 px-3 py-3">
               <label className="flex items-center justify-between gap-3">
-                <span className="min-w-0 flex-1 font-semibold">{item.name}</span>
+                <span className="min-w-0 flex-1 font-semibold">{item.name}<span className="block text-xs font-normal text-muted">{item.category}</span></span>
                 <Input aria-label={`Conteo de ${item.name} en ${location}`} className="w-24! shrink-0" type="number" inputMode="decimal" min="0" max="9999999999.99" step="0.01" placeholder={counted(item) ? item.quantity ?? "" : "—"} value={values[item.id] ?? ""} onChange={(event) => { setValues((current) => ({ ...current, [item.id]: event.target.value })); setSaved(false); }} />
                 <span className="w-12 shrink-0 text-xs text-muted">{item.unit}</span>
               </label>

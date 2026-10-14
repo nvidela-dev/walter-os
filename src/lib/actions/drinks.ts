@@ -23,8 +23,8 @@ export async function createDrinkItem(input: unknown): Promise<ActionResult> {
     const existing = matches[0];
     if (existing !== undefined && existing.unitId !== unit.id) return actionError("Ese producto ya existe con otra unidad. Usá su unidad actual.");
     const productId = existing?.id ?? randomUUID();
-    const placement = db.insert(drinkItems).values({ productId, location: data.location })
-      .onConflictDoUpdate({ target: [drinkItems.productId, drinkItems.location], set: { active: true } });
+    const placement = db.insert(drinkItems).values({ productId, location: data.location, category: data.category, countUnit: data.countUnit })
+      .onConflictDoUpdate({ target: [drinkItems.productId, drinkItems.location], set: { active: true, category: data.category, countUnit: data.countUnit } });
     if (existing === undefined) await db.batch([
       db.insert(products).values({ id: productId, name: data.name, unitId: unit.id, unit: unit.code }),
       placement,
@@ -40,7 +40,7 @@ export async function setDrinkTarget(input: unknown): Promise<ActionResult> {
   await requireAccess("main");
   try {
     const data = drinkTargetSchema.parse(input);
-    const [item] = await db.select({ unit: products.unit }).from(drinkItems)
+    const [item] = await db.select({ unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})` }).from(drinkItems)
       .innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
       .where(and(eq(drinkItems.id, data.itemId), eq(drinkItems.active, true)));
     if (item === undefined) return actionError("Esta bebida ya no está disponible.");
@@ -66,7 +66,7 @@ export async function saveDrinkCounts(input: unknown): Promise<ActionResult> {
   const userId = await requireAccess("drinks");
   try {
     const data = drinkCountsSchema.parse(input);
-    const rows = await db.select({ id: drinkItems.id, location: drinkItems.location, name: products.name, unit: products.unit })
+    const rows = await db.select({ id: drinkItems.id, location: drinkItems.location, name: products.name, unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})` })
       .from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
       .where(and(eq(drinkItems.active, true), inArray(drinkItems.id, data.map((row) => row.itemId))));
     if (rows.length !== data.length) return actionError("Hay bebidas que ya no están disponibles. Volvé a cargar la lista.");

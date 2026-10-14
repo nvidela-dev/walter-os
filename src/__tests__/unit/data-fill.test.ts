@@ -56,3 +56,15 @@ it("rejects unauthorized saves and reads", async () => {
   vi.mocked(requireAccess).mockRejectedValueOnce(new Error("Denied"));
   await expect(getDataFillQueue()).rejects.toThrow("Denied");
 });
+
+it("limits the drinks wizard to active drinks without a provider and removes saved assignments", async () => {
+  const drinkId = randomUUID();
+  const kitchenId = randomUUID();
+  const hiddenId = randomUUID();
+  await client.query("INSERT INTO productos(id,nombre) VALUES($1,'Gin'),($2,'Harina'),($3,'Hidden drink')", [drinkId,kitchenId,hiddenId]);
+  await client.query("INSERT INTO inventario_bebidas_productos(producto_id,ubicacion,activo) VALUES($1,'Bar',true),($2,'Bar',false)", [drinkId,hiddenId]);
+  expect((await getDataFillQueue(true)).pending.map(row => row.id)).toEqual([drinkId]);
+  expect((await getDataFillQueue()).pending.map(row => row.id)).toContain(kitchenId);
+  expect((await assignProductProvider({productId: drinkId,providerId})).ok).toBe(true);
+  expect((await getDataFillQueue(true)).pending).toEqual([]);
+});

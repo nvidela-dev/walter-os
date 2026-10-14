@@ -111,3 +111,13 @@ it("refuses a partially installed soft-delete schema", async () => {
     await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Partial product archive schema");
   } finally { await db.close(); }
 });
+
+it("refuses partial drink category setup", async () => {
+  const db = new PGlite();
+  try {
+    await db.exec("CREATE TABLE productos(id uuid PRIMARY KEY,nombre text); CREATE TABLE proveedor_productos(precio numeric)");
+    await db.exec(inventoryBootstrapSql());
+    await db.exec("ALTER TABLE inventario_bebidas_productos DROP COLUMN categoria");
+    await expect(db.exec(inventoryBootstrapSql())).rejects.toThrow("Partial drink categories schema");
+  } finally { await db.close(); }
+});
