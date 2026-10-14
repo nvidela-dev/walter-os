@@ -13,6 +13,8 @@ export const drinkItems = pgTable("inventario_bebidas_productos", {
   id: uuid("id").primaryKey().defaultRandom(),
   productId: uuid("producto_id").notNull().references(() => products.id, { onDelete: "restrict" }),
   location: text("ubicacion").notNull(),
+  category: text("categoria").notNull().default("Sin categoría"),
+  countUnit: text("unidad_conteo"),
   targetQuantity: numeric("cantidad_objetivo", { precision: 12, scale: 2 }),
   targetUnit: text("unidad_objetivo"),
   active: boolean("activo").notNull().default(true),

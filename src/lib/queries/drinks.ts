@@ -8,7 +8,7 @@ import { requireAccess } from "@/lib/auth/access";
 import { isoDateSchema } from "@/lib/validation";
 
 export interface DrinkRow {
-  id: string; name: string; unit: string; location: string;
+  id: string; name: string; unit: string; location: string; category: string;
   targetQuantity: string | null; targetUnit: string | null;
   quantity: string | null; countedUnit: string | null; countedAt: Date | null;
   previousQuantity: string | null; previousUnit: string | null;
@@ -28,7 +28,7 @@ export async function getDrinksInventory(): Promise<{ week: string; items: Drink
     .where(eq(drinkObservations.week, prior?.week ?? "0001-01-01"))
     .orderBy(drinkObservations.itemId, desc(drinkObservations.recordedAt), desc(drinkObservations.id)).as("previous_drinks");
   const items = await db.select({
-    id: drinkItems.id, name: products.name, unit: products.unit, location: drinkItems.location,
+    id: drinkItems.id, name: products.name, unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})`, location: drinkItems.location, category: drinkItems.category,
     targetQuantity: drinkItems.targetQuantity, targetUnit: drinkItems.targetUnit,
     quantity: current.quantity, countedUnit: current.unit, countedAt: current.recordedAt,
     previousQuantity: previous.quantity, previousUnit: previous.unit,
@@ -52,9 +52,9 @@ export async function getDrinkHistory(page = 1, selectedWeek?: string): Promise<
   return { weeks, hasNext: rows.length > 10, selected, entries };
 }
 
-export async function getDrinkManagement(): Promise<{ id: string; name: string; unit: string; location: string; targetQuantity: string | null; targetUnit: string | null; active: boolean }[]> {
+export async function getDrinkManagement(): Promise<{ id: string; name: string; unit: string; location: string; category: string; targetQuantity: string | null; targetUnit: string | null; active: boolean }[]> {
   await requireAccess("main");
-  return db.select({ id: drinkItems.id, name: products.name, unit: products.unit, location: drinkItems.location,
+  return db.select({ id: drinkItems.id, name: products.name, unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})`, location: drinkItems.location, category: drinkItems.category,
     targetQuantity: drinkItems.targetQuantity, targetUnit: drinkItems.targetUnit, active: drinkItems.active,
   }).from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt))).orderBy(drinkItems.location, products.name);
 }

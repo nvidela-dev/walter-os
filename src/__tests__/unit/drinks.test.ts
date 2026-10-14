@@ -137,3 +137,21 @@ it("protects drinks from provider product deletion", async () => {
   expect((await removeProductFromProvider(providerId, productId)).ok).toBe(false);
   expect((await client.query("SELECT * FROM proveedor_productos WHERE proveedor_id=$1 AND producto_id=$2", [providerId, productId])).rows).toHaveLength(1);
 });
+
+
+it("counts provider packs in individual bottles without changing purchasing units or prices", async () => {
+  const productId = randomUUID();
+  await client.query("INSERT INTO productos(id,nombre,unidad,unidad_id) VALUES($1,'Bottle test cola','pack',$2)", [productId, unitId]);
+  const providerId = randomUUID();
+  await client.query("INSERT INTO proveedores(id,nombre) VALUES($1,'Bottle supplier')", [providerId]);
+  await client.query("INSERT INTO proveedor_productos(proveedor_id,producto_id,precio,cantidad) VALUES($1,$2,100,12)", [providerId, productId]);
+  await client.query("INSERT INTO inventario_bebidas_productos(producto_id,ubicacion,categoria,unidad_conteo) VALUES($1,'Bar','Refrescos','botella')", [productId]);
+  const item = (await getDrinksInventory()).items.find(row => row.name === 'Bottle test cola');
+  expect(item).toMatchObject({unit: 'botella',category: 'Refrescos',location: 'Bar'});
+  expect((await saveDrinkCounts([{itemId: item?.id, quantity: '7', unit: 'pack'}])).ok).toBe(false);
+  expect((await saveDrinkCounts([{itemId: item?.id, quantity: '7', unit: 'botella'}])).ok).toBe(true);
+  expect((await setDrinkTarget({itemId: item?.id, quantity: '10'})).ok).toBe(true);
+  expect((await getDrinkHistory()).entries.find(row => row.name === 'Bottle test cola')).toMatchObject({unit: 'botella',quantity: '7.00'});
+  expect((await client.query("SELECT unidad FROM productos WHERE id=$1", [productId])).rows[0]).toEqual({unidad: 'pack'});
+  expect((await client.query("SELECT precio,cantidad FROM proveedor_productos WHERE producto_id=$1", [productId])).rows[0]).toMatchObject({precio: '100.00',cantidad: '12.00'});
+});
