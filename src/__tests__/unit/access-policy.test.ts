@@ -43,7 +43,7 @@ it("restricts Waitress to drinks counting and history, including route prefix tr
   expect(canAccess("kitchen", "drinks")).toBe(false);
   expect(canAccess("waitress", "inventory")).toBe(false);
   expect(canAccess("waitress", "main")).toBe(false);
-  for (const route of ["/", "/inventory", "/inventory/new", "/providers", "/access", "/drinks-other", "/drinks/manage", "/drinks/manage/new", "/data-fill", "/inventory-plan"]) {
+  for (const route of ["/", "/inventory", "/inventory/new", "/providers", "/access", "/drinks-other", "/drinks/manage", "/drinks/manage/new", "/data-fill", "/inventory-plan", "/product-duplicates"]) {
     expect(routeDecision("waitress", route, "GET")).toBe("drinks");
     expect(routeDecision("waitress", route, "POST")).toBe("forbidden");
   }

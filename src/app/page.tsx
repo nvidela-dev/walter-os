@@ -138,6 +138,12 @@ const sections: {
         icon: SparklesIcon,
         bg: "bg-[linear-gradient(145deg,#b99bea,#7751a8)]",
       }, {
+        name: "Revisar duplicados",
+        description: "Compará productos y archivá los repetidos.",
+        href: "/product-duplicates",
+        icon: SparklesIcon,
+        bg: "bg-[linear-gradient(145deg,#eba98b,#aa6247)]",
+      }, {
         name: "Plan de Inventario",
         description: "Definí cuánto debería haber de cada producto.",
         href: "/inventory-plan",
