@@ -3,7 +3,7 @@ import "server-only";
 import { and, desc, eq, isNull,lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { drinkItems, drinkObservations, products } from "@/db/schema";
+import { drinkItems, drinkObservations, products, units } from "@/db/schema";
 import { requireAccess } from "@/lib/auth/access";
 import { isoDateSchema } from "@/lib/validation";
 
@@ -57,4 +57,15 @@ export async function getDrinkManagement(): Promise<{ id: string; name: string; 
   return db.select({ id: drinkItems.id, name: products.name, unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})`, location: drinkItems.location, category: drinkItems.category,
     targetQuantity: drinkItems.targetQuantity, targetUnit: drinkItems.targetUnit, active: drinkItems.active,
   }).from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt))).orderBy(drinkItems.location, products.name);
+}
+
+export async function getDrinkCreationOptions(): Promise<{ units: { id: string; code: string; name: string }[]; locations: string[] }> {
+  await requireAccess("drinks");
+  const [unitRows, locationRows] = await Promise.all([
+    db.select({ id: units.id, code: units.code, name: units.name }).from(units).orderBy(units.name),
+    db.selectDistinct({ location: drinkItems.location }).from(drinkItems)
+      .innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
+      .where(eq(drinkItems.active, true)).orderBy(drinkItems.location),
+  ]);
+  return { units: unitRows, locations: locationRows.map((row) => row.location) };
 }

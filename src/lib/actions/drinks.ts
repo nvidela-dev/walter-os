@@ -13,6 +13,15 @@ import { drinkActiveSchema, drinkCountsSchema, drinkItemSchema, drinkTargetSchem
 
 export async function createDrinkItem(input: unknown): Promise<ActionResult> {
   await requireAccess("main");
+  return createDrink(input, true);
+}
+
+export async function addDrinkItem(input: unknown): Promise<ActionResult> {
+  await requireAccess("drinks");
+  return createDrink(input, false);
+}
+
+async function createDrink(input: unknown, allowUpdate: boolean): Promise<ActionResult> {
   try {
     const data = drinkItemSchema.parse(input);
     const [unit] = await db.select().from(units).where(eq(units.id, data.unitId));
@@ -23,13 +32,19 @@ export async function createDrinkItem(input: unknown): Promise<ActionResult> {
     const existing = matches[0];
     if (existing !== undefined && existing.unitId !== unit.id) return actionError("Ese producto ya existe con otra unidad. Usá su unidad actual.");
     const productId = existing?.id ?? randomUUID();
-    const placement = db.insert(drinkItems).values({ productId, location: data.location, category: data.category, countUnit: data.countUnit })
-      .onConflictDoUpdate({ target: [drinkItems.productId, drinkItems.location], set: { active: true, category: data.category, countUnit: data.countUnit } });
+    const insert = db.insert(drinkItems).values({ productId, location: data.location, category: data.category, countUnit: data.countUnit });
+    // The staff add path never restores, recategorizes, or changes an existing drink.
+    const placement = allowUpdate
+      ? insert.onConflictDoUpdate({ target: [drinkItems.productId, drinkItems.location], set: { active: true, category: data.category, countUnit: data.countUnit } }).returning({ id: drinkItems.id })
+      : insert.onConflictDoNothing().returning({ id: drinkItems.id });
     if (existing === undefined) await db.batch([
       db.insert(products).values({ id: productId, name: data.name, unitId: unit.id, unit: unit.code }),
       placement,
     ]);
-    else await placement;
+    else {
+      const added = await placement;
+      if (added.length === 0) return actionError("Esta bebida ya está registrada en esa ubicación. Si está oculta, pedile a Admin que la restaure.");
+    }
     revalidatePath("/drinks", "layout");
     revalidatePath("/data-fill");
     return actionOk(undefined);

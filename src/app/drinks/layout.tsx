@@ -13,6 +13,7 @@ export default async function DrinksLayout({ children }: { children: ReactNode }
     <nav className="flex flex-wrap gap-4 border-b py-3 text-sm font-semibold">
       <Link href="/drinks" className="inline-flex min-h-11 items-center">Contar</Link>
       <Link href="/drinks/history" className="inline-flex min-h-11 items-center">Historial</Link>
+      <Link href="/drinks/new" className="inline-flex min-h-11 items-center">Agregar bebida</Link>
       {group === "admin" && <Link href="/drinks/manage" className="inline-flex min-h-11 items-center">Bebidas y objetivos</Link>}
     </nav>
     {children}

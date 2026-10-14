@@ -25,8 +25,8 @@ vi.mock("@/db", async () => {
   } }), testClient: client };
 });
 
-import { createDrinkItem, saveDrinkCounts, setDrinkActive, setDrinkTarget } from "@/lib/actions/drinks";
-import { getDrinkHistory, getDrinkManagement, getDrinksInventory } from "@/lib/queries/drinks";
+import { addDrinkItem, createDrinkItem, saveDrinkCounts, setDrinkActive, setDrinkTarget } from "@/lib/actions/drinks";
+import { getDrinkCreationOptions, getDrinkHistory, getDrinkManagement, getDrinksInventory } from "@/lib/queries/drinks";
 
 let client: PGlite;
 let unitId: string;
@@ -154,4 +154,29 @@ it("counts provider packs in individual bottles without changing purchasing unit
   expect((await getDrinkHistory()).entries.find(row => row.name === 'Bottle test cola')).toMatchObject({unit: 'botella',quantity: '7.00'});
   expect((await client.query("SELECT unidad FROM productos WHERE id=$1", [productId])).rows[0]).toEqual({unidad: 'pack'});
   expect((await client.query("SELECT precio,cantidad FROM proveedor_productos WHERE producto_id=$1", [productId])).rows[0]).toMatchObject({precio: '100.00',cantidad: '12.00'});
+});
+
+it("Waitress can add drinks but cannot modify or restore existing items through the add endpoint", async () => {
+  actor.role = "waitress";
+  expect((await getDrinkCreationOptions()).units.length).toBeGreaterThan(0);
+  const input = { name: "New lemonade", unitId, location: "Bar", category: "Refrescos", countUnit: "botella" };
+  expect((await addDrinkItem(input)).ok).toBe(true);
+  expect((await addDrinkItem({ ...input, location: "Depósito" })).ok).toBe(true);
+  expect((await client.query("SELECT * FROM productos WHERE nombre='New lemonade'")).rows).toHaveLength(1);
+  const before = (await client.query("SELECT * FROM inventario_bebidas_productos b JOIN productos p ON p.id=b.producto_id WHERE p.nombre='New lemonade' ORDER BY b.ubicacion")).rows;
+  expect((await addDrinkItem({ ...input, category: "Alcoholes", countUnit: null, targetQuantity: "99" })).ok).toBe(false);
+  expect((await client.query("SELECT * FROM inventario_bebidas_productos b JOIN productos p ON p.id=b.producto_id WHERE p.nombre='New lemonade' ORDER BY b.ubicacion")).rows).toEqual(before);
+  await client.query("UPDATE inventario_bebidas_productos SET activo=false WHERE producto_id=(SELECT id FROM productos WHERE nombre='New lemonade') AND ubicacion='Bar'");
+  expect((await addDrinkItem(input)).ok).toBe(false);
+  expect((await getDrinksInventory()).items.some((item) => item.name === input.name && item.location === "Bar")).toBe(false);
+  await expect(createDrinkItem(input)).rejects.toThrow("Denied");
+  await expect(setDrinkTarget({ itemId, quantity: "2" })).rejects.toThrow("Denied");
+  await expect(setDrinkActive({ itemId, active: false })).rejects.toThrow("Denied");
+  for (const role of ["kitchen", null] as const) {
+    actor.role = role;
+    await expect(addDrinkItem(input)).rejects.toThrow("Denied");
+    await expect(getDrinkCreationOptions()).rejects.toThrow("Denied");
+  }
+  actor.role = "admin";
+  expect((await createDrinkItem(input)).ok).toBe(true);
 });

@@ -47,7 +47,7 @@ it("restricts Waitress to drinks counting and history, including route prefix tr
     expect(routeDecision("waitress", route, "GET")).toBe("drinks");
     expect(routeDecision("waitress", route, "POST")).toBe("forbidden");
   }
-  for (const route of ["/drinks", "/drinks/history"]) {
+  for (const route of ["/drinks", "/drinks/history", "/drinks/new"]) {
     expect(routeDecision("waitress", route, "GET")).toBe("allow");
     expect(routeDecision("waitress", route, "POST")).toBe("allow");
     expect(routeDecision("kitchen", route, "GET")).toBe("inventory");
