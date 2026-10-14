@@ -27,3 +27,9 @@
 .mc-footer { color: #8498ad; padding: 6px 8px; border-top: 1px solid #34404d; font-size: 10px; }
 .matching-console .mc-empty { padding: 12px 8px; }
 @media (max-width: 850px) { .matching-page { padding: 8px; } .mc-panels { grid-template-columns: minmax(0, 1fr); } .mc-list { max-height: 260px; } .mc-detail { border-left: 0; border-top: 1px solid #34404d; } .mc-candidates { max-height: 480px; } }
+.mc-duplicate-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mc-duplicate-card { padding: 12px; border: 1px solid #34404d; overflow-wrap: anywhere; }
+.mc-duplicate-card h2 { margin: 0 0 8px; color: #76e4a3; font-size: 14px; }
+.mc-duplicate-card p { margin-top: 8px; }
+@media (max-width: 550px) { .mc-duplicate-cards { grid-template-columns: 1fr; } }
+.mc-duplicate-options { max-height: 180px; overflow-y: auto; }

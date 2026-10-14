@@ -19,10 +19,12 @@ vi.mock("@/db", async () => {
 });
 
 import { addFridgeProduct, saveInventory } from "@/lib/actions/inventory";
+import { archiveDuplicate } from "@/lib/actions/product-duplicates";
 import { reviewProductMatch, setProductArchived } from "@/lib/actions/product-matching";
 import { requireAccess } from "@/lib/auth/access";
 import { getFridgeInventory, getInventoryHistory, searchInventoryProducts } from "@/lib/queries/inventory";
 import { getInvoiceFormData } from "@/lib/queries/invoices";
+import { getDuplicateProducts } from "@/lib/queries/product-duplicates";
 import { getProductMatching } from "@/lib/queries/product-matching";
 import { getProviderWithProducts } from "@/lib/queries/providers";
 
@@ -74,4 +76,19 @@ it("requires Admin authorization before archiving or reviewing", async () => {
   expect((await client.query("SELECT eliminado_at FROM productos WHERE id=$1", [source])).rows).toEqual([{ eliminado_at: null }]);
   vi.mocked(requireAccess).mockRejectedValueOnce(new Error("Denied"));
   await expect(reviewProductMatch({ inventoryId: source, catalogueId: target, status: "accepted" })).rejects.toThrow("Denied");
+});
+it("reviews duplicates against active IDs, preserves observations and links, and restores", async () => {
+  const before = (await client.query("SELECT * FROM observaciones_inventario")).rows;
+  expect((await archiveDuplicate({ keepId: source, archiveId: source })).ok).toBe(false);
+  expect((await archiveDuplicate({ keepId: randomUUID(), archiveId: source })).ok).toBe(false);
+  expect(await archiveDuplicate({ keepId: target, archiveId: source })).toEqual({ ok: true, data: undefined });
+  expect((await getDuplicateProducts()).find(p => p.id === source)).toMatchObject({ observations: before.length, placements: [{ number: 1, note: null, active: true }] });
+  expect((await getDuplicateProducts()).find(p => p.id === source)?.deletedAt).not.toBeNull();
+  expect((await getDuplicateProducts()).find(p => p.id === target)?.providers[0]?.id).toBe(provider);
+  expect((await archiveDuplicate({ keepId: source, archiveId: target })).ok).toBe(false);
+  expect((await client.query("SELECT * FROM observaciones_inventario")).rows).toEqual(before);
+  await setProductArchived({ productId: source, archived: false });
+  expect((await getFridgeInventory(fridge))[0]?.id).toBe(source);
+  vi.mocked(requireAccess).mockRejectedValueOnce(new Error("Denied"));
+  await expect(archiveDuplicate({ keepId: target, archiveId: source })).rejects.toThrow("Denied");
 });
