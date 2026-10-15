@@ -62,3 +62,9 @@ export const menuVersions = pgTable("menu_versiones", {
   check("menu_versiones_revision_check",sql`${table.revision} >= 0`),
   check("menu_versiones_snapshot_check",sql`(${table.status}='draft' AND ${table.submittedAt} IS NULL AND ${table.submittedBy} IS NULL) OR (${table.status}='submitted' AND ${table.submittedAt} IS NOT NULL AND ${table.submittedBy} IS NOT NULL)`),
 ]);
+
+// Activation is a pointer; submitted snapshots remain completely immutable.
+export const activeMenus = pgTable("menus_activos", {
+  menuName: text("carta").primaryKey(),
+  versionId: uuid("version_id").notNull().references(() => menuVersions.id, {onDelete:"restrict"}),
+});

@@ -11,7 +11,7 @@ import { createMenuItem, deleteMenuItem, saveMenuSection, updateMenuItem } from 
 import { createMenuDraft, rebaseMenuDraft, saveMenuDraft, submitMenuDraft } from "@/lib/actions/menu-versions";
 import { requireAccess } from "@/lib/auth/access";
 import { compareMenus, type MenuDocument, menuDocumentSchema } from "@/lib/menu/versions";
-import { getLatestMenuVersion, getMenuVersion, getMenuVersions } from "@/lib/queries/menu-versions";
+import { getActiveMenuVersion, getLatestMenuVersion, getMenuVersion, getMenuVersions } from "@/lib/queries/menu-versions";
 
 import { inventoryBootstrapSql } from "../../../scripts/inventory-bootstrap";
 let client:PGlite;
@@ -26,6 +26,9 @@ beforeAll(async()=>{
  await client.query("INSERT INTO menu(nombre,precio_venta,seccion_id) VALUES('Pizza',350,$1)",[otherSection]);
  const before=(await client.query("SELECT * FROM menu ORDER BY id")).rows;
  await client.exec(readFileSync("drizzle/0025_menu_versions.sql","utf8"));
+ const historyBefore=(await client.query("SELECT * FROM menu_versiones ORDER BY id")).rows;
+ await client.exec(readFileSync("drizzle/0026_active_menus.sql","utf8"));
+ expect((await client.query("SELECT * FROM menu_versiones ORDER BY id")).rows).toEqual(historyBefore);
  expect((await client.query("SELECT * FROM menu ORDER BY id")).rows).toEqual(before);
  const baseline=await getLatestMenuVersion("Don Juan");if(!baseline)throw new Error("Missing baseline");original=baseline.document;initialId=baseline.id;
 },30000);
@@ -78,6 +81,21 @@ it("enforces category assignments, unique identities/options, pending prices and
  const invalid=structuredClone(original);if(invalid.items[0])invalid.items[0].sectionId=randomUUID();expect(menuDocumentSchema.safeParse(invalid).success).toBe(false);
  const duplicate={...original,items:[...original.items,...original.items]};expect(menuDocumentSchema.safeParse(duplicate).success).toBe(false);
  for(const action of [()=>createMenuDraft("Don Juan"),()=>getMenuVersions(),()=>getMenuVersion(initialId),()=>getLatestMenuVersion("Don Juan"),()=>saveMenuDraft(initialId,0,original),()=>submitMenuDraft(initialId,0,null),()=>rebaseMenuDraft(initialId,0)]){vi.mocked(requireAccess).mockRejectedValueOnce(new Error("Denied"));await expect(action()).rejects.toThrow("Denied");}
+});
+it("keeps exactly one active submitted menu per family and drafting leaves it unchanged",async()=>{
+ const first=await getActiveMenuVersion("Don Juan"),other=await getActiveMenuVersion("Genüsse");if(!first||!other)throw new Error("Missing active menus");
+ const draft=await createMenuDraft("Don Juan");if(!draft.ok)throw new Error("Missing draft");
+ expect((await getActiveMenuVersion("Don Juan"))?.id).toBe(first.id);
+ expect((await getMenuVersion(draft.data.id))?.document).toEqual(first.document);
+ expect((await submitMenuDraft(draft.data.id,0,first.id)).ok).toBe(true);
+ expect((await getActiveMenuVersion("Don Juan"))?.id).toBe(draft.data.id);
+ expect((await getActiveMenuVersion("Genüsse"))?.id).toBe(other.id);
+ expect((await getMenuVersion(first.id))?.document).toEqual(first.document);
+ expect((await client.query("SELECT carta,count(*)::int AS n FROM menus_activos GROUP BY carta ORDER BY carta")).rows).toEqual([{carta:"Don Juan",n:1},{carta:"Genüsse",n:1}]);
+ await expect(client.query("UPDATE menus_activos SET version_id=$1 WHERE carta='Don Juan'",[other.id])).rejects.toThrow("latest submitted");
+ await expect(client.query("UPDATE menus_activos SET version_id=$1 WHERE carta='Don Juan'",[first.id])).rejects.toThrow("latest submitted");
+ await expect(client.query("DELETE FROM menus_activos WHERE carta='Don Juan'")).rejects.toThrow("cannot be removed");
+ vi.mocked(requireAccess).mockRejectedValueOnce(new Error("Denied"));await expect(getActiveMenuVersion("Don Juan")).rejects.toThrow("Denied");
 });
 it("bootstrap preserves versions and fails closed if immutability is disabled",async()=>{
  const before=(await client.query("SELECT * FROM menu_versiones ORDER BY id")).rows;

@@ -16,6 +16,7 @@ export function inventoryBootstrapSql(): string {
   const drinkCategoriesMigration = readFileSync("drizzle/0023_drink_categories.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const menuMigration = readFileSync("drizzle/0024_optimal_colleen_wing.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const menuVersionsMigration = readFileSync("drizzle/0025_menu_versions.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const activeMenusMigration = readFileSync("drizzle/0026_active_menus.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -164,6 +165,21 @@ BEGIN
     OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu'::regclass AND tgname='menu_legacy_readonly' AND tgenabled='O')
     OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_secciones'::regclass AND tgname='menu_sections_legacy_readonly' AND tgenabled='O') THEN
     RAISE EXCEPTION 'Menu version immutability or submission function is missing';
+  END IF;
+
+  IF to_regclass('public.menus_activos') IS NULL THEN
+    ${activeMenusMigration}
+  END IF;
+  PERFORM carta,version_id FROM public.menus_activos LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menus_activos'::regclass AND tgname='menus_activos_validar' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_versiones'::regclass AND tgname='menu_versiones_activar' AND tgenabled='O')
+    OR position('menus_activos' in pg_get_functiondef('public.submit_menu_version(uuid,integer,uuid,text)'::regprocedure))=0 THEN
+    RAISE EXCEPTION 'Active menu constraints or submission function are missing';
+  END IF;
+  IF EXISTS(SELECT 1 FROM (SELECT DISTINCT ON(carta) carta,id FROM public.menu_versiones WHERE estado='submitted' ORDER BY carta,presentado_at DESC,id DESC) v
+    LEFT JOIN public.menus_activos a ON a.carta=v.carta WHERE a.version_id IS DISTINCT FROM v.id)
+    OR EXISTS(SELECT 1 FROM public.menus_activos a JOIN public.menu_versiones v ON v.id=a.version_id WHERE v.carta<>a.carta OR v.estado<>'submitted') THEN
+    RAISE EXCEPTION 'Active menu is inconsistent with submitted history';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

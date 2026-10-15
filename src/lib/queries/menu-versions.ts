@@ -3,7 +3,7 @@ import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { menuVersions } from "@/db/schema";
+import { activeMenus, menuVersions } from "@/db/schema";
 import { requireAccess } from "@/lib/auth/access";
 import { parseUuidOrNull } from "@/lib/validation";
 
@@ -21,4 +21,10 @@ export async function getLatestMenuVersion(menuName: string): Promise<typeof men
   await requireAccess("main");
   const [version] = await db.select().from(menuVersions).where(and(eq(menuVersions.menuName,menuName),eq(menuVersions.status,"submitted"))).orderBy(desc(menuVersions.submittedAt),desc(menuVersions.id)).limit(1);
   return version ?? null;
+}
+
+export async function getActiveMenuVersion(menuName: string): Promise<typeof menuVersions.$inferSelect | null> {
+  await requireAccess("main");
+  const [row] = await db.select({version:menuVersions}).from(activeMenus).innerJoin(menuVersions,and(eq(activeMenus.versionId,menuVersions.id),eq(activeMenus.menuName,menuVersions.menuName),eq(menuVersions.status,"submitted"))).where(eq(activeMenus.menuName,menuName));
+  return row?.version ?? null;
 }

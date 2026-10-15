@@ -34,3 +34,20 @@ legacy photo imports and direct legacy writes are blocked by database triggers o
 Vercel's inventory bootstrap installs the migration once and verifies required
 columns, the immutable trigger, and the atomic submission function. A partial
 installation fails the deployment instead of recreating or replacing histories.
+
+## Explicit active menus
+
+`menus_activos` stores exactly one submitted version pointer per menu family.
+Migration `0026_active_menus.sql` initializes these pointers from the latest
+submitted versions without modifying any historical snapshot. `/menu` defaults
+to the active menu contents and prices, with separate family tabs; drafts and
+previous versions are listed below. Version pages label active versus historical
+menus explicitly.
+
+New Menu copies the active version. Submitting freezes the draft and changes
+that family's active pointer in the same transaction, under the same family
+lock and reviewed-baseline check. Draft creation and saves never activate a menu.
+Database triggers validate that pointers reference the latest submitted version
+of their own family, forbid removing the active pointer, and activate every newly
+submitted version. Old snapshots remain immutable. There is no manual historical
+reactivation or scheduled activation flow.

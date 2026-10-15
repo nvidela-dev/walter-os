@@ -7,14 +7,14 @@ import { menuVersions } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
 import { menuDocumentSchema } from "@/lib/menu/versions";
-import { getLatestMenuVersion } from "@/lib/queries/menu-versions";
+import { getActiveMenuVersion } from "@/lib/queries/menu-versions";
 import { requiredTextSchema, uuidSchema } from "@/lib/validation";
 
 export async function createMenuDraft(menuName: string): Promise<ActionResult<{id: string}>> {
   const actor = await requireAccess("main");
   try {
     const family = requiredTextSchema.parse(menuName);
-    const latest = await getLatestMenuVersion(family);
+    const latest = await getActiveMenuVersion(family);
     if (latest === null && !["Don Juan","Genüsse"].includes(family)) return actionError("Carta no encontrada.");
     const [draft] = await db.insert(menuVersions).values({menuName:family,createdBy:actor,baseVersionId:latest?.id ?? null,document:latest?.document ?? {sections:[],items:[]}}).returning({id:menuVersions.id});
     if (!draft) return actionError("No se pudo crear el borrador.");
@@ -40,7 +40,7 @@ export async function rebaseMenuDraft(id: string, revision: number): Promise<Act
   try {
     uuidSchema.parse(id);
     if (!Number.isSafeInteger(revision) || revision < 0) return actionError("Revisión inválida.");
-    const rows = await db.execute(sql`UPDATE public.menu_versiones d SET version_base_id=(SELECT id FROM public.menu_versiones WHERE carta=d.carta AND estado='submitted' ORDER BY presentado_at DESC,id DESC LIMIT 1),revision=revision+1 WHERE d.id=${id}::uuid AND d.revision=${revision} AND d.estado='draft' RETURNING d.id`);
+    const rows = await db.execute(sql`UPDATE public.menu_versiones d SET version_base_id=(SELECT version_id FROM public.menus_activos WHERE carta=d.carta),revision=revision+1 WHERE d.id=${id}::uuid AND d.revision=${revision} AND d.estado='draft' RETURNING d.id`);
     if (rows.rows.length === 0) return actionError("El borrador cambió. Recargá para continuar.");
     revalidatePath("/menu","layout");
     return actionOk(undefined);
