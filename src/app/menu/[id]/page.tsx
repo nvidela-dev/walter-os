@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { deleteMenuItem } from "@/lib/actions/menu";
-import { getMenuItem, getRecipeOptions } from "@/lib/queries/menu";
+import { getMenuItem, getMenuSections } from "@/lib/queries/menu";
 
 import { MenuForm } from "../menu-form";
 
@@ -16,7 +16,7 @@ export default async function MenuItemPage({
   params: Promise<{ id: string }>;
 }): Promise<ReactElement> {
   const { id } = await params;
-  const [item, recipes] = await Promise.all([getMenuItem(id), getRecipeOptions()]);
+  const [item, sections] = await Promise.all([getMenuItem(id), getMenuSections()]);
   if (!item) notFound();
 
   return (
@@ -26,7 +26,7 @@ export default async function MenuItemPage({
         title={item.name}
         actions={<DeleteButton id={item.id} name={item.name} deleteAction={deleteMenuItem} redirectTo="/menu" />}
       />
-      <main className="flex-1 py-5"><div className="app-card rounded-2xl p-6"><MenuForm item={item} recipes={recipes} /></div></main>
+      <main className="flex-1 py-5"><div className="app-card rounded-2xl p-6"><MenuForm item={item} sections={sections} /></div></main>
     </div>
   );
 }

@@ -1,0 +1,2017 @@
+[
+  {
+    "menuName": "Don Juan",
+    "section": "Platos Suizos",
+    "name": "Kassler con chucrut",
+    "sellPrice": "750",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Platos Suizos",
+    "name": "Kassler con puré de manzana",
+    "sellPrice": "750",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Platos Suizos",
+    "name": "Salchicha con chucrut",
+    "sellPrice": "750",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Platos Suizos",
+    "name": "Salchicha con puré de manzana",
+    "sellPrice": "750",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Platos Suizos",
+    "name": "Plato suizo",
+    "sellPrice": "900",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Platos Suizos",
+    "name": "Papas a la suiza",
+    "sellPrice": "500",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Brochette mixta",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Bife al champiñones",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Bife a la italiana",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Bife al curry",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Bife a la pimienta",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Bife a la mostaza",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Entrecot",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Finito de carne",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Carnes",
+    "name": "Tacos de carne",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Hamburguesas al plato + Fritas",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Hamburguesas al pan + Fritas",
+    "sellPrice": "400",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Chivito al plato completo",
+    "sellPrice": "550",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Chivito al plato para 2",
+    "sellPrice": "900",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Chivito canadiense al pan",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Chivito común al pan",
+    "sellPrice": "400",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Baurú",
+    "sellPrice": "550",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Milanesa",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Milanesa fiorentina + Fritas",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Milanesa fugazza + Fritas",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 9
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Milanesa napolitana + Fritas",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 10
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Milanesa con cheddar y bacon",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 11
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Gramajo",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 12
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Papas champi",
+    "sellPrice": "350",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 13
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Minutas",
+    "name": "Papas con cheddar y bacon",
+    "sellPrice": "350",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 14
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pollo",
+    "name": "Pollo a la naranja",
+    "sellPrice": "700",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pollo",
+    "name": "Pollo al champiñón",
+    "sellPrice": "700",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pollo",
+    "name": "Pollo al curry",
+    "sellPrice": "700",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pollo",
+    "name": "Pollo a la italiana",
+    "sellPrice": "700",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pollo",
+    "name": "Pollo grillé con crema de espinacas",
+    "sellPrice": "700",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pollo",
+    "name": "Filet de pollo",
+    "sellPrice": "550",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Sorrentinos",
+    "sellPrice": "600",
+    "description": "Salsas: Boloñesa · Carusso · Fileto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Ravioles",
+    "sellPrice": "400",
+    "description": "Jamón y queso o verdura. Salsas: Boloñesa · Carusso · Fileto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Ñoquis",
+    "sellPrice": "450",
+    "description": "Papa, espinaca o mix. Salsas: Boloñesa · Carusso · Fileto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Tallarines",
+    "sellPrice": "350",
+    "description": "Salsas: Boloñesa · Carusso · Fileto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Tallarines con jamón y brócoli",
+    "sellPrice": "500",
+    "description": "Salsas: Boloñesa · Carusso · Fileto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Tallarines a la Scarparo",
+    "sellPrice": "450",
+    "description": "Crema, boloñesa y pesto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Canelones",
+    "sellPrice": "450",
+    "description": "Verdura, carne, jamón y choclo. Salsas: Boloñesa · Carusso · Fileto.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Lasaña tradicional",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Lasaña fiorentina",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Pastas Caseras",
+    "name": "Lasaña de pollo y brócoli",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 9
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Canelones al gusto",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Lasaña",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Pizza",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Sándwiches calientes",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Olímpico",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Finito de carne o pollo",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Chivito canadiense al pan",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Papas fritas",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Puré",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Libre de Gluten",
+    "name": "Bastones de muzzarella",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04 (1).jpeg",
+    "sortOrder": 9
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Selección Veggie",
+    "name": "Lasaña",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Selección Veggie",
+    "name": "Crepes de verdura",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Selección Veggie",
+    "name": "Hamburguesa vegetal al pan",
+    "sellPrice": "400",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Selección Veggie",
+    "name": "Hamburguesa vegetal al plato",
+    "sellPrice": "600",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Selección Veggie",
+    "name": "Ensaladas",
+    "sellPrice": "500",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Selección Veggie",
+    "name": "Omelette",
+    "sellPrice": "500",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "Griega",
+    "sellPrice": "500",
+    "description": "Tomate, pepino, morrón, cebolla, queso y aceitunas.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "Nicoise",
+    "sellPrice": "500",
+    "description": "Tomate, cebolla, aceitunas, huevo y papas.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "De la casa",
+    "sellPrice": "500",
+    "description": "Lechuga, tomate, jamón, queso, pollo y huevo.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "Lombarda",
+    "sellPrice": "500",
+    "description": "Col lombarda, col blanca, cebolla y mostaza.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "Primavera",
+    "sellPrice": "500",
+    "description": "Tomate, lechuga, zanahoria, remolacha y maíz.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "César",
+    "sellPrice": "500",
+    "description": "Lechuga, rúcula, parmesano, crutones y pollo.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Ensaladas",
+    "name": "Caprese",
+    "sellPrice": "500",
+    "description": "Tomate, queso y albahaca.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado con muzzarella",
+    "sellPrice": "350",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado napolitano",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado al champiñón",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado con tomate y muzzarella",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado de pollo y tomate",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Tostados Calientes",
+    "name": "Tostado de choclo y jamón",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Postres",
+    "name": "Postre",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "½ porción · 1 persona",
+        "price": "150"
+      },
+      {
+        "label": "1 porción · 2 personas",
+        "price": "250"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Refrescos",
+    "name": "Refresco 600 ml",
+    "sellPrice": "150",
+    "description": "Línea Coca-Cola. Precio manuscrito: 150.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Refrescos",
+    "name": "Refresco 1 L",
+    "sellPrice": "200",
+    "description": "Línea Coca-Cola.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Refrescos",
+    "name": "Agua mineral 600 ml",
+    "sellPrice": "150",
+    "description": "Precio manuscrito: 150.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Refrescos",
+    "name": "Agua saborizada Salus 600 ml",
+    "sellPrice": "150",
+    "description": "Precio manuscrito: 150.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Jugos Naturales",
+    "name": "Jugo de frutilla",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Jugos Naturales",
+    "name": "Jugo de naranja",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Jugos Naturales",
+    "name": "Jugo de durazno",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Jugos Naturales",
+    "name": "Jugo de ananá",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Jugos Naturales",
+    "name": "Limonada",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Tirada de barril Cabesas Bier",
+    "sellPrice": "200",
+    "description": "Variedades: IPA Atómica · Sabotaje · Patria · Scottish Ale · Mamut · Patota. Tamaño de la porción no indicado.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Corona 710 ml",
+    "sellPrice": "350",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Corona 335 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Patagonia 730 ml",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Stella Artois 330 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Stella Artois Noire 500 ml",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Patricia Dunkel 500 ml",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Patricia Gluten Free 330 ml",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Franziskaner",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Schöfferhofer Pomelo",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 9
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas",
+    "name": "Clausthaler Lemon",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 10
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Corona 330 ml · sin alcohol",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Stella Artois 330 ml · sin alcohol",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Heineken 330 ml · sin alcohol",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Don Juan",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Faxe 500 ml · sin alcohol",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Don Juan · WhatsApp Image 2026-10-14 at 21.18.04.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Para Picar",
+    "name": "Bastones de muzzarella y arrolladitos primavera",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Para Picar",
+    "name": "Gramajo",
+    "sellPrice": "450",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Para Picar",
+    "name": "Ravioles fritos",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Para Picar",
+    "name": "Aros de cebolla",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Para Picar",
+    "name": "Ronda de milas",
+    "sellPrice": "800",
+    "description": "Para 4 personas: 2 milas de carne y 2 milas de pollo con salsas.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Picadas Completas",
+    "name": "Picada cervecera",
+    "sellPrice": "700",
+    "description": "Incluye aceitunas, arrolladitos y bastones de muzzarella. Otros ingredientes pendientes de transcripción.",
+    "priceOptions": [],
+    "reviewNote": "Revisar ingredientes pequeños de la foto: texto parcialmente borroso.",
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Picadas Completas",
+    "name": "Picada de la casa",
+    "sellPrice": "850",
+    "description": "Porción de papas fritas con salsa a elección. Otros ingredientes pendientes de transcripción.",
+    "priceOptions": [],
+    "reviewNote": "Revisar ingredientes pequeños de la foto: texto parcialmente borroso.",
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Picadas Completas",
+    "name": "Picada de pizzas",
+    "sellPrice": "500",
+    "description": "8 piezas con variedad de gustos.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Muzzarella",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Muzzarella y jamón",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Muzzarella y bacon",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Muzzarella, cheddar y bacon",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Jamón y champi",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Cebolla, bondiola y parmesano",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Capresse",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "250"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Pizzas",
+    "name": "Cuatro quesos",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "Picetas",
+        "price": "400"
+      },
+      {
+        "label": "Pizzas",
+        "price": "400"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Hamburguesas",
+    "name": "Clásica",
+    "sellPrice": "400",
+    "description": "Carne, lechuga, tomate, muzzarella, jamón, huevo y mayonesa. Incluye fritas.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Hamburguesas",
+    "name": "Premium",
+    "sellPrice": "400",
+    "description": "Carne, cheddar, bacon y cebolla morada. Incluye fritas.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Hamburguesas",
+    "name": "Premium Smash",
+    "sellPrice": null,
+    "description": "Doble carne, cheddar, bacon y cebolla morada. Incluye fritas.",
+    "priceOptions": [],
+    "reviewNote": "Precio 500 visible pero tachado en la foto: confirmar precio vigente.",
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Papas",
+    "name": "Porción de papas",
+    "sellPrice": "250",
+    "description": "Fritas, rústicas o noisette.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Papas",
+    "name": "Porción con salsa",
+    "sellPrice": "350",
+    "description": "Fritas, rústicas o noisette. Salsa: cheddar y bacon, champi o cuatro quesos.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Papas",
+    "name": "Salchipapa",
+    "sellPrice": "400",
+    "description": "Fritas, rústicas o noisette.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Postres",
+    "name": "Postre",
+    "sellPrice": null,
+    "description": null,
+    "priceOptions": [
+      {
+        "label": "½ porción · 1 persona",
+        "price": "150"
+      },
+      {
+        "label": "1 porción · 2 personas",
+        "price": "250"
+      }
+    ],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.05.jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Tirada de barril Cabesas Bier",
+    "sellPrice": "200",
+    "description": "Variedades: IPA Atómica · Sabotaje · Patria · Scottish Ale · Mamut · Patota. Tamaño de la porción no indicado.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Corona 710 ml",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Corona 335 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Patagonia 730 ml",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Budweiser 330 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Heineken 330 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Heineken 710 ml",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Miller 330 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Miller 710 ml",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Amstel 710 ml",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 9
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Stella Artois 330 ml",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 10
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Stella Artois Noire 500 ml",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 11
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Patricia Dunkel 500 ml",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 12
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Patricia Gluten Free 330 ml",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 13
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Franziskaner",
+    "sellPrice": "250",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 14
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Schöfferhofer Pomelo",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 15
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas",
+    "name": "Clausthaler Lemon",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 16
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Corona 330 ml · sin alcohol",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Stella Artois 330 ml · sin alcohol",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Heineken 330 ml · sin alcohol",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Cervezas · Sin Alcohol",
+    "name": "Faxe 500 ml · sin alcohol",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Aperol Spritz",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Negroni",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Ocean Citric",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Campari con naranja",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Caipiriña",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Caipiroska",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 5
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Caipirissima",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 6
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Mojito",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 7
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Mojito de frutilla",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 8
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Daikiri",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 9
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Gin tonic",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 10
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Charro negro",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 11
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Cuba libre",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 12
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Mandarina Aperol",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 13
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Puesta de sol",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 14
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Jäger con Monster",
+    "sellPrice": "300",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 15
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Tragos",
+    "name": "Jäger",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 16
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Fernet",
+    "name": "Fernet con Coca",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Fernet",
+    "name": "Fermut",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Fernet",
+    "name": "Fernet Orange",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Fernet",
+    "name": "Fernoster",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Fernet",
+    "name": "Mint Tonic",
+    "sellPrice": "200",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Jugos Naturales",
+    "name": "Jugo de frutilla",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Jugos Naturales",
+    "name": "Jugo de naranja",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Jugos Naturales",
+    "name": "Jugo de durazno",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 2
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Jugos Naturales",
+    "name": "Jugo de ananá",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 3
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Jugos Naturales",
+    "name": "Limonada",
+    "sellPrice": "200",
+    "description": "Disponible también en versión frappé.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 4
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Refrescos",
+    "name": "Agua Salus",
+    "sellPrice": "150",
+    "description": "Precio manuscrito: 150.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 0
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Refrescos",
+    "name": "Refrescos 600 ml",
+    "sellPrice": "150",
+    "description": "Línea Coca-Cola. Precio manuscrito: 150.",
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 1
+  },
+  {
+    "menuName": "Genüsse",
+    "section": "Refrescos",
+    "name": "Energizante Monster",
+    "sellPrice": "150",
+    "description": null,
+    "priceOptions": [],
+    "reviewNote": null,
+    "sourceNote": "Genüsse · WhatsApp Image 2026-10-14 at 21.18.04 (2).jpeg",
+    "sortOrder": 2
+  }
+]

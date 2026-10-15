@@ -14,6 +14,7 @@ export function inventoryBootstrapSql(): string {
   const matchingMigration = readFileSync("drizzle/0021_neat_jasper_sitwell.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const archiveMigration = readFileSync("drizzle/0022_daffy_smiling_tiger.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const drinkCategoriesMigration = readFileSync("drizzle/0023_drink_categories.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const menuMigration = readFileSync("drizzle/0024_optimal_colleen_wing.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -137,6 +138,20 @@ BEGIN
   PERFORM categoria, unidad_conteo FROM public.inventario_bebidas_productos LIMIT 0;
   IF position('unidad_conteo' in pg_get_functiondef('public.bebidas_snapshot()'::regprocedure)) = 0 THEN
     RAISE EXCEPTION 'Drinks snapshot must use the counting unit';
+  END IF;
+
+  SELECT count(*) INTO existing_count FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='menu'
+      AND column_name IN ('seccion_id','opciones_precio','clave_fuente','fuente','nota_revision','orden');
+  IF existing_count = 0 AND to_regclass('public.menu_secciones') IS NULL THEN
+    ${menuMigration}
+  ELSIF existing_count <> 6 OR to_regclass('public.menu_secciones') IS NULL THEN
+    RAISE EXCEPTION 'Partial menu catalogue schema: refusing automatic repair';
+  END IF;
+  PERFORM id, carta, nombre, orden FROM public.menu_secciones LIMIT 0;
+  PERFORM seccion_id, opciones_precio, clave_fuente, fuente, nota_revision, orden FROM public.menu LIMIT 0;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='menu' AND column_name='precio_venta' AND is_nullable='YES') THEN
+    RAISE EXCEPTION 'Menu catalogue must allow pending prices';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

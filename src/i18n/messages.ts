@@ -319,12 +319,12 @@ export const t = {
 
   menu: {
     title: "Menú",
-    newTitle: "Nuevo Plato",
-    addCta: "Agregar Plato",
+    newTitle: "Nuevo ítem de menú",
+    addCta: "Agregar ítem",
     emptyTitle: "Sin platos",
     emptyDescription: "Agrega los platos del menú",
     fields: {
-      name: "Nombre del Plato",
+      name: "Nombre del ítem",
       sellPrice: "Precio de Venta ($)",
       recipe: "Receta Asociada",
       noRecipe: "Sin receta",
