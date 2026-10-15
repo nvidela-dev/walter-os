@@ -1,0 +1,15 @@
+import { notFound } from "next/navigation";
+import type { ReactElement } from "react";
+
+import { PageHeader } from "@/components/ui/page-header";
+import { getLatestMenuVersion, getMenuVersion } from "@/lib/queries/menu-versions";
+
+import { MenuVersionEditor } from "./version-editor";
+export const dynamic = "force-dynamic";
+export default async function MenuVersionPage({params}: {params: Promise<{id:string}>}): Promise<ReactElement> {
+  const version = await getMenuVersion((await params).id);
+  if (!version) notFound();
+  const baseline = version.baseVersionId === null ? null : await getMenuVersion(version.baseVersionId);
+  const latest = await getLatestMenuVersion(version.menuName);
+  return <div className="app-page max-w-4xl"><PageHeader title={`${version.menuName} · ${version.status === "draft" ? "Borrador" : "Presentada"}`} backHref="/menu" /><MenuVersionEditor key={`${version.id}:${version.revision}`} version={version} baseline={baseline?.document ?? {sections:[],items:[]}} stale={version.status === "draft" && (latest?.id ?? null) !== version.baseVersionId} baselineDate={baseline?.submittedAt?.toISOString() ?? null} /></div>;
+}

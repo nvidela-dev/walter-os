@@ -1,5 +1,7 @@
 import { relations, sql } from "drizzle-orm";
-import { check, integer, jsonb, numeric, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { check, foreignKey, index, integer, jsonb, numeric, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+
+import type { MenuDocument } from "@/lib/menu/versions";
 
 import { recipes } from "./recipes";
 
@@ -42,3 +44,21 @@ export const menuRelations = relations(menu, ({ one }) => ({
 
 export type MenuItem = typeof menu.$inferSelect;
 export type NewMenuItem = typeof menu.$inferInsert;
+
+export const menuVersions = pgTable("menu_versiones", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  menuName: text("carta").notNull(),
+  status: text("estado").$type<"draft" | "submitted">().notNull().default("draft"),
+  baseVersionId: uuid("version_base_id"),
+  revision: integer("revision").notNull().default(0),
+  document: jsonb("contenido").$type<MenuDocument>().notNull(),
+  createdAt: timestamp("created_at", {withTimezone: true}).notNull().defaultNow(),
+  submittedAt: timestamp("presentado_at", {withTimezone: true}),
+  createdBy: text("creado_por").notNull(),
+  submittedBy: text("presentado_por"),
+}, table => [check("menu_versiones_estado_check", sql`${table.status} in ('draft','submitted')`),
+  foreignKey({name:"menu_versiones_base_fk",columns:[table.baseVersionId],foreignColumns:[table.id]}).onDelete("restrict"),
+  index("menu_versiones_carta_estado_fecha").on(table.menuName,table.status,table.submittedAt.desc()),
+  check("menu_versiones_revision_check",sql`${table.revision} >= 0`),
+  check("menu_versiones_snapshot_check",sql`(${table.status}='draft' AND ${table.submittedAt} IS NULL AND ${table.submittedBy} IS NULL) OR (${table.status}='submitted' AND ${table.submittedAt} IS NOT NULL AND ${table.submittedBy} IS NOT NULL)`),
+]);

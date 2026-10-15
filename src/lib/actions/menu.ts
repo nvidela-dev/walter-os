@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { menu, menuSections } from "@/db/schema";
+import { menu, menuSections, menuVersions } from "@/db/schema";
 import { t } from "@/i18n";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
@@ -13,6 +13,7 @@ import { menuItemInputSchema, menuSectionSchema } from "@/lib/validators/menu";
 
 export async function createMenuItem(input: unknown): Promise<ActionResult<{ id: string }>> {
   await requireAccess("main");
+  if ((await db.select({id:menuVersions.id}).from(menuVersions).limit(1)).length > 0) return actionError("Las cartas presentadas se conservan. Creá un Nuevo menú para editar.");
   const parsed = menuItemInputSchema.safeParse(input);
   if (!parsed.success) return unknownActionError(parsed.error);
 
@@ -31,6 +32,7 @@ export async function updateMenuItem(
   input: unknown
 ): Promise<ActionResult<{ id: string }>> {
   await requireAccess("main");
+  if ((await db.select({id:menuVersions.id}).from(menuVersions).limit(1)).length > 0) return actionError("Las cartas presentadas se conservan. Creá un Nuevo menú para editar.");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -56,6 +58,7 @@ export async function updateMenuItem(
 
 export async function deleteMenuItem(id: string): Promise<ActionResult> {
   await requireAccess("main");
+  if ((await db.select({id:menuVersions.id}).from(menuVersions).limit(1)).length > 0) return actionError("Las cartas presentadas se conservan. Creá un Nuevo menú para editar.");
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) return unknownActionError(parsedId.error);
 
@@ -76,6 +79,7 @@ export async function deleteMenuItem(id: string): Promise<ActionResult> {
 
 export async function saveMenuSection(id: string | null, input: unknown): Promise<ActionResult> {
   await requireAccess("main");
+  if ((await db.select({id:menuVersions.id}).from(menuVersions).limit(1)).length > 0) return actionError("Las cartas presentadas se conservan. Creá un Nuevo menú para editar.");
   try {
     const data = menuSectionSchema.parse(input);
     if (id === null) await db.insert(menuSections).values(data);

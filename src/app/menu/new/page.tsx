@@ -1,20 +1,12 @@
 import type { ReactElement } from "react";
 
 import { PageHeader } from "@/components/ui/page-header";
-import { t } from "@/i18n";
-import { getMenuSections } from "@/lib/queries/menu";
+import { getMenuVersions } from "@/lib/queries/menu-versions";
 
-import { MenuForm } from "../menu-form";
-
+import { NewMenuForm } from "./new-menu-form";
 export const dynamic = "force-dynamic";
-
-export default async function NewMenuItemPage(): Promise<ReactElement> {
-  const sections = await getMenuSections();
-
-  return (
-    <div className="app-page flex flex-col bg-white">
-      <PageHeader backHref="/menu" title={t.menu.newTitle} />
-      <main className="flex-1 py-5"><div className="app-card rounded-2xl p-6"><MenuForm sections={sections} /></div></main>
-    </div>
-  );
+export default async function NewMenuPage(): Promise<ReactElement> {
+  const versions = await getMenuVersions();
+  const families = [...new Set(["Don Juan","Genüsse",...versions.map(version => version.menuName)])];
+  return <div className="app-page max-w-2xl"><PageHeader title="Nuevo menú" backHref="/menu" /><main className="space-y-4 py-5"><p className="text-sm text-muted">Copiamos la última carta presentada. Podés editar el borrador y comparar todos los cambios antes de presentarlo. Los precios anteriores se conservan.</p><NewMenuForm families={families} /></main></div>;
 }

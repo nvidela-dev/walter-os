@@ -15,6 +15,7 @@ export function inventoryBootstrapSql(): string {
   const archiveMigration = readFileSync("drizzle/0022_daffy_smiling_tiger.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const drinkCategoriesMigration = readFileSync("drizzle/0023_drink_categories.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const menuMigration = readFileSync("drizzle/0024_optimal_colleen_wing.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const menuVersionsMigration = readFileSync("drizzle/0025_menu_versions.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -152,6 +153,17 @@ BEGIN
   PERFORM seccion_id, opciones_precio, clave_fuente, fuente, nota_revision, orden FROM public.menu LIMIT 0;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='menu' AND column_name='precio_venta' AND is_nullable='YES') THEN
     RAISE EXCEPTION 'Menu catalogue must allow pending prices';
+  END IF;
+
+  IF to_regclass('public.menu_versiones') IS NULL THEN
+    ${menuVersionsMigration}
+  END IF;
+  PERFORM id,carta,estado,version_base_id,revision,contenido,created_at,presentado_at,creado_por,presentado_por FROM public.menu_versiones LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_versiones'::regclass AND tgname='menu_versiones_inmutables' AND tgenabled='O')
+    OR to_regprocedure('public.submit_menu_version(uuid,integer,uuid,text)') IS NULL
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu'::regclass AND tgname='menu_legacy_readonly' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_secciones'::regclass AND tgname='menu_sections_legacy_readonly' AND tgenabled='O') THEN
+    RAISE EXCEPTION 'Menu version immutability or submission function is missing';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.
