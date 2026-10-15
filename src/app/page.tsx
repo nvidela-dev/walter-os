@@ -2,7 +2,6 @@ import { UserButton } from "@clerk/nextjs";
 import {
   ArchiveBoxIcon,
   BanknotesIcon,
-  BookOpenIcon,
   ClipboardDocumentListIcon,
   ClockIcon,
   DocumentTextIcon,
@@ -69,12 +68,6 @@ const sections: {
       {
         title: t.home.sections.kitchen.kitchen,
         apps: [
-          {
-            ...t.home.tiles.recipes,
-            href: "/recipes",
-            icon: BookOpenIcon,
-            bg: "bg-[linear-gradient(145deg,#5bd0c6,#2c9b91)]",
-          },
           {
             ...t.home.tiles.inventory,
             href: "/inventory",
