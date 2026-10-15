@@ -15,17 +15,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactElement } from "react";
 
+import { type HomeApp, HomeTile } from "@/components/home-tile";
 import { t } from "@/i18n";
 import { getCurrentGroup } from "@/lib/auth/access";
 import { landingPath } from "@/lib/auth/policy";
-
-interface HomeApp {
-  bg: string;
-  description: string;
-  href: string;
-  icon: typeof TruckIcon;
-  name: string;
-}
 
 const sections: {
   groups: { apps: HomeApp[]; title: string }[];
@@ -132,18 +125,6 @@ const sections: {
         icon: SparklesIcon,
         bg: "bg-[linear-gradient(145deg,#63cdb2,#278b73)]",
       }, {
-        name: "Unir nombres",
-        description: "Revisá equivalencias entre inventario y catálogo.",
-        href: "/product-matching",
-        icon: SparklesIcon,
-        bg: "bg-[linear-gradient(145deg,#b99bea,#7751a8)]",
-      }, {
-        name: "Revisar duplicados",
-        description: "Compará productos y archivá los repetidos.",
-        href: "/product-duplicates",
-        icon: SparklesIcon,
-        bg: "bg-[linear-gradient(145deg,#eba98b,#aa6247)]",
-      }, {
         name: "Plan de Inventario",
         description: "Definí cuánto debería haber de cada producto.",
         href: "/inventory-plan",
@@ -153,23 +134,6 @@ const sections: {
     }],
   },
 ];
-
-function HomeTile({ app }: { app: HomeApp }): ReactElement {
-  return (
-    <Link
-      href={app.href}
-      className="group flex w-[7.25rem] min-w-0 flex-col items-center gap-2 text-center transition active:scale-[0.96]"
-    >
-      <div className={`ios-icon flex h-[4.25rem] w-[4.25rem] items-center justify-center text-white transition group-hover:scale-[1.03] ${app.bg}`}>
-        <app.icon className="h-8 w-8" />
-      </div>
-      <span className="w-full text-center text-[13px] font-semibold leading-tight text-[#1f2d35] drop-shadow-[0_1px_8px_rgba(255,255,255,0.72)]">
-        {app.name}
-      </span>
-      <span className="sr-only">{app.description}</span>
-    </Link>
-  );
-}
 
 export const dynamic = "force-dynamic";
 export const viewport: Viewport = { themeColor: "#dce7e4" };
