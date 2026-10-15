@@ -53,7 +53,7 @@ it("Waitress lands on drinks and sees no administrative or kitchen navigation", 
   await expect(Home()).rejects.toThrow("redirect:/drinks");
   render(await DrinksLayout({ children: <p>Drink counts</p> }));
   expect(screen.getByRole("link", { name: "Agregar bebida" })).toHaveAttribute("href", "/drinks/new?category=Alcoholes");
-  expect(screen.getByRole("link", { name: "Contar" })).toHaveAttribute("href", "/drinks?category=Alcoholes");
+  expect(screen.getByRole("link", { name: "Inventarios" })).toHaveAttribute("href", "/drinks?category=Alcoholes");
   expect(screen.queryByRole("link", { name: "Bebidas y objetivos" })).not.toBeInTheDocument();
   expect(screen.queryByRole("link", { name: "Inicio" })).not.toBeInTheDocument();
 });

@@ -1,0 +1,16 @@
+import Link from "next/link";
+import type { ReactElement } from "react";
+
+import type { DrinkDocumentItem, drinkDocuments, drinkEditEvents } from "@/db/schema";
+import { drinkDocumentHref } from "@/lib/drinks/documents";
+export function DrinkDocumentView({document,canEdit,events,userId,suppliers,supplierView=false}: {document:typeof drinkDocuments.$inferSelect;canEdit:boolean;events:(typeof drinkEditEvents.$inferSelect)[];userId:string;suppliers:{itemId:string;providerId:string;name:string}[];supplierView?:boolean}):ReactElement{
+ const href=drinkDocumentHref(document.id,document.category,document.date);const groups=new Map<string,DrinkDocumentItem[]>();
+ for(const item of document.items){const links=[...new Map(suppliers.filter(link=>link.itemId===item.itemId).map(link=>[link.providerId,link])).values()];const name=!supplierView?item.location:links.length===0?"Sin proveedor":links.length===1?links[0]?.name??"Sin proveedor":`Varios proveedores: ${links.map(link=>link.name).sort().join(", ")}`;groups.set(name,[...(groups.get(name)??[]),item]);}
+ return <main className="space-y-4 py-4"><div className="flex items-start justify-between gap-3"><div><h1 className="text-xl font-bold">{document.category} · {document.date}</h1><p className="text-xs text-muted">{document.items.filter(item=>item.quantity!==null).length}/{document.items.length} revisados · Guardado {document.updatedAt.toLocaleString("es-UY",{timeZone:"America/Montevideo"})}</p></div>{canEdit&&<Link href={drinkDocumentHref(document.id,document.category,document.date,true)} className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white">Editar</Link>}</div><div className="flex gap-4 text-sm"><Link className="py-2 underline" href={href}>Inventario</Link><Link className="py-2 underline" href={`${href}&view=suppliers`}>Por proveedor</Link></div>
+ {supplierView&&<p className="text-xs text-muted">Cada bebida aparece una sola vez. Varios proveedores no indican quién entregó el stock.</p>}
+ {[...groups].map(([name,items])=><section key={name} className="overflow-hidden rounded-xl border border-slate-200"><h2 className="bg-slate-50 px-3 py-2 text-sm font-bold">{name}</h2><div className="divide-y divide-slate-100">{items.map(item=><div key={item.itemId} className="flex items-center justify-between gap-3 px-3 py-2"><div className="min-w-0"><p className="text-sm font-medium">{item.name}</p>{supplierView&&<p className="text-xs text-muted">{item.location}</p>}</div><p className="shrink-0 text-sm tabular-nums">{item.quantity===null?<span className="text-muted">Sin revisar</span>:`${item.quantity} ${item.unit}`}</p></div>)}</div></section>)}
+ {document.items.length===0&&<p className="text-sm">Todavía no hay bebidas en este archivo.</p>}
+ {!canEdit&&<p className="text-xs text-muted">Solo Admin o quien creó este inventario puede editarlo.</p>}
+ <details className="rounded-xl border border-slate-200 p-3"><summary className="text-sm font-semibold">Registro de ediciones · {events.length}</summary><p className="py-2 text-xs text-muted">Solo quién guardó y cuándo. No se guardan cantidades anteriores.</p>{events.map(event=><p key={event.id} className="py-1 text-xs">{event.actor===userId?"Vos":event.actorName} · {event.recordedAt.toLocaleString("es-UY",{timeZone:"America/Montevideo"})}</p>)}</details>
+ </main>;
+}

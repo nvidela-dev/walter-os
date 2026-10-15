@@ -17,6 +17,7 @@ export function inventoryBootstrapSql(): string {
   const menuMigration = readFileSync("drizzle/0024_optimal_colleen_wing.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const menuVersionsMigration = readFileSync("drizzle/0025_menu_versions.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const activeMenusMigration = readFileSync("drizzle/0026_active_menus.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const drinkDocumentsMigration = readFileSync("drizzle/0027_drink_documents.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -180,6 +181,22 @@ BEGIN
     LEFT JOIN public.menus_activos a ON a.carta=v.carta WHERE a.version_id IS DISTINCT FROM v.id)
     OR EXISTS(SELECT 1 FROM public.menus_activos a JOIN public.menu_versiones v ON v.id=a.version_id WHERE v.carta<>a.carta OR v.estado<>'submitted') THEN
     RAISE EXCEPTION 'Active menu is inconsistent with submitted history';
+  END IF;
+
+  SELECT count(*) INTO existing_count FROM pg_tables WHERE schemaname='public' AND tablename IN ('documentos_bebidas','ediciones_documentos_bebidas');
+  IF existing_count=0 THEN
+    ${drinkDocumentsMigration}
+  ELSIF existing_count<>2 THEN RAISE EXCEPTION 'Partial drinks document schema: refusing automatic repair';
+  END IF;
+  PERFORM id,fecha,categoria,items,revision,creado_por,created_at,updated_at FROM public.documentos_bebidas LIMIT 0;
+  PERFORM id,documento_id,usuario,nombre_usuario,fecha FROM public.ediciones_documentos_bebidas LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.documentos_bebidas'::regclass AND tgname='documentos_bebidas_identidad' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.ediciones_documentos_bebidas'::regclass AND tgname='ediciones_bebidas_inmutables' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_bebidas'::regclass AND tgname='bebidas_documentos_solo' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.documentos_bebidas'::regclass AND conname='documentos_bebidas_fecha_categoria')
+    OR to_regprocedure('public.save_drink_document(uuid,integer,jsonb,text,text,boolean)') IS NULL
+    OR EXISTS(SELECT 1 FROM public.observaciones_bebidas) THEN
+    RAISE EXCEPTION 'Drinks document guards or save function are missing, or legacy counts remain';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

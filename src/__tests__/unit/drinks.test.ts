@@ -48,84 +48,20 @@ beforeAll(async () => {
 beforeEach(() => { actor.role = "admin"; });
 afterAll(async () => { await client.close(); });
 
-it("Admin builds a separate drinks list with canonical products and per-location targets", async () => {
-  expect((await createDrinkItem({ name: "Cola 600 ml", unitId, location: "Bar" })).ok).toBe(true);
-  expect((await createDrinkItem({ name: "Cola 600 ml", unitId, location: "Depósito" })).ok).toBe(true);
-  expect((await createDrinkItem({ name: "Cola 600 ml", unitId, location: "Bar" })).ok).toBe(true);
-  const items = await getDrinkManagement();
-  expect(items).toHaveLength(2);
-  expect((await client.query("SELECT * FROM productos WHERE nombre='Cola 600 ml'")).rows).toHaveLength(1);
-  const bar = items.find((row) => row.location === "Bar");
-  if (bar === undefined) throw new Error("Missing drink");
-  itemId = bar.id;
-  expect(bar.targetQuantity).toBeNull();
-  expect((await setDrinkTarget({ itemId, quantity: "12" })).ok).toBe(true);
-  expect((await getDrinksInventory()).items.find((row) => row.id === itemId)).toMatchObject({ quantity: null, targetQuantity: "12.00", targetUnit: "unidad" });
-  expect((await client.query("SELECT * FROM heladera_productos")).rows).toHaveLength(0);
-  expect((await client.query("SELECT * FROM observaciones_inventario")).rows).toHaveLength(0);
+it("Admin manages canonical drink placements and objectives separately from inventory counts",async()=>{
+ expect((await createDrinkItem({name:"Cola 600 ml",unitId,location:"Bar",category:"Refrescos",countUnit:"botella"})).ok).toBe(true);
+ expect((await createDrinkItem({name:"Cola 600 ml",unitId,location:"Depósito",category:"Refrescos",countUnit:"botella"})).ok).toBe(true);
+ const items=await getDrinkManagement();const item=items.find(row=>row.location==="Bar");if(!item)throw new Error("Missing item");itemId=item.id;
+ expect((await client.query("SELECT * FROM productos WHERE nombre='Cola 600 ml'")).rows).toHaveLength(1);
+ expect((await setDrinkTarget({itemId,quantity:"12"})).ok).toBe(true);
+ expect((await getDrinksInventory()).items.find(row=>row.id===itemId)).toMatchObject({unit:"botella",quantity:null,targetQuantity:"12.00",targetUnit:"botella"});
+ expect((await client.query("SELECT * FROM observaciones_bebidas")).rows).toHaveLength(0);
 });
-
-it("Waitress counts zero, corrects a weekly snapshot, preserves audit records and cannot edit the catalogue", async () => {
-  actor.role = "waitress";
-  expect((await saveDrinkCounts([{ itemId, quantity: "0", unit: "unidad" }])).ok).toBe(true);
-  expect((await saveDrinkCounts([{ itemId, quantity: "5.50", unit: "unidad" }])).ok).toBe(true);
-  const inventory = await getDrinksInventory();
-  expect(inventory.items.find((item) => item.id === itemId)).toMatchObject({ quantity: "5.50", countedUnit: "unidad" });
-  expect(inventory.items.find((item) => item.location === "Depósito")?.quantity).toBeNull();
-  const history = await getDrinkHistory();
-  expect(history.weeks).toEqual([inventory.week]);
-  expect(history.entries).toHaveLength(1);
-  expect(history.entries[0]).toMatchObject({ quantity: "5.50", name: "Cola 600 ml", location: "Bar", recordedBy: "staff_user" });
-  expect((await client.query("SELECT * FROM observaciones_bebidas")).rows).toHaveLength(2);
-  await expect(client.query("UPDATE observaciones_bebidas SET cantidad=9")).rejects.toThrow("append-only");
-  await expect(client.query("DELETE FROM observaciones_bebidas")).rejects.toThrow("append-only");
-  await expect(createDrinkItem({ name: "Wine", unitId, location: "Bar" })).rejects.toThrow("Denied");
-  await expect(setDrinkTarget({ itemId, quantity: "1", unit: "pack" })).rejects.toThrow("Denied");
-  await expect(setDrinkActive({ itemId, active: false })).rejects.toThrow("Denied");
-  await expect(getDrinkManagement()).rejects.toThrow("Denied");
+it("closes legacy snapshot saves and denies unrelated roles",async()=>{
+ actor.role="waitress";expect((await saveDrinkCounts([{itemId,quantity:"0",unit:"botella"}],"Refrescos")).ok).toBe(false);
+ expect((await getDrinkHistory()).entries).toHaveLength(0);
+ for(const role of ["kitchen",null] as const){actor.role=role;await expect(getDrinksInventory()).rejects.toThrow("Denied");await expect(saveDrinkCounts([])).rejects.toThrow("Denied");}
 });
-
-it("uses historical names and units even after catalogue changes, and validates counts atomically", async () => {
-  const product = await client.query<{ producto_id: string }>("SELECT producto_id FROM inventario_bebidas_productos WHERE id=$1", [itemId]);
-  await client.query("UPDATE productos SET nombre='Renamed cola',unidad='pack' WHERE id=$1", [product.rows[0]?.producto_id]);
-  expect((await getDrinkHistory()).entries[0]?.name).toBe("Cola 600 ml");
-  expect((await getDrinkHistory()).entries[0]?.unit).toBe("unidad");
-  expect((await getDrinksInventory()).items.find((item) => item.id === itemId)).toMatchObject({ unit: "pack", countedUnit: "unidad", targetUnit: "unidad" });
-  expect((await saveDrinkCounts([{ itemId, quantity: "1", unit: "unidad" }])).ok).toBe(false);
-  const before = (await client.query("SELECT * FROM observaciones_bebidas")).rows;
-  for (const input of [
-    [{ itemId, quantity: "-1", unit: "pack" }], [{ itemId, quantity: "", unit: "pack" }], [{ itemId, quantity: "1.234", unit: "pack" }],
-    [{ itemId, quantity: "1", unit: "pack" }, { itemId, quantity: "2", unit: "pack" }],
-    [{ itemId, quantity: "1", unit: "pack" }, { itemId: randomUUID(), quantity: "2", unit: "pack" }],
-  ]) expect((await saveDrinkCounts(input)).ok).toBe(false);
-  expect((await client.query("SELECT * FROM observaciones_bebidas")).rows).toEqual(before);
-  await setDrinkActive({ itemId, active: false });
-  expect((await saveDrinkCounts([{ itemId, quantity: "2", unit: "pack" }])).ok).toBe(false);
-  expect((await getDrinksInventory()).items.some((item) => item.id === itemId)).toBe(false);
-  expect((await getDrinkHistory()).entries).toHaveLength(1);
-  await setDrinkActive({ itemId, active: true });
-});
-
-it("denies Kitchen and users without roles on all drinks reads and saves", async () => {
-  for (const role of ["kitchen", null] as const) {
-    actor.role = role;
-    await expect(getDrinksInventory()).rejects.toThrow("Denied");
-    await expect(getDrinkHistory()).rejects.toThrow("Denied");
-    await expect(saveDrinkCounts([{ itemId, quantity: "9", unit: "pack" }])).rejects.toThrow("Denied");
-  }
-});
-
-it("separates weekly snapshots and compares against the prior drinks week", async () => {
-  await client.exec("ALTER TABLE observaciones_bebidas DISABLE TRIGGER bebidas_snapshot_insert");
-  await client.query("INSERT INTO observaciones_bebidas(item_id,semana,nombre,ubicacion,cantidad,unidad,registrado_at,registrado_por) VALUES ($1,'2020-01-07','Old name','Old location',7,'pack','2020-01-07T12:00:00Z','older_staff')", [itemId]);
-  await client.exec("ALTER TABLE observaciones_bebidas ENABLE TRIGGER bebidas_snapshot_insert");
-  const inventory = await getDrinksInventory();
-  expect(inventory.items.find((item) => item.id === itemId)).toMatchObject({ previousQuantity: "7.00", previousUnit: "pack" });
-  const old = await getDrinkHistory(1, "2020-01-07");
-  expect(old.entries[0]).toMatchObject({ name: "Old name", location: "Old location", quantity: "7.00", unit: "pack" });
-  expect((await getDrinkHistory()).weeks).toHaveLength(2);
-});
-
 it("protects drinks from provider product deletion", async () => {
   const { removeProductFromProvider } = await import("@/lib/actions/products");
   const rows = await client.query<{ producto_id: string }>("SELECT producto_id FROM inventario_bebidas_productos WHERE id=$1", [itemId]);
@@ -138,23 +74,6 @@ it("protects drinks from provider product deletion", async () => {
   expect((await client.query("SELECT * FROM proveedor_productos WHERE proveedor_id=$1 AND producto_id=$2", [providerId, productId])).rows).toHaveLength(1);
 });
 
-
-it("counts provider packs in individual bottles without changing purchasing units or prices", async () => {
-  const productId = randomUUID();
-  await client.query("INSERT INTO productos(id,nombre,unidad,unidad_id) VALUES($1,'Bottle test cola','pack',$2)", [productId, unitId]);
-  const providerId = randomUUID();
-  await client.query("INSERT INTO proveedores(id,nombre) VALUES($1,'Bottle supplier')", [providerId]);
-  await client.query("INSERT INTO proveedor_productos(proveedor_id,producto_id,precio,cantidad) VALUES($1,$2,100,12)", [providerId, productId]);
-  await client.query("INSERT INTO inventario_bebidas_productos(producto_id,ubicacion,categoria,unidad_conteo) VALUES($1,'Bar','Refrescos','botella')", [productId]);
-  const item = (await getDrinksInventory()).items.find(row => row.name === 'Bottle test cola');
-  expect(item).toMatchObject({unit: 'botella',category: 'Refrescos',location: 'Bar'});
-  expect((await saveDrinkCounts([{itemId: item?.id, quantity: '7', unit: 'pack'}])).ok).toBe(false);
-  expect((await saveDrinkCounts([{itemId: item?.id, quantity: '7', unit: 'botella'}])).ok).toBe(true);
-  expect((await setDrinkTarget({itemId: item?.id, quantity: '10'})).ok).toBe(true);
-  expect((await getDrinkHistory()).entries.find(row => row.name === 'Bottle test cola')).toMatchObject({unit: 'botella',quantity: '7.00'});
-  expect((await client.query("SELECT unidad FROM productos WHERE id=$1", [productId])).rows[0]).toEqual({unidad: 'pack'});
-  expect((await client.query("SELECT precio,cantidad FROM proveedor_productos WHERE producto_id=$1", [productId])).rows[0]).toMatchObject({precio: '100.00',cantidad: '12.00'});
-});
 
 it("Waitress can add drinks but cannot modify or restore existing items through the add endpoint", async () => {
   actor.role = "waitress";
@@ -179,23 +98,4 @@ it("Waitress can add drinks but cannot modify or restore existing items through 
   }
   actor.role = "admin";
   expect((await createDrinkItem(input)).ok).toBe(true);
-});
-
-it("rejects mixed-category and stale-tab saves atomically", async () => {
-  const before = (await client.query("SELECT * FROM observaciones_bebidas ORDER BY id")).rows;
-  const drinks = (await getDrinksInventory()).items;
-  const cola = drinks.find((item) => item.id === itemId);
-  const lemonade = drinks.find((item) => item.name === "New lemonade" && item.location === "Bar");
-  if (!cola || !lemonade) throw new Error("Missing fixtures");
-  expect((await saveDrinkCounts([{ itemId: cola.id, quantity: "2", unit: cola.unit }, { itemId: lemonade.id, quantity: "3", unit: lemonade.unit }], "Refrescos")).ok).toBe(false);
-  expect((await saveDrinkCounts([{ itemId: lemonade.id, quantity: "3", unit: lemonade.unit }], "Cervezas")).ok).toBe(false);
-  expect((await client.query("SELECT * FROM observaciones_bebidas ORDER BY id")).rows).toEqual(before);
-});
-
-it("scopes history weeks and observations to the selected current category", async () => {
-  const refreshments = await getDrinkHistory(1, undefined, "Refrescos");
-  expect(refreshments.entries.every((entry) => entry.name === "Bottle test cola")).toBe(true);
-  const beers = await getDrinkHistory(1, undefined, "Cervezas");
-  expect(beers.weeks).toEqual([]);
-  expect(beers.entries).toEqual([]);
 });

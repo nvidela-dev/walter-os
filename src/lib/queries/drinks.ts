@@ -82,3 +82,8 @@ export async function getDrinkCategoryAssignments(): Promise<{ itemId: string; c
   await requireAccess("drinks");
   return db.select({ itemId: drinkItems.id, category: drinkItems.category }).from(drinkItems);
 }
+
+export async function getDrinkCountItems(): Promise<{id:string;category:string;name:string;location:string;unit:string}[]> {
+  await requireAccess("drinks");
+  return db.select({id:drinkItems.id,category:drinkItems.category,name:products.name,location:drinkItems.location,unit:sql<string>`coalesce(${drinkItems.countUnit},${products.unit})`}).from(drinkItems).innerJoin(products,and(eq(products.id,drinkItems.productId),isNull(products.deletedAt))).where(eq(drinkItems.active,true)).orderBy(drinkItems.location,products.name);
+}

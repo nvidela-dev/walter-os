@@ -200,23 +200,10 @@ week. No completion approval, package conversions, purchase-order history, or
 external supplier messaging has been added. Local tests and document references
 do not establish current production contents or signed-in production behavior.
 
-## Drinks category workflow (2026-10-15)
+## Drinks documents (2026-10-15)
 
-Drinks use three tabs throughout counting, history, creation, objectives, provider
-assignment, and the supplier summary: Alcoholes, Cervezas, and Refrescos. Missing
-or invalid category links open Alcoholes. Navigation retains the selected category;
-there is no combined drinks view. Counts save separately by category, and the server
-rejects mixed categories and a category that changed after the tab was loaded.
-After saving, the selected category's latest weekly counts appear by provider.
-
-Supplier summaries display each drink placement once. Products with several
-catalogue suppliers appear in a separate multiple-provider group; products without
-links remain Sin proveedor. This summary reports stock and does not infer purchase
-orders or consumption. Blank counts remain unknown and explicit zero remains zero.
-History retains recorded names, quantities, units, and locations, while filtering
-by each drink's current category (as disclosed on the history screen).
-
-Waitress can count, read history and summaries, and add drinks. Admin retains full
-access, including objectives, hide/restore, and provider assignment. Legacy drinks
-outside the three categories are flagged for Admin classification rather than
-silently reassigned; their records are preserved.
+Drinks now use one saved document per category and actual date, opening read-only.
+See [Drinks inventory documents](drink-documents.md) for ownership, editing,
+actor/time-only logs, legacy conversion, and supplier views. This supersedes the
+previous weekly append-only drinks count workflow; kitchen weekly inventory
+continues unchanged.

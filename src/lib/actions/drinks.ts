@@ -2,15 +2,14 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, isNull,sql } from "drizzle-orm";
+import { and, eq, isNull,sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { drinkItems, drinkObservations, products, units } from "@/db/schema";
+import { drinkItems, products, units } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
-import { DRINK_CATEGORIES } from "@/lib/drinks/categories";
-import { drinkActiveSchema, drinkCountsSchema, drinkItemSchema, drinkTargetSchema } from "@/lib/validators/drinks";
+import { drinkActiveSchema, drinkItemSchema, drinkTargetSchema } from "@/lib/validators/drinks";
 
 export async function createDrinkItem(input: unknown): Promise<ActionResult> {
   await requireAccess("main");
@@ -78,25 +77,7 @@ export async function setDrinkActive(input: unknown): Promise<ActionResult> {
   } catch (error) { return unknownActionError(error); }
 }
 
-export async function saveDrinkCounts(input: unknown, category?: string): Promise<ActionResult> {
-  const userId = await requireAccess("drinks");
-  try {
-    const data = drinkCountsSchema.parse(input);
-    const rows = await db.select({ id: drinkItems.id, category: drinkItems.category, location: drinkItems.location, name: products.name, unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})` })
-      .from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
-      .where(and(eq(drinkItems.active, true), inArray(drinkItems.id, data.map((row) => row.itemId))));
-    if (new Set(rows.map((row) => row.category)).size > 1) return actionError("Guardá cada categoría por separado.");
-    if (category !== undefined && (!DRINK_CATEGORIES.some((value) => value === category) || rows.some((row) => row.category !== category))) return actionError("La categoría cambió. Volvé a cargar esta pestaña antes de guardar.");
-    if (rows.length !== data.length) return actionError("Hay bebidas que ya no están disponibles. Volvé a cargar la lista.");
-    if (data.some((count) => rows.find((row) => row.id === count.itemId)?.unit !== count.unit)) {
-      return actionError("La unidad de una bebida cambió. Volvé a cargar la lista antes de contar.");
-    }
-    await db.insert(drinkObservations).values(data.map((count) => {
-      const item = rows.find((row) => row.id === count.itemId);
-      if (item === undefined) throw new Error("Missing drink item");
-      return { itemId: item.id, name: item.name, location: item.location, unit: item.unit, quantity: count.quantity, recordedBy: userId };
-    }));
-    revalidatePath("/drinks", "layout");
-    return actionOk(undefined);
-  } catch (error) { return unknownActionError(error); }
+export async function saveDrinkCounts(_input: unknown, _category?: string): Promise<ActionResult> {
+  await requireAccess("drinks");
+  return actionError("Abrí un documento de inventario y elegí Editar para guardar los conteos.");
 }

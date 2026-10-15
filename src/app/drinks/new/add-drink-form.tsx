@@ -12,7 +12,7 @@ import { addDrinkItem } from "@/lib/actions/drinks";
 import { getFormString } from "@/lib/form";
 import type { UnitOption } from "@/lib/types/providers";
 
-export function AddDrinkForm({ units, locations, category = "Alcoholes" }: { units: UnitOption[]; locations: string[]; category?: string }): ReactElement {
+export function AddDrinkForm({ units, locations, category = "Alcoholes", returnHref }: { units: UnitOption[]; locations: string[]; category?: string; returnHref?: string }): ReactElement {
   const router = useRouter();
   const [saved, setSaved] = useState(false);
   const { error, isSubmitting, runAction } = useActionForm();
@@ -24,7 +24,7 @@ export function AddDrinkForm({ units, locations, category = "Alcoholes" }: { uni
       location: getFormString(data, "location"), category: getFormString(data, "category"),
       countUnit: getFormString(data, "countUnit") || null,
     }));
-    if (result.ok) { form.reset(); setSaved(true); router.refresh(); }
+    if (result.ok) { form.reset(); setSaved(true); if (returnHref !== undefined) router.push(returnHref); router.refresh(); }
   }
   return <form className="space-y-3 rounded-xl border p-4" onSubmit={(event) => { event.preventDefault(); void submit(event.currentTarget); }}>
     <fieldset disabled={isSubmitting} className="space-y-3">
