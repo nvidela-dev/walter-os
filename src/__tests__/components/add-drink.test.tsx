@@ -11,7 +11,7 @@ vi.mock("@/lib/actions/drinks", () => ({ addDrinkItem: vi.fn() }));
 it("adds a drink without exposing target, restore or provider controls and retains input on error", async () => {
   const user = userEvent.setup();
   vi.mocked(addDrinkItem).mockResolvedValue({ ok: false, error: "Revisá la bebida" });
-  render(<AddDrinkForm units={[{ id: "u", code: "unidad", name: "Unidad" }]} locations={["Bar"]} />);
+  render(<AddDrinkForm category="Refrescos" units={[{ id: "u", code: "unidad", name: "Unidad" }]} locations={["Bar"]} />);
   await user.type(screen.getByLabelText("Nombre"), "Limonada");
   await user.selectOptions(screen.getByLabelText("Unidad del producto"), "u");
   await user.click(screen.getByRole("button", { name: "Agregar bebida" }));

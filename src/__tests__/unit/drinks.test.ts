@@ -180,3 +180,22 @@ it("Waitress can add drinks but cannot modify or restore existing items through 
   actor.role = "admin";
   expect((await createDrinkItem(input)).ok).toBe(true);
 });
+
+it("rejects mixed-category and stale-tab saves atomically", async () => {
+  const before = (await client.query("SELECT * FROM observaciones_bebidas ORDER BY id")).rows;
+  const drinks = (await getDrinksInventory()).items;
+  const cola = drinks.find((item) => item.id === itemId);
+  const lemonade = drinks.find((item) => item.name === "New lemonade" && item.location === "Bar");
+  if (!cola || !lemonade) throw new Error("Missing fixtures");
+  expect((await saveDrinkCounts([{ itemId: cola.id, quantity: "2", unit: cola.unit }, { itemId: lemonade.id, quantity: "3", unit: lemonade.unit }], "Refrescos")).ok).toBe(false);
+  expect((await saveDrinkCounts([{ itemId: lemonade.id, quantity: "3", unit: lemonade.unit }], "Cervezas")).ok).toBe(false);
+  expect((await client.query("SELECT * FROM observaciones_bebidas ORDER BY id")).rows).toEqual(before);
+});
+
+it("scopes history weeks and observations to the selected current category", async () => {
+  const refreshments = await getDrinkHistory(1, undefined, "Refrescos");
+  expect(refreshments.entries.every((entry) => entry.name === "Bottle test cola")).toBe(true);
+  const beers = await getDrinkHistory(1, undefined, "Cervezas");
+  expect(beers.weeks).toEqual([]);
+  expect(beers.entries).toEqual([]);
+});

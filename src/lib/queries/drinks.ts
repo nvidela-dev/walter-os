@@ -1,9 +1,9 @@
 import "server-only";
 
-import { and, desc, eq, isNull,lt, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull,lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { drinkItems, drinkObservations, products, units } from "@/db/schema";
+import { drinkItems, drinkObservations, products, providerProducts, providers, units } from "@/db/schema";
 import { requireAccess } from "@/lib/auth/access";
 import { isoDateSchema } from "@/lib/validation";
 
@@ -38,16 +38,17 @@ export async function getDrinksInventory(): Promise<{ week: string; items: Drink
   return { week, items };
 }
 
-export async function getDrinkHistory(page = 1, selectedWeek?: string): Promise<{ weeks: string[]; hasNext: boolean; selected: string | null; entries: DrinkHistoryRow[] }> {
+export async function getDrinkHistory(page = 1, selectedWeek?: string, category?: string): Promise<{ weeks: string[]; hasNext: boolean; selected: string | null; entries: DrinkHistoryRow[] }> {
   await requireAccess("drinks");
   if (!Number.isSafeInteger(page) || page < 1 || page > 1000000) throw new Error("Invalid history page");
   if (selectedWeek !== undefined) isoDateSchema.parse(selectedWeek);
+  const categoryFilter = category === undefined ? undefined : inArray(drinkObservations.itemId, db.select({ id: drinkItems.id }).from(drinkItems).where(eq(drinkItems.category, category)));
   const rows = await db.selectDistinct({ week: drinkObservations.week }).from(drinkObservations)
-    .orderBy(desc(drinkObservations.week)).limit(11).offset((page - 1) * 10);
+    .where(categoryFilter).orderBy(desc(drinkObservations.week)).limit(11).offset((page - 1) * 10);
   const weeks = rows.slice(0, 10).map((row) => row.week);
   const selected = selectedWeek ?? weeks[0] ?? null;
   const entries = selected === null ? [] : await db.selectDistinctOn([drinkObservations.itemId]).from(drinkObservations)
-    .where(eq(drinkObservations.week, selected)).orderBy(drinkObservations.itemId, desc(drinkObservations.recordedAt), desc(drinkObservations.id));
+    .where(and(eq(drinkObservations.week, selected), categoryFilter)).orderBy(drinkObservations.itemId, desc(drinkObservations.recordedAt), desc(drinkObservations.id));
   entries.sort((a, b) => a.location.localeCompare(b.location) || a.name.localeCompare(b.name));
   return { weeks, hasNext: rows.length > 10, selected, entries };
 }
@@ -68,4 +69,16 @@ export async function getDrinkCreationOptions(): Promise<{ units: { id: string; 
       .where(eq(drinkItems.active, true)).orderBy(drinkItems.location),
   ]);
   return { units: unitRows, locations: locationRows.map((row) => row.location) };
+}
+
+// Names only: this read path is available to counting staff without supplier management access.
+export async function getDrinkSuppliers(): Promise<{ itemId: string; providerId: string; name: string }[]> {
+  await requireAccess("drinks");
+  return db.select({ itemId: drinkItems.id, providerId: providers.id, name: providers.name }).from(drinkItems)
+    .innerJoin(providerProducts, eq(providerProducts.productId, drinkItems.productId))
+    .innerJoin(providers, eq(providers.id, providerProducts.providerId));
+}
+export async function getDrinkCategoryAssignments(): Promise<{ itemId: string; category: string }[]> {
+  await requireAccess("drinks");
+  return db.select({ itemId: drinkItems.id, category: drinkItems.category }).from(drinkItems);
 }

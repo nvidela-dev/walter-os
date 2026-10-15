@@ -10,7 +10,8 @@ import { getCurrentGroup } from "@/lib/auth/access";
 
 vi.mock("@/lib/auth/access", () => ({ getCurrentGroup: vi.fn(), requireAccess: vi.fn(() => Promise.resolve("staff")) }));
 vi.mock("@clerk/nextjs", () => ({ UserButton: () => null, useClerk: () => ({ signOut: vi.fn() }) }));
-vi.mock("next/navigation", () => ({ redirect: (path: string) => { throw new Error(`redirect:${path}`); } }));
+vi.mock("@/lib/queries/drinks", () => ({ getDrinkCategoryAssignments: () => Promise.resolve([]) }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/drinks", useSearchParams: () => new URLSearchParams(), redirect: (path: string) => { throw new Error(`redirect:${path}`); } }));
 
 describe("group-specific navigation", () => {
   it("Admin sees the inventory tile and access management", async () => {
@@ -51,8 +52,8 @@ it("Waitress lands on drinks and sees no administrative or kitchen navigation", 
   vi.mocked(getCurrentGroup).mockResolvedValue("waitress");
   await expect(Home()).rejects.toThrow("redirect:/drinks");
   render(await DrinksLayout({ children: <p>Drink counts</p> }));
-  expect(screen.getByRole("link", { name: "Agregar bebida" })).toHaveAttribute("href", "/drinks/new");
-  expect(screen.getByRole("link", { name: "Contar" })).toHaveAttribute("href", "/drinks");
+  expect(screen.getByRole("link", { name: "Agregar bebida" })).toHaveAttribute("href", "/drinks/new?category=Alcoholes");
+  expect(screen.getByRole("link", { name: "Contar" })).toHaveAttribute("href", "/drinks?category=Alcoholes");
   expect(screen.queryByRole("link", { name: "Bebidas y objetivos" })).not.toBeInTheDocument();
   expect(screen.queryByRole("link", { name: "Inicio" })).not.toBeInTheDocument();
 });

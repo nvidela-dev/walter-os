@@ -6,7 +6,8 @@ import { DrinksCounter } from "@/app/drinks/drinks-counter";
 import { saveDrinkCounts } from "@/lib/actions/drinks";
 import type { DrinkRow } from "@/lib/queries/drinks";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+const push = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn(), push }) }));
 vi.mock("@/lib/actions/drinks", () => ({ saveDrinkCounts: vi.fn() }));
 
 const items: DrinkRow[] = [
@@ -18,17 +19,17 @@ beforeEach(() => { vi.clearAllMocks(); });
 it("saves entered zero without treating blank drinks as zero", async () => {
   const user = userEvent.setup();
   vi.mocked(saveDrinkCounts).mockResolvedValue({ ok: true, data: undefined });
-  render(<DrinksCounter week="2026-10-06" items={items} />);
+  render(<DrinksCounter category="Refrescos" week="2026-10-06" items={items} />);
   await user.type(screen.getByRole("spinbutton", { name: "Conteo de Cola en Bar" }), "0");
   await user.click(screen.getByRole("button", { name: "Guardar conteos (1)" }));
-  expect(saveDrinkCounts).toHaveBeenCalledWith([{ itemId: "a", quantity: "0", unit: "unidad" }]);
-  expect(await screen.findByRole("status")).toHaveTextContent("Conteos guardados");
+  expect(saveDrinkCounts).toHaveBeenCalledWith([{ itemId: "a", quantity: "0", unit: "unidad" }], "Refrescos");
+  expect(push).toHaveBeenCalledWith("/drinks/summary?category=Refrescos");
 });
 
 it("preserves entered counts after a failed save and filters pending drinks", async () => {
   const user = userEvent.setup();
   vi.mocked(saveDrinkCounts).mockResolvedValue({ ok: false, error: "No se pudo guardar" });
-  render(<DrinksCounter week="2026-10-06" items={items} />);
+  render(<DrinksCounter category="Refrescos" week="2026-10-06" items={items} />);
   await user.type(screen.getByRole("spinbutton", { name: "Conteo de Cola en Bar" }), "6");
   await user.click(screen.getByRole("button", { name: "Guardar conteos (1)" }));
   expect(await screen.findByText("No se pudo guardar")).toBeInTheDocument();
@@ -38,15 +39,17 @@ it("preserves entered counts after a failed save and filters pending drinks", as
 });
 
 
-it("filters categories while retaining entered counts", async () => {
+it("retains separate drafts across category tabs and saves only the selected category", async () => {
   const user = userEvent.setup();
   const first = items[0];
   const second = items[1];
   if (first === undefined || second === undefined) throw new Error("Missing fixtures");
-  render(<DrinksCounter week="2026-10-13" items={[first, {...second, category: "Alcoholes"}]} />);
+  const alcohol = {...second, category: "Alcoholes"};
+  const { rerender } = render(<DrinksCounter category="Refrescos" week="2026-10-13" items={[first]} />);
   await user.type(screen.getByRole("spinbutton", {name: "Conteo de Cola en Bar"}), "4");
-  await user.selectOptions(screen.getByRole("combobox", {name: "Categoría"}), "Alcoholes");
+  rerender(<DrinksCounter category="Alcoholes" week="2026-10-13" items={[alcohol]} />);
   expect(screen.queryByRole("spinbutton", {name: "Conteo de Cola en Bar"})).not.toBeInTheDocument();
-  await user.selectOptions(screen.getByRole("combobox", {name: "Categoría"}), "");
+  expect(screen.getByRole("button", {name: "Guardar conteos (0)"})).toBeDisabled();
+  rerender(<DrinksCounter category="Refrescos" week="2026-10-13" items={[first]} />);
   expect(screen.getByRole("spinbutton", {name: "Conteo de Cola en Bar"})).toHaveValue(4);
 });

@@ -39,7 +39,7 @@ function DrinkEditor({ item }: { item: Item }): ReactElement {
   </section>;
 }
 
-export function DrinkManagement({ items, units }: { items: Item[]; units: UnitOption[] }): ReactElement {
+export function DrinkManagement({ items, units, category = "Alcoholes" }: { items: Item[]; units: UnitOption[]; category?: string }): ReactElement {
   const router = useRouter();
   const { error, isSubmitting, runAction } = useActionForm();
   const [saved, setSaved] = useState(false);
@@ -51,13 +51,13 @@ export function DrinkManagement({ items, units }: { items: Item[]; units: UnitOp
   }
   return <main className="space-y-4 py-4">
     <h1 className="text-xl font-bold">Bebidas y objetivos</h1>
-    <Link href="/data-fill?scope=drinks" className="inline-block rounded-xl border px-4 py-3 font-semibold">¿Quién vende estas bebidas? · Completar proveedores</Link>
+    <Link href={`/data-fill?scope=drinks&category=${encodeURIComponent(category)}`} className="inline-block rounded-xl border px-4 py-3 font-semibold">¿Quién vende estas bebidas? · Completar proveedores</Link>
     <p className="text-sm text-muted">Cada objetivo corresponde a esa ubicación. Vacío significa sin objetivo; 0 significa que no necesitás tener esa bebida allí.</p>
     <form onSubmit={(event) => { event.preventDefault(); void create(event.currentTarget); }} className="space-y-3 rounded-xl border p-4">
       <h2 className="font-semibold">Agregar bebida</h2>
       <fieldset disabled={isSubmitting} className="space-y-3">
         <label className="block text-sm">Nombre<Input name="name" required maxLength={200} placeholder="Ej.: Coca-Cola 600 ml" /></label>
-        <label className="block text-sm">Categoría<Select name="category" defaultValue="Refrescos">{["Alcoholes", "Cervezas", "Refrescos", "Sin categoría"].map((category) => <option key={category}>{category}</option>)}</Select></label>
+        <input type="hidden" name="category" value={category} />
         <label className="block text-sm">Unidad de conteo<Select name="countUnit" defaultValue="botella"><option value="botella">Botellas individuales</option><option value="">Unidad del producto</option></Select></label>
         <label className="block text-sm">Ubicación<Input name="location" required maxLength={200} placeholder="Ej.: Heladera del bar" defaultValue="Bar" list="drink-locations" /></label>
         <datalist id="drink-locations">{[...new Set(items.map((item) => item.location))].map((location) => <option key={location} value={location} />)}</datalist>

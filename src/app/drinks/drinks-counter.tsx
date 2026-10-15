@@ -9,12 +9,12 @@ import { useActionForm } from "@/components/hooks/use-action-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveDrinkCounts } from "@/lib/actions/drinks";
+import { drinkHref } from "@/lib/drinks/categories";
 import type { DrinkRow } from "@/lib/queries/drinks";
 
-export function DrinksCounter({ week, items }: { week: string; items: DrinkRow[] }): ReactElement {
+export function DrinksCounter({ week, items, category = "Alcoholes" }: { week: string; items: DrinkRow[]; category?: string }): ReactElement {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
   const [pendingOnly, setPendingOnly] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
@@ -23,17 +23,16 @@ export function DrinksCounter({ week, items }: { week: string; items: DrinkRow[]
   const counted = (item: DrinkRow): boolean => item.quantity !== null && item.countedUnit === item.unit;
   const visible = items.filter((item) => normalize(item.name).includes(normalize(search)) && (!category || item.category === category) && (!pendingOnly || !counted(item)));
   const locations = [...new Set(visible.map((item) => item.location))];
-  const entries = Object.entries(values).filter(([, quantity]) => quantity.trim() !== "");
+  const entries = Object.entries(values).filter(([id, quantity]) => quantity.trim() !== "" && items.some((item) => item.id === id));
   async function save(): Promise<void> {
     setSaved(false);
-    const result = await runAction(() => saveDrinkCounts(entries.map(([itemId, quantity]) => ({ itemId, quantity, unit: items.find((item) => item.id === itemId)?.unit ?? "" }))));
-    if (result.ok) { setValues({}); setSaved(true); router.refresh(); }
+    const result = await runAction(() => saveDrinkCounts(entries.map(([itemId, quantity]) => ({ itemId, quantity, unit: items.find((item) => item.id === itemId)?.unit ?? "" })), category));
+    if (result.ok) { setValues({}); setSaved(true); router.push(drinkHref("/drinks/summary", category)); router.refresh(); }
   }
   return <main className="space-y-4 py-4">
     <div><h1 className="font-bold">Semana del {week}</h1><p className="text-sm text-muted">Martes a lunes · {items.filter(counted).length} de {items.length} bebidas contadas</p></div>
     <p className="text-sm text-muted">Completá lo que contaste. Vacío significa sin revisar; 0 significa que no queda nada. Para corregir un conteo, ingresá la cantidad nueva.</p>
     <label className="block"><span className="sr-only">Buscar bebida</span><Input type="search" placeholder="Buscar bebida…" value={search} onChange={(event) => { setSearch(event.target.value); }} /></label>
-    <label className="block text-sm">Categoría<select aria-label="Categoría" value={category} onChange={(event) => { setCategory(event.target.value); }} className="mt-1 w-full rounded-xl border p-3"><option value="">Todas</option>{["Alcoholes", "Cervezas", "Refrescos", "Sin categoría"].map((value) => <option key={value}>{value}</option>)}</select></label>
     <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={pendingOnly} onChange={(event) => { setPendingOnly(event.target.checked); }} className="h-5 w-5" />Solo pendientes</label>
     <form onSubmit={(event) => { event.preventDefault(); void save(); }} className="space-y-4">
       <fieldset disabled={isSubmitting} className="space-y-4">
