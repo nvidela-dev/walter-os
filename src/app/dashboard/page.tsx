@@ -1,5 +1,5 @@
 import { UserButton } from "@clerk/nextjs";
-import { SparklesIcon, TruckIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftRightIcon, SparklesIcon, TruckIcon } from "@heroicons/react/24/outline";
 import type { Viewport } from "next";
 import Link from "next/link";
 import type { ReactElement } from "react";
@@ -9,6 +9,7 @@ import { requireAccess } from "@/lib/auth/access";
 
 const apps: HomeApp[] = [
   { name: "Dashboard", description: "Proveedores, productos y facturas.", href: "/dashboard/providers", icon: TruckIcon },
+  { name: "Preguntale a Luna", description: "Consultá los datos de Walter con GPT Luna.", href: "/dashboard/database-chat", icon: ChatBubbleLeftRightIcon },
   { name: "Unir nombres", description: "Revisá equivalencias entre inventario y catálogo.", href: "/product-matching", icon: SparklesIcon },
   { name: "Revisar duplicados", description: "Compará productos y archivá los repetidos.", href: "/product-duplicates", icon: SparklesIcon },
 ];
