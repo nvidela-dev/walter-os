@@ -18,6 +18,7 @@ export function inventoryBootstrapSql(): string {
   const menuVersionsMigration = readFileSync("drizzle/0025_menu_versions.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const activeMenusMigration = readFileSync("drizzle/0026_active_menus.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const drinkDocumentsMigration = readFileSync("drizzle/0027_drink_documents.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const deletionMigration = readFileSync("drizzle/0029_inventory_deletion.sql", "utf8");
   const scanUsageMigration = readFileSync("drizzle/0028_clammy_tigra.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
@@ -207,6 +208,14 @@ BEGIN
   IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.uso_lectura_facturas'::regclass AND contype='p')
     OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.uso_lectura_facturas'::regclass AND conname='uso_lectura_facturas_cantidad') THEN
     RAISE EXCEPTION 'Invoice scan usage constraints are missing';
+  END IF;
+
+  IF to_regprocedure('public.delete_drink_document(uuid,integer,text,boolean)') IS NULL
+    AND to_regprocedure('public.delete_inventory_run(bigint,text)') IS NULL THEN
+    ${deletionMigration}
+  ELSIF to_regprocedure('public.delete_drink_document(uuid,integer,text,boolean)') IS NULL
+    OR to_regprocedure('public.delete_inventory_run(bigint,text)') IS NULL THEN
+    RAISE EXCEPTION 'Partial inventory deletion functions';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

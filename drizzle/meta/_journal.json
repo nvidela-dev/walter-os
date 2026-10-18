@@ -204,6 +204,13 @@
       "when": 1792356868639,
       "tag": "0028_clammy_tigra",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792361878149,
+      "tag": "0029_inventory_deletion",
+      "breakpoints": true
     }
   ]
 }

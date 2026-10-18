@@ -1,3 +1,4 @@
+vi.mock("@/lib/actions/delete-inventory", () => ({ deleteSavedInventory: vi.fn() }));
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -6,6 +7,7 @@ import { CreateDrinkDocumentForm } from "@/app/drinks/create-document-form";
 import { DrinkDocumentView } from "@/app/drinks/documents/[id]/document-view";
 import { DrinkDocumentEditor } from "@/app/drinks/documents/[id]/edit/document-editor";
 import type { drinkDocuments } from "@/db/schema";
+import { deleteSavedInventory } from "@/lib/actions/delete-inventory";
 import { createDrinkDocument, saveDrinkDocument } from "@/lib/actions/drink-documents";
 const push=vi.hoisted(()=>vi.fn());vi.mock("next/navigation",()=>({useRouter:()=>({push,refresh:vi.fn()})}));
 vi.mock("@/lib/actions/drink-documents",()=>({saveDrinkDocument:vi.fn(),createDrinkDocument:vi.fn()}));
@@ -28,4 +30,18 @@ it("shows a supplier breakdown without duplicating stock across multiple provide
 });
 it("creates or opens one dated file in display mode",async()=>{
  const user=userEvent.setup();vi.mocked(createDrinkDocument).mockResolvedValue({ok:true,data:{id:doc.id}});render(<CreateDrinkDocumentForm category="Cervezas" today="2026-10-15"/>);await user.click(screen.getByRole("button",{name:"Crear o abrir Cervezas"}));expect(createDrinkDocument).toHaveBeenCalledWith("Cervezas","2026-10-15");expect(push).toHaveBeenCalledWith(`/drinks/documents/${doc.id}?category=Cervezas&date=2026-10-15`);
+});
+
+it("requires explicit confirmation before deleting a saved inventory", async () => {
+ const user = userEvent.setup();
+ vi.mocked(deleteSavedInventory).mockResolvedValue({ok:true,data:undefined});
+ render(<DrinkDocumentView document={doc} canEdit userId="owner" events={[]} suppliers={[]} />);
+ await user.click(screen.getByRole("button",{name:"Eliminar inventario"}));
+ expect(deleteSavedInventory).not.toHaveBeenCalled();
+ await user.click(screen.getByRole("button",{name:"Conservar inventario"}));
+ expect(deleteSavedInventory).not.toHaveBeenCalled();
+ await user.click(screen.getByRole("button",{name:"Eliminar inventario"}));
+ await user.click(screen.getByRole("button",{name:"Sí, eliminar inventario"}));
+ expect(deleteSavedInventory).toHaveBeenCalledWith("drinks",doc.id,"3");
+ expect(push).toHaveBeenCalledWith("/drinks");
 });

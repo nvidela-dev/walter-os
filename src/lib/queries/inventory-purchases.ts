@@ -9,9 +9,9 @@ import { compareStockToTarget, type PurchaseProduct } from "@/lib/inventory/purc
 
 export interface PurchaseInventory { day: string | null; products: PurchaseProduct[] }
 
-export async function getInventoryPurchases(): Promise<PurchaseInventory> {
+export async function getInventoryPurchases(runId?: number): Promise<PurchaseInventory> {
   await requireAccess("inventory");
-  const [run] = await db.select({ id: inventoryRuns.id, day: inventoryRuns.day }).from(inventoryRuns).orderBy(desc(inventoryRuns.day)).limit(1);
+  const [run] = await db.select({ id: inventoryRuns.id, day: inventoryRuns.day }).from(inventoryRuns).where(runId === undefined ? undefined : eq(inventoryRuns.id, runId)).orderBy(desc(inventoryRuns.day)).limit(1);
   // Pin all counts to this run even if a new weekly inventory starts during the read.
   const [rows, links] = await Promise.all([
     db.select({ id: products.id, name: products.name, unit: products.unit,

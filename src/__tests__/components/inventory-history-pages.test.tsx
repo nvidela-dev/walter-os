@@ -1,3 +1,5 @@
+vi.mock("@/lib/auth/access", () => ({ getCurrentGroup: () => Promise.resolve("kitchen") }));
+vi.mock("@/lib/actions/delete-inventory", () => ({ deleteSavedInventory: vi.fn() }));
 import { render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 
