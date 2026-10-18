@@ -12,6 +12,8 @@ import type { menuVersions } from "@/db/schema";
 import { rebaseMenuDraft, saveMenuDraft, submitMenuDraft } from "@/lib/actions/menu-versions";
 import { compareMenus, type MenuDocument, menuDocumentSchema } from "@/lib/menu/versions";
 
+import { DiscardDraft } from "../../discard-draft";
+
 type Item = MenuDocument["items"][number];
 export function MenuVersionEditor({version,baseline,stale,baselineDate}: {version: typeof menuVersions.$inferSelect; baseline: MenuDocument; stale: boolean; baselineDate: string | null}): ReactElement {
   const router = useRouter();
@@ -39,6 +41,7 @@ export function MenuVersionEditor({version,baseline,stale,baselineDate}: {versio
   return <main className="space-y-4 py-5">
     <p className="text-sm text-muted">{editable ? "Editá esta copia. La carta vigente y sus precios quedan guardados hasta que presentes la nueva versión." : `Versión guardada el ${version.submittedAt?.toLocaleString("es-UY",{timeZone:"America/Montevideo"}) ?? "—"}. Esta carta conserva sus precios y contenido.`}</p>
     {stale && <div role="alert" className="space-y-2 rounded-xl bg-amber-50 p-3"><p>Hay una carta más reciente. Guardá tus cambios y actualizá la comparación antes de presentar. Tu borrador se conserva completo; revisá también los ítems quitados.</p><Button disabled={isSubmitting || !saved} onClick={() => {void runAction(() => rebaseMenuDraft(version.id,revision)).then(result => {if(result.ok) router.refresh();});}}>Comparar con la última carta</Button></div>}
+    {editable && <DiscardDraft id={version.id} revision={revision} disabled={isSubmitting} />}
     <FormMessage message={error} />
     {saved && !review && <p role="status" className="text-sm text-emerald-800">Borrador guardado.</p>}
     {review ? <>

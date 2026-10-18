@@ -61,3 +61,17 @@ export async function submitMenuDraft(id: string, revision: number, baseId: stri
     return unknownActionError(error);
   }
 }
+
+export async function discardMenuDraft(id: string, revision: number): Promise<ActionResult> {
+  await requireAccess("main");
+  try {
+    uuidSchema.parse(id);
+    if (!Number.isSafeInteger(revision) || revision < 0) return actionError("Revisión inválida.");
+    const [discarded] = await db.delete(menuVersions)
+      .where(and(eq(menuVersions.id, id), eq(menuVersions.revision, revision), eq(menuVersions.status, "draft")))
+      .returning({ id: menuVersions.id });
+    if (!discarded) return actionError("El borrador cambió o ya fue presentado. Recargá antes de descartarlo.");
+    revalidatePath("/menu", "layout");
+    return actionOk(undefined);
+  } catch (error) { return unknownActionError(error); }
+}

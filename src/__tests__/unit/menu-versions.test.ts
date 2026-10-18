@@ -8,7 +8,7 @@ vi.mock("next/cache",()=>({revalidatePath:vi.fn()}));
 vi.mock("@/lib/auth/access",()=>({requireAccess:vi.fn(()=>Promise.resolve("admin"))}));
 vi.mock("@/db",async()=>{const {drizzle}=await import("drizzle-orm/pglite");const client=new PGlite();return {db:drizzle(client),testClient:client};});
 import { createMenuItem, deleteMenuItem, saveMenuSection, updateMenuItem } from "@/lib/actions/menu";
-import { createMenuDraft, rebaseMenuDraft, saveMenuDraft, submitMenuDraft } from "@/lib/actions/menu-versions";
+import { createMenuDraft, discardMenuDraft, rebaseMenuDraft, saveMenuDraft, submitMenuDraft } from "@/lib/actions/menu-versions";
 import { requireAccess } from "@/lib/auth/access";
 import { compareMenus, type MenuDocument, menuDocumentSchema } from "@/lib/menu/versions";
 import { getActiveMenuVersion, getLatestMenuVersion, getMenuVersion, getMenuVersions } from "@/lib/queries/menu-versions";
@@ -103,4 +103,21 @@ it("bootstrap preserves versions and fails closed if immutability is disabled",a
  expect((await client.query("SELECT * FROM menu_versiones ORDER BY id")).rows).toEqual(before);
  await client.exec("ALTER TABLE menu_versiones DISABLE TRIGGER menu_versiones_inmutables");
  await expect(client.exec(inventoryBootstrapSql())).rejects.toThrow("Menu version immutability");
+});
+
+it("discards only the current draft revision while preserving active and historical menus", async () => {
+ const activeBefore = await getActiveMenuVersion("Don Juan");
+ const historyBefore = (await getMenuVersions()).filter(version => version.status === "submitted");
+ const result = await createMenuDraft("Don Juan");
+ if (!result.ok) throw new Error(result.error);
+ const draft = await getMenuVersion(result.data.id);
+ if (!draft) throw new Error("Missing draft");
+ expect((await saveMenuDraft(draft.id, 0, draft.document)).ok).toBe(true);
+ expect((await discardMenuDraft(draft.id, 0)).ok).toBe(false);
+ expect(await getMenuVersion(draft.id)).not.toBeNull();
+ expect((await discardMenuDraft(draft.id, 1)).ok).toBe(true);
+ expect(await getMenuVersion(draft.id)).toBeNull();
+ if (activeBefore) expect((await discardMenuDraft(activeBefore.id, activeBefore.revision)).ok).toBe(false);
+ expect(await getActiveMenuVersion("Don Juan")).toEqual(activeBefore);
+ expect((await getMenuVersions()).filter(version => version.status === "submitted")).toEqual(historyBefore);
 });
