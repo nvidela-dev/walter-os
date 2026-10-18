@@ -18,6 +18,7 @@ export function inventoryBootstrapSql(): string {
   const menuVersionsMigration = readFileSync("drizzle/0025_menu_versions.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const activeMenusMigration = readFileSync("drizzle/0026_active_menus.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const drinkDocumentsMigration = readFileSync("drizzle/0027_drink_documents.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const scanUsageMigration = readFileSync("drizzle/0028_clammy_tigra.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -197,6 +198,15 @@ BEGIN
     OR to_regprocedure('public.save_drink_document(uuid,integer,jsonb,text,text,boolean)') IS NULL
     OR EXISTS(SELECT 1 FROM public.observaciones_bebidas) THEN
     RAISE EXCEPTION 'Drinks document guards or save function are missing, or legacy counts remain';
+  END IF;
+
+  IF to_regclass('public.uso_lectura_facturas') IS NULL THEN
+    ${scanUsageMigration}
+  END IF;
+  PERFORM clave,dia,cantidad,ultimo_at FROM public.uso_lectura_facturas LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.uso_lectura_facturas'::regclass AND contype='p')
+    OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.uso_lectura_facturas'::regclass AND conname='uso_lectura_facturas_cantidad') THEN
+    RAISE EXCEPTION 'Invoice scan usage constraints are missing';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

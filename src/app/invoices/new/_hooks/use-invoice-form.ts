@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type SyntheticEvent, useMemo, useState, useTransition } from "react";
+import { type SyntheticEvent, useMemo, useRef, useState, useTransition } from "react";
 
 import { t } from "@/i18n";
 import { createInvoice } from "@/lib/actions/invoices";
+import { invoiceDraftTotal, reviewedTotalMatches } from "@/lib/invoice-photo/review";
+import { exactNameMatch, type ExtractedInvoice } from "@/lib/invoice-photo/schema";
 import type { InvoiceFormProduct, InvoiceFormProvider } from "@/lib/types/invoices";
 import type { ProviderType } from "@/lib/types/providers";
 
@@ -19,6 +21,12 @@ const todayLocal = (): string => {
 };
 
 export interface InvoiceFormController {
+  loadPhoto: (data: ExtractedInvoice) => void;
+  photo: ExtractedInvoice | null;
+  reviewedTotal: string;
+  setReviewedTotal: (value: string) => void;
+  reviewed: boolean;
+  setReviewed: (value: boolean) => void;
   addLine: () => void;
   amount: string;
   changeProvider: (id: string) => void;
@@ -53,6 +61,12 @@ export interface InvoiceFormController {
 
 export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormController {
   const router = useRouter();
+  const submissionId = useRef<string | null>(null);
+  const submitting = useRef(false);
+  const [saved, setSaved] = useState(false);
+  const [photo, setPhoto] = useState<ExtractedInvoice | null>(null);
+  const [reviewedTotal, setReviewedTotal] = useState("");
+  const [reviewedFingerprint, setReviewedFingerprint] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [type, setType] = useState<ProviderType>("producto");
@@ -87,24 +101,45 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
     [products]
   );
 
-  const linesTotal = lines.reduce(
-    (sum, line) => sum + Number(line.unitPrice || 0) * Number(line.quantity || 0),
-    0
-  );
-  const total = type === "servicio" ? Number(amount || 0) : linesTotal;
+  const total = Number(invoiceDraftTotal(type === "servicio" ? amount : lines.map((line) => ({
+    quantity: line.quantity || "0", unitPrice: line.unitPrice || "0",
+  }))) ?? "0");
+
+  const fingerprint = JSON.stringify({ type, providerId, date, number, notes, lines, amount, reviewedTotal });
+  const reviewed = reviewedFingerprint === fingerprint;
+  function setReviewed(value: boolean): void { setReviewedFingerprint(value ? fingerprint : null); }
+  function loadPhoto(data: ExtractedInvoice): void {
+    const matched = exactNameMatch(data.supplier, providers);
+    setPhoto(data);
+    setType(matched?.type ?? "producto");
+    setProviderId(matched?.id ?? "");
+    setDate(data.date ?? "");
+    setNumber(data.number ?? "");
+    setNotes("");
+    setAmount(matched?.type === "servicio" ? data.total ?? "" : "");
+    setReviewedTotal(data.total ?? "");
+    setReviewedFingerprint(null);
+    setLines(data.lines.length > 0 ? data.lines.map((line) => ({
+      productId: exactNameMatch(line.description, matched?.products ?? [])?.id ?? "",
+      quantity: line.quantity ?? "",
+      unitPrice: line.unitPrice ?? "",
+      source: line,
+    })) : [{ productId: "", quantity: "", unitPrice: "" }]);
+    setError(null);
+  }
 
   function changeType(next: ProviderType): void {
     if (next === type) return;
     setType(next);
     setProviderId("");
-    setLines([emptyLine()]);
+    setLines((current) => photo === null ? [emptyLine()] : current.map((line) => ({ ...line, productId: "" })));
     setAmount("");
     setError(null);
   }
 
   function changeProvider(id: string): void {
     setProviderId(id);
-    setLines([emptyLine()]);
+    setLines((current) => photo === null ? [emptyLine()] : current.map((line) => ({ ...line, productId: "" })));
   }
 
   function updateLine(idx: number, patch: Partial<InvoiceLineDraft>): void {
@@ -121,7 +156,7 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
     const product = productById.get(selectedProductId);
     updateLine(idx, {
       productId: selectedProductId,
-      unitPrice: product?.currentPrice ?? "",
+      unitPrice: photo === null ? product?.currentPrice ?? "" : lines[idx]?.unitPrice ?? "",
     });
   }
 
@@ -161,7 +196,12 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
 
   function handleSubmit(e: SyntheticEvent<HTMLFormElement>): void {
     e.preventDefault();
+    if (submitting.current || saved) return;
     setError(null);
+    if (photo !== null && (!reviewed || !reviewedTotalMatches(type === "servicio" ? amount : lines, reviewedTotal))) {
+      setError("Revisá los datos y unidades, confirmá la moneda y corregí la diferencia con el total final antes de guardar.");
+      return;
+    }
 
     if (!providerId) {
       setError(t.invoices.errors.selectProvider);
@@ -174,6 +214,8 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
         setError(t.invoices.errors.invalidAmount);
         return;
       }
+      submitting.current = true;
+      submissionId.current ??= crypto.randomUUID();
       startTransition(async () => {
         try {
           const result = await createInvoice({
@@ -182,15 +224,16 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
             number: number.trim() || null,
             notes: notes.trim() || null,
             amount,
-          });
+          }, { submissionId: submissionId.current, reviewedTotal: photo === null ? undefined : reviewedTotal });
           if (!result.ok) {
             setError(result.error);
             return;
           }
+          setSaved(true);
           router.push("/invoices");
         } catch {
           setError(t.invoices.errors.createFailed);
-        }
+        } finally { submitting.current = false; }
       });
       return;
     }
@@ -219,6 +262,8 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
       });
     }
 
+    submitting.current = true;
+    submissionId.current ??= crypto.randomUUID();
     startTransition(async () => {
       try {
         const result = await createInvoice({
@@ -227,19 +272,21 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
           number: number.trim() || null,
           notes: notes.trim() || null,
           lines: payloadLines,
-        });
+        }, { submissionId: submissionId.current, reviewedTotal: photo === null ? undefined : reviewedTotal });
         if (!result.ok) {
           setError(result.error);
           return;
         }
+        setSaved(true);
         router.push("/invoices");
       } catch {
         setError(t.invoices.errors.createFailed);
-      }
+      } finally { submitting.current = false; }
     });
   }
 
   return {
+    photo, loadPhoto, reviewedTotal, setReviewedTotal, reviewed, setReviewed,
     addLine,
     amount,
     changeProvider,
@@ -251,7 +298,7 @@ export function useInvoiceForm(providers: InvoiceFormProvider[]): InvoiceFormCon
     handleProductCreated,
     handleProductSaved,
     handleSubmit,
-    isPending,
+    isPending: isPending || saved,
     lines,
     notes,
     number,
