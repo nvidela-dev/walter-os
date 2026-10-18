@@ -7,7 +7,7 @@
   --cream-dark: #e4e4e7;
   --warm: #3f3f46;
   --warm-dark: #27272a;
-  --accent: #b45309;
+  --accent: #047857;
   --muted: #52525b;
 }
 
@@ -46,7 +46,7 @@ body {
 }
 
 :where(button, a, input, select, textarea, summary):focus-visible {
-  outline: 2px solid #52525b;
+  outline: 2px solid #047857;
   outline-offset: 3px;
 }
 
@@ -127,42 +127,11 @@ summary { cursor: pointer; min-height: 2.75rem; align-content: center; }
     color: #52525b;
   }
 
-  /* Wallpaper and translucent surfaces belong only to the launcher at /. */
-  .home-screen {
-    --foreground: #1f2d35;
-    --font-sans: var(--font-geist-sans);
-    min-height: 100svh;
-    background-color: #eff5f4;
-    background-image: linear-gradient(rgba(239, 245, 244, 0.16), rgba(239, 245, 244, 0.18)), url("/wallpapers/calm-ios-v2.webp");
-    background-attachment: fixed;
-    background-position: center;
-    background-repeat: no-repeat, no-repeat;
-    background-size: cover, cover;
-    color: #1f2d35;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-sans), system-ui, sans-serif;
-    font-variant-numeric: normal;
-    font-synthesis: weight style;
-    letter-spacing: normal;
-    line-height: 1.5;
-  }
-  .home-screen .ios-page {
-    margin-inline: auto;
-    min-height: 100svh;
-    width: 100%;
-    max-width: 48rem;
-    padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 2rem;
-  }
-  .home-screen .ios-glass {
-    border: 1px solid rgb(255 255 255 / 68%);
-    background: rgb(255 255 255 / 54%);
-    box-shadow: 0 18px 60px rgb(39 67 78 / 16%);
-    -webkit-backdrop-filter: blur(28px) saturate(1.25);
-    backdrop-filter: blur(28px) saturate(1.25);
-  }
-  .home-screen .ios-icon {
-    border-radius: 28%;
-    box-shadow: 0 12px 24px rgb(31 45 53 / 18%), inset 0 1px 0 rgb(255 255 255 / 42%);
-  }
+  .home-screen { min-height: 100svh; background: #fff; color: #18181b; }
+  .home-screen .ios-page { margin-inline: auto; min-height: 100svh; max-width: 48rem; padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom)); }
+  .home-screen .ios-glass { border: 1px solid #e4e4e7; background: #f4f4f5; box-shadow: none; }
+  .home-screen .ios-icon { border-radius: 1rem; background: #18181b; box-shadow: none; }
+
 }
 
 @media (min-width: 640px) {
@@ -192,3 +161,20 @@ html:has(.home-screen)::-webkit-scrollbar-thumb { background: rgba(102, 121, 130
 @media (prefers-reduced-motion: reduce) {
   .data-fill *, .data-fill-enter, .data-fill-celebrate { animation: none; transition: none; }
 }
+
+
+/* Immediate touch feedback also covers legacy links and controls. */
+:where(button, a[href], summary) { transition: background-color 120ms ease, opacity 120ms ease, transform 120ms ease; }
+:where(button:not(:disabled), a[href], summary):active { opacity: .72; }
+:where(button:not(:disabled), summary) { cursor: pointer; }
+:where(button:disabled) { cursor: not-allowed; }
+.app-press:active { transform: scale(.98); }
+.app-icon-button:active, .app-text-action:active, .app-nav-card:active { background: #d1fae5; }
+.app-tab { min-width: 0; display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: .5rem; padding: .65rem .5rem; border-radius: .75rem; font-size: .875rem; font-weight: 600; white-space: nowrap; }
+.app-tab[aria-current="page"], .app-tab[aria-pressed="true"] { background: #047857; color: white; }
+.app-subtab { border-radius: 0; border-bottom: 3px solid transparent; }
+.app-subtab[aria-current="page"] { background: #ecfdf5; border-color: #047857; color: #065f46; }
+.app-spinner { display: inline-block; width: 1rem; height: 1rem; flex-shrink: 0; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: app-spin .7s linear infinite; }
+@keyframes app-spin { to { transform: rotate(360deg); } }
+.app-fridge-card > a { min-height: 72px; border-radius: .5rem; }
+.app-fridge-card > a:active { background: #ecfdf5; }

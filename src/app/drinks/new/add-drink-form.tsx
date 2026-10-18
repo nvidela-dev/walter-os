@@ -34,7 +34,7 @@ export function AddDrinkForm({ units, locations, category = "Alcoholes", returnH
       <datalist id="drink-locations">{locations.map((location) => <option key={location} value={location} />)}</datalist>
       <label className="block text-sm">Unidad del producto<Select name="unitId" required defaultValue=""><option value="" disabled>Elegí una unidad</option>{units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name} ({unit.code})</option>)}</Select></label>
       <label className="block text-sm">Cómo se cuenta<Select name="countUnit" defaultValue="botella"><option value="botella">Botellas individuales</option><option value="">Unidad del producto</option></Select></label>
-      <Button type="submit">{isSubmitting ? "Guardando…" : "Agregar bebida"}</Button>
+      <Button type="submit" busy={isSubmitting}>{isSubmitting ? "Guardando…" : "Agregar bebida"}</Button>
     </fieldset>
     <FormMessage message={error} />
     {saved && <p role="status" className="text-sm text-emerald-800">Bebida agregada. Ya aparece en el inventario para contar.</p>}

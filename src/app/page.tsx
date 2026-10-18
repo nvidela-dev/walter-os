@@ -33,13 +33,11 @@ const sections: {
             ...t.home.tiles.providers,
             href: "/providers",
             icon: TruckIcon,
-            bg: "bg-[linear-gradient(145deg,#f6b05f,#d86e42)]",
           },
           {
             ...t.home.tiles.invoices,
             href: "/invoices",
             icon: DocumentTextIcon,
-            bg: "bg-[linear-gradient(145deg,#8a96a8,#44556a)]",
           },
         ],
       },
@@ -50,13 +48,11 @@ const sections: {
             ...t.home.tiles.employees,
             href: "/employees",
             icon: UserGroupIcon,
-            bg: "bg-[linear-gradient(145deg,#e990a9,#c84d7b)]",
           },
           {
             ...t.home.tiles.hours,
             href: "#",
             icon: ClockIcon,
-            bg: "bg-[linear-gradient(145deg,#b9c0c5,#707b84)]",
           },
         ],
       },
@@ -72,14 +68,12 @@ const sections: {
             ...t.home.tiles.inventory,
             href: "/inventory",
             icon: ArchiveBoxIcon,
-            bg: "bg-[linear-gradient(145deg,#a8b3bd,#6f7b86)]",
           },
           {
             name: "Bebidas",
             description: "Inventario semanal de bebidas",
             href: "/drinks",
             icon: ArchiveBoxIcon,
-            bg: "bg-[linear-gradient(145deg,#67bde0,#357ba7)]",
           },
         ],
       },
@@ -95,13 +89,11 @@ const sections: {
             ...t.home.tiles.menu,
             href: "/menu",
             icon: ClipboardDocumentListIcon,
-            bg: "bg-[linear-gradient(145deg,#9f7aea,#6b4bd6)]",
           },
           {
             ...t.home.tiles.cashOutputs,
             href: "#",
             icon: BanknotesIcon,
-            bg: "bg-[linear-gradient(145deg,#b8c0c5,#727d86)]",
           },
         ],
       },
@@ -116,20 +108,18 @@ const sections: {
         description: "Elegí el proveedor de cada producto, uno por uno.",
         href: "/data-fill",
         icon: SparklesIcon,
-        bg: "bg-[linear-gradient(145deg,#63cdb2,#278b73)]",
       }, {
         name: "Plan de Inventario",
         description: "Definí cuánto debería haber de cada producto.",
         href: "/inventory-plan",
         icon: ClipboardDocumentListIcon,
-        bg: "bg-[linear-gradient(145deg,#79b3e8,#426fa8)]",
       }],
     }],
   },
 ];
 
 export const dynamic = "force-dynamic";
-export const viewport: Viewport = { themeColor: "#dce7e4" };
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default async function Home(): Promise<ReactElement> {
   const group = await getCurrentGroup();
@@ -139,7 +129,7 @@ export default async function Home(): Promise<ReactElement> {
       <main className="ios-page flex flex-col">
         <header className="mb-9 flex items-center justify-between">
           <div className="ios-glass rounded-full px-4 py-2">
-            <p className="text-sm font-semibold text-[#1f2d35]">{t.app.name}</p>
+            <p className="text-sm font-semibold text-foreground">{t.app.name}</p>
           </div>
           <UserButton
             appearance={{
@@ -154,16 +144,16 @@ export default async function Home(): Promise<ReactElement> {
         <Link href="/access" className="ios-glass mb-6 rounded-2xl px-5 py-3 font-semibold">{t.access.title}</Link>
         <div className="space-y-8">
           {sections.map((section) => (
-            <section key={section.title} className="space-y-6">
-              <h1 className="px-1 text-[1.75rem] font-bold leading-none text-[#1f2d35] drop-shadow-[0_1px_10px_rgba(255,255,255,0.75)]">
+            <section key={section.title} className="space-y-3">
+              <h2 className="px-1 text-[1.75rem] font-bold leading-none text-foreground ">
                 {section.title}
-              </h1>
+              </h2>
 
-              <div className="space-y-7">
+              <div className="space-y-3">
                 {section.groups.map((group) => (
                   <div
                     key={group.title}
-                    className="ios-glass rounded-[2rem] border-white/[0.34] bg-white/[0.18] px-5 py-5 shadow-[0_16px_44px_rgba(31,45,53,0.07)]"
+                    className="ios-glass rounded-2xl  px-5 py-5 "
                   >
                     <div className="flex flex-wrap justify-center gap-x-10 gap-y-7">
                       {group.apps.map((app) => (

@@ -7,6 +7,7 @@ import { type ReactElement, useMemo, useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/form-feedback";
 import { Button, buttonClassName } from "@/components/ui/button";
+import { FilterButton } from "@/components/ui/tabs";
 import { t } from "@/i18n";
 import { deleteInvoice, togglePaid } from "@/lib/actions/invoices";
 
@@ -81,21 +82,22 @@ export function InvoiceList({
         {FILTERS.map((f) => {
           const active = filter === f.key;
           return (
-            <button
+            <FilterButton
               key={f.key}
               type="button"
+              selected={active}
               onClick={() => { setFilter(f.key); }}
-              className={`min-h-11 shrink-0 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${
+              className={`app-tab shrink-0 rounded-lg px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${
                 active
-                  ? "bg-white text-foreground shadow-sm"
+                  ? "bg-emerald-700 text-white"
                   : "text-muted hover:bg-zinc-200"
               }`}
             >
               {f.label}
-              <span className={`ml-1 text-xs ${active ? "text-[#3f3f46]" : "text-[#64748b]"}`}>
+              <span className={`ml-1 text-xs ${active ? "text-white" : "text-[#64748b]"}`}>
                 {counts[f.key]}
               </span>
-            </button>
+            </FilterButton>
           );
         })}
       </div>

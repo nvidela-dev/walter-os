@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { NavigationLink as Link } from "@/components/ui/navigation-link";
 import { drinkCategory } from "@/lib/drinks/categories";
 import { drinkDocumentHref } from "@/lib/drinks/documents";
 import { getDrinkDocuments } from "@/lib/queries/drink-documents";

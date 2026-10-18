@@ -118,7 +118,7 @@ export function ProviderForm({ provider }: { provider?: ProviderView }): ReactEl
         </div>
       </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
+      <Button type="submit" busy={isSubmitting} className="w-full py-4 text-base">
         {isSubmitting ? t.common.saving : isEditing ? t.common.saveChanges : t.providers.create}
       </Button>
     </form>

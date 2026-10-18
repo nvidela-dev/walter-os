@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 
-import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { FilterButton } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { t } from "@/i18n";
 import type { InvoiceFormProvider } from "@/lib/types/invoices";
@@ -45,15 +45,15 @@ export function InvoiceDetailsSection({
         <p className="mb-2 text-xs font-medium text-muted">{t.invoices.fields.type}</p>
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-1">
           {TYPE_TABS.map((tab) => (
-            <Button
+            <FilterButton
               key={tab.value}
               type="button"
               onClick={() => { changeType(tab.value); }}
-              variant={tab.value === type ? "primary" : "ghost"}
+              selected={tab.value === type}
               className="py-2.5 text-sm"
             >
               {tab.label}
-            </Button>
+            </FilterButton>
           ))}
         </div>
       </div>

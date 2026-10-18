@@ -20,7 +20,7 @@ export function RunControls({ day, today }: { day: string | null; today: string 
   }
   return <div className="space-y-2">
     <p className="text-sm">{day === null ? "Todavía no hay inventarios." : t.inventory.latestRun(runDate(day))}</p>
-    {day === inventoryWeek(today) ? <><p className="text-sm text-muted">Ya hay un inventario de esta semana. ¿Querés editarlo?</p><Link href="/inventory/new" className="underline">Editar inventario de la semana</Link></> : <><Button disabled={isSubmitting} onClick={() => { void start(); }}>Comenzar inventario semanal</Button><p className="text-sm text-muted">Los productos quedan sin conteo hasta que los revises. El inventario anterior se conserva.</p></>}
+    {day === inventoryWeek(today) ? <><p className="text-sm text-muted">Ya hay un inventario de esta semana. ¿Querés editarlo?</p><Link href="/inventory/new" className="underline">Editar inventario de la semana</Link></> : <><Button busy={isSubmitting} onClick={() => { void start(); }}>Comenzar inventario semanal</Button><p className="text-sm text-muted">Los productos quedan sin conteo hasta que los revises. El inventario anterior se conserva.</p></>}
     <FormMessage message={error} />
   </div>;
 }

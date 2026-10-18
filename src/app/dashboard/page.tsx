@@ -8,13 +8,13 @@ import { type HomeApp, HomeTile } from "@/components/home-tile";
 import { requireAccess } from "@/lib/auth/access";
 
 const apps: HomeApp[] = [
-  { name: "Dashboard", description: "Proveedores, productos y facturas.", href: "/dashboard/providers", icon: TruckIcon, bg: "bg-[linear-gradient(145deg,#8a96a8,#44556a)]" },
-  { name: "Unir nombres", description: "Revisá equivalencias entre inventario y catálogo.", href: "/product-matching", icon: SparklesIcon, bg: "bg-[linear-gradient(145deg,#b99bea,#7751a8)]" },
-  { name: "Revisar duplicados", description: "Compará productos y archivá los repetidos.", href: "/product-duplicates", icon: SparklesIcon, bg: "bg-[linear-gradient(145deg,#eba98b,#aa6247)]" },
+  { name: "Dashboard", description: "Proveedores, productos y facturas.", href: "/dashboard/providers", icon: TruckIcon },
+  { name: "Unir nombres", description: "Revisá equivalencias entre inventario y catálogo.", href: "/product-matching", icon: SparklesIcon },
+  { name: "Revisar duplicados", description: "Compará productos y archivá los repetidos.", href: "/product-duplicates", icon: SparklesIcon },
 ];
 
 export const dynamic = "force-dynamic";
-export const viewport: Viewport = { themeColor: "#dce7e4" };
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default async function DashboardMenu(): Promise<ReactElement> {
   await requireAccess("main");

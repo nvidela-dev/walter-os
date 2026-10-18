@@ -28,7 +28,7 @@ function SectionEditor({ section, menuName }: { section?: Section; menuName: str
     <div className="flex flex-wrap gap-2">
       <Input aria-label="Nombre de sección" className="min-w-0 flex-1" name="name" required defaultValue={section?.name ?? ""} placeholder="Nueva sección" />
       <Input aria-label="Orden de sección" className="w-20!" name="order" type="number" min="0" max="10000" defaultValue={section?.sortOrder ?? 0} />
-      <Button type="submit" disabled={isSubmitting}>{section === undefined ? "Agregar sección" : "Guardar sección"}</Button>
+      <Button type="submit" busy={isSubmitting}>{section === undefined ? "Agregar sección" : "Guardar sección"}</Button>
     </div><FormMessage message={error} />
   </form>;
 }

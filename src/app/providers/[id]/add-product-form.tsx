@@ -122,7 +122,7 @@ export function AddProductForm({
         </Button>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          busy={isSubmitting}
           className="flex-1 rounded-lg py-3 text-sm"
         >
           {isSubmitting ? t.products.adding : t.common.add}

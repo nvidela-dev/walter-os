@@ -1,7 +1,9 @@
 "use client";
 
+import { CameraIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import { type ChangeEvent, type ReactElement, useEffect, useRef, useState } from "react";
 
+import { FormMessage } from "@/components/form-feedback";
 import { Button } from "@/components/ui/button";
 import { type ExtractedInvoice, extractedInvoiceSchema, MAX_PHOTO_BYTES } from "@/lib/invoice-photo/schema";
 
@@ -36,6 +38,8 @@ export function InvoicePhoto({ onExtracted, disabled, onBusy }: { onBusy: (busy:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lock = useRef(false);
+  const cameraInput = useRef<HTMLInputElement>(null);
+  const imageInput = useRef<HTMLInputElement>(null);
   const [extracted, setExtracted] = useState(false);
   useEffect((): (() => void) | undefined => {
     if (file === null) return;
@@ -44,7 +48,9 @@ export function InvoicePhoto({ onExtracted, disabled, onBusy }: { onBusy: (busy:
     return () => { URL.revokeObjectURL(next); };
   }, [file]);
   function select(event: ChangeEvent<HTMLInputElement>): void {
-    setFile(event.target.files?.[0] ?? null);
+    const selected = event.target.files?.[0];
+    if (!selected) return;
+    setFile(selected);
     setError(null);
   }
   async function scan(): Promise<void> {
@@ -70,13 +76,13 @@ export function InvoicePhoto({ onExtracted, disabled, onBusy }: { onBusy: (busy:
     <h2 className="font-semibold">Cargar desde una foto</h2>
     <p className="text-sm text-muted">Fotografiá la factura completa y legible. Se envía a OpenAI al tocar «Leer foto». Revisá todo antes de guardar. Walter no guarda la imagen.</p>
     {!extracted && <>
-      <label className="block text-sm font-medium">Tomar foto
-        <input aria-label="Tomar foto" className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={select} disabled={busy || disabled} />
-      </label>
-      <label className="block text-sm font-medium">O elegir imagen
-        <input aria-label="Elegir imagen" className="mt-2 block w-full text-sm" type="file" accept="image/jpeg,image/png,image/webp" onChange={select} disabled={busy || disabled} />
-      </label>
-      <Button type="button" onClick={() => { void scan(); }} disabled={file === null || busy || disabled}>{busy ? "Leyendo…" : "Leer foto y completar borrador"}</Button>
+      <input ref={cameraInput} aria-label="Tomar foto" className="hidden" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={select} disabled={busy || disabled} />
+      <input ref={imageInput} aria-label="Elegir imagen" className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={select} disabled={busy || disabled} />
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button variant={file === null ? "primary" : "secondary"} onClick={() => cameraInput.current?.click()} disabled={busy || disabled}><CameraIcon className="h-5 w-5" aria-hidden="true" />{file === null ? "Tomar foto" : "Tomar otra foto"}</Button>
+        <Button variant="secondary" onClick={() => imageInput.current?.click()} disabled={busy || disabled}><PhotoIcon className="h-5 w-5" aria-hidden="true" />{file === null ? "Elegir imagen" : "Cambiar imagen"}</Button>
+      </div>
+      {file !== null && <p role="status" className="break-all text-sm text-muted">Foto seleccionada: {file.name}</p>}
       <p className="text-xs text-muted">La lectura reemplaza los datos del borrador. Una foto por factura; para varias páginas, completá las líneas restantes manualmente.</p>
     </>}
     {url !== "" && <details open><summary className="cursor-pointer text-sm font-medium">Foto original · abrir para ampliar</summary>
@@ -86,6 +92,9 @@ export function InvoicePhoto({ onExtracted, disabled, onBusy }: { onBusy: (busy:
         <img src={url} alt="Foto original de la factura para revisar" className="mt-2 max-h-96 w-full rounded-lg object-contain" />
       </a>
     </details>}
-    {error !== null && <p role="alert" className="text-sm text-red-700">{error}</p>}
+    {!extracted && file !== null && <Button className="w-full" onClick={() => { void scan(); }} busy={busy} disabled={disabled}>{busy ? "Leyendo factura…" : "Leer factura y completar borrador"}</Button>}
+    <div role="status" aria-live="polite">{busy && <p className="text-sm text-muted">La lectura puede tardar unos segundos. Después podrás revisar todos los datos.</p>}</div>
+    <FormMessage tone="success" message={extracted ? "Borrador listo. Revisá los datos y el total antes de guardar." : null} />
+    <FormMessage message={error} />
   </section>;
 }

@@ -183,7 +183,7 @@ export function EmployeeForm({ employee }: { employee?: EmployeeView }): ReactEl
           },
         ]}
       />
-      <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
+      <Button type="submit" busy={isSubmitting} className="w-full py-4 text-base">
         {isSubmitting ? t.common.loading : isEditing ? t.common.save : t.common.add}
       </Button>
     </form>

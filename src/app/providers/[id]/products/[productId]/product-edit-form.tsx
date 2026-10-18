@@ -89,7 +89,7 @@ export function ProductEditForm({
 
       <Button
         type="submit"
-        disabled={isSubmitting}
+        busy={isSubmitting}
         className="w-full py-4 text-base"
       >
         {isSubmitting ? t.common.saving : t.common.saveChanges}

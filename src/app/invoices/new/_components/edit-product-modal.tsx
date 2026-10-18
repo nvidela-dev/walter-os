@@ -65,7 +65,7 @@ export function EditProductModal({
           <Button
             type="button"
             onClick={onClose}
-            disabled={isSubmitting}
+            busy={isSubmitting}
             aria-label={t.common.close}
             variant="ghost"
             size="icon"
@@ -122,7 +122,7 @@ export function EditProductModal({
           <Button
             type="button"
             onClick={onClose}
-            disabled={isSubmitting}
+            busy={isSubmitting}
             variant="secondary"
             className="flex-1 py-3 text-sm"
           >

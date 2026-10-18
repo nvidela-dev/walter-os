@@ -1,7 +1,7 @@
 import { ChevronRightIcon, ClipboardDocumentListIcon, ClockIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { NavigationLink as Link } from "@/components/ui/navigation-link";
 import { t } from "@/i18n";
 import { inventoryWeek } from "@/lib/inventory/run-display";
 import { getFridges } from "@/lib/queries/inventory";
@@ -28,7 +28,7 @@ export default async function InventoryPage(): Promise<ReactElement> {
     </nav>
     {fridges.length === 0 && <p>{t.inventory.empty}</p>}
     <div className="grid grid-cols-2 gap-3">{fridges.map((fridge) => <div key={fridge.id} className="app-card app-fridge-card space-y-2 rounded-2xl p-4"><Link href={`/inventory/${fridge.id}`} className="block">
-      <span className="block text-lg font-semibold leading-tight tracking-tight">{t.inventory.fridge(fridge.number)}</span>
+      <span className="block text-lg font-semibold leading-tight tracking-tight">{t.inventory.fridge(fridge.number)}<ChevronRightIcon className="ml-1 inline h-4 w-4 text-emerald-700" aria-hidden="true" /></span>
       {fridge.name !== null && <span className="mt-1 block text-sm text-muted">{fridge.name}</span>}
     </Link><InventoryProgress compact counted={currentWeek ? progress.fridges.find((row) => row.id === fridge.id)?.counted ?? 0 : 0} total={progress.fridges.find((row) => row.id === fridge.id)?.total ?? 0} /><FridgeDetails fridge={fridge} /></div>)}</div>
   </main>;

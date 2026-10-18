@@ -28,7 +28,7 @@ export function CatalogueForm({ fridgeId, matches, units, query }: {
     {query !== "" && matches.length === 0 && <p className="text-sm">{t.inventory.noMatches}</p>}
     {matches.map((product) => <div className="flex items-center justify-between gap-3 border-b border-cream-dark pb-3" key={product.id}>
       <span>{product.name} <small className="text-muted">({product.unit})</small></span>
-      <Button disabled={isSubmitting} variant="secondary" onClick={() => { void runAction(() => addFridgeProduct({ fridgeId, productId: product.id })); }}>{t.inventory.add}</Button>
+      <Button busy={isSubmitting} variant="secondary" onClick={() => { void runAction(() => addFridgeProduct({ fridgeId, productId: product.id })); }}>{t.inventory.add}</Button>
     </div>)}
     <details><summary className="cursor-pointer py-3 text-sm">{t.inventory.missing}</summary>
       <form onSubmit={(event) => void create(event)} className="space-y-3">
