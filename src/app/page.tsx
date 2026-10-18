@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import {
   ArchiveBoxIcon,
   BanknotesIcon,
+  ChatBubbleLeftRightIcon,
   ClipboardDocumentListIcon,
   ClockIcon,
   DocumentTextIcon,
@@ -98,6 +99,18 @@ const sections: {
         ],
       },
     ],
+  },
+  {
+    title: "Asistente",
+    groups: [{
+      title: "Consultas de datos",
+      apps: [{
+        name: "Preguntale a Luna",
+        description: "Consultá los datos de Walter con GPT Luna.",
+        href: "/dashboard/database-chat",
+        icon: ChatBubbleLeftRightIcon,
+      }],
+    }],
   },
   {
     title: "Relleno de Datos",
