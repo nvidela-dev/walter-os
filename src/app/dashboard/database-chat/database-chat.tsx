@@ -21,7 +21,12 @@ export function DatabaseChat(): ReactElement {
   const [busy, setBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [messages, busy]);
+  useEffect(() => {
+    const element = bottomRef.current;
+    if (typeof element?.scrollIntoView !== "function") return;
+    try { element.scrollIntoView({ behavior: "smooth", block: "end" }); }
+    catch { /* Scrolling is optional; it must not interrupt a chat request. */ }
+  }, [messages, busy]);
 
   async function sendMessage(event?: SyntheticEvent<HTMLFormElement>, suggestedMessage?: string): Promise<void> {
     event?.preventDefault();
@@ -39,14 +44,21 @@ export function DatabaseChat(): ReactElement {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages.slice(-12) }),
       });
-      const payload: unknown = await response.json();
+      let payload: unknown;
+      try {
+        payload = await response.json();
+      } catch {
+        throw new Error(`El servidor respondió de forma inesperada (HTTP ${response.status}). Probá de nuevo.`);
+      }
       const answer = typeof payload === "object" && payload !== null && "answer" in payload && typeof payload.answer === "string" ? payload.answer : null;
       if (!response.ok || answer === null) {
         const message = typeof payload === "object" && payload !== null && "error" in payload && typeof payload.error === "string" ? payload.error : "No se pudo obtener una respuesta.";
-        throw new Error(message);
+        const reference = typeof payload === "object" && payload !== null && "requestId" in payload && typeof payload.requestId === "string" ? ` Referencia: ${payload.requestId}.` : "";
+        throw new Error(`${message}${reference}${response.ok ? ` (HTTP ${response.status})` : ""}`);
       }
       setMessages((current) => [...current, { role: "assistant", content: answer }]);
     } catch (sendError) {
+      setDraft((current) => current.length === 0 ? content : current);
       setError(sendError instanceof Error ? sendError.message : "No se pudo enviar la consulta. Intentá de nuevo.");
     } finally {
       setBusy(false);

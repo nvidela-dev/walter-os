@@ -58,6 +58,7 @@ function responseText(output: ResponseOutput[]): string {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const requestId = crypto.randomUUID();
   const reply = (body: unknown, status: number): Response => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
   try { await requireAccess("main"); }
   catch { return reply({ error: "No tenés acceso a este asistente." }, 403); }
@@ -67,6 +68,8 @@ export async function POST(request: Request): Promise<Response> {
   if (key === undefined || key.trim() === "") return reply({ error: "Falta configurar OPENAI_API_KEY en el servidor." }, 503);
 
   let messages: z.infer<typeof requestSchema>["messages"];
+  let stage = "schema";
+  let upstreamStatus: number | undefined;
   try {
     const contentLength = Number(request.headers.get("content-length") ?? 0);
     if (contentLength > 32_000) return reply({ error: "La conversación es demasiado larga. Empezá un chat nuevo." }, 413);
@@ -94,6 +97,7 @@ export async function POST(request: Request): Promise<Response> {
     const fetchResponse = async (): Promise<ResponseOutput[]> => {
       const remaining = deadline - Date.now();
       if (remaining < 1_000) throw new Error("Database chat timed out");
+      stage = "openai";
       const response = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -110,7 +114,10 @@ export async function POST(request: Request): Promise<Response> {
           parallel_tool_calls: false,
         }),
       });
-      if (!response.ok) throw new Error("OpenAI request failed");
+      if (!response.ok) {
+        upstreamStatus = response.status;
+        throw new Error("OpenAI request failed");
+      }
       const payload: unknown = await response.json();
       if (typeof payload !== "object" || payload === null || !("output" in payload) || !("status" in payload) || payload.status !== "completed") throw new Error("Invalid model response");
       return asOutputItems(payload.output);
@@ -135,10 +142,12 @@ export async function POST(request: Request): Promise<Response> {
         toolCalls += 1;
         let result: string;
         try {
+          stage = "database-tool";
           const args: unknown = JSON.parse(call.arguments);
           const query = z.object({ query: z.string().min(1).max(6_000) }).parse(args).query;
           result = await queryDatabaseReadOnly(query, deadline);
         } catch {
+          console.error("Luna database query failed", { requestId, stage: "database-tool" });
           result = "La consulta no fue permitida o no se pudo completar. Reformulala como una consulta SELECT simple.";
         }
         input.push({ type: "function_call_output", call_id: call.call_id, output: result });
@@ -147,6 +156,7 @@ export async function POST(request: Request): Promise<Response> {
     return reply({ error: "La consulta necesitó demasiados pasos. Probá dividir la pregunta." }, 502);
   } catch {
     // Do not log prompts, database rows, model responses, credentials, or raw provider errors.
-    return reply({ error: "No se pudo consultar la base. Revisá la conexión y la configuración de la API." }, 502);
+    console.error("Luna request failed", { requestId, stage, upstreamStatus });
+    return reply({ error: "No se pudo completar la consulta. Revisá la conexión y la configuración de la API.", requestId }, 502);
   }
 }
