@@ -29,6 +29,7 @@ it("excludes missing counts and zero shortages and requires choosing an ambiguou
   ]} label="Refrescos" date="2026-10-18" />);
   await user.click(screen.getByRole("checkbox"));
   expect(screen.getByRole("button", { name: "Confirmar y generar pedidos" })).toBeDisabled();
+  await user.click(screen.getByText("Revisar pedido · Refrescos"));
   await user.selectOptions(screen.getByRole("combobox"), "b");
   expect(screen.getByRole("checkbox")).not.toBeChecked();
   await user.click(screen.getByRole("checkbox"));
@@ -73,4 +74,20 @@ it("generates an internal production list even when there are no external purcha
   await user.click(screen.getByRole("button", { name: "Confirmar y generar pedidos" }));
   expect(screen.getByRole("button", { name: "Copiar producción" })).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Copiar pedido" })).not.toBeInTheDocument();
+});
+
+
+it("keeps review collapsed and places confirmation controls before the expandable section", async () => {
+  const user = userEvent.setup();
+  render(<OrderReport products={[product()]} label="Alimentos" date="2026-10-19" />);
+  const summary = screen.getByText("Revisar pedido · Alimentos");
+  const details = summary.closest("details");
+  expect(details).not.toHaveAttribute("open");
+  expect(screen.getByRole("checkbox").compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Confirmar y generar pedidos" }).compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  await user.click(summary);
+  expect(details).toHaveAttribute("open");
+  expect(screen.getByText("Agua")).toBeVisible();
+  await user.click(summary);
+  expect(details).not.toHaveAttribute("open");
 });
