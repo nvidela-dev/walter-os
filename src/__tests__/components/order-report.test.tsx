@@ -16,7 +16,7 @@ it("requires confirmation before exposing messages, copies the provider request,
   await user.click(generate);
   expect(screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Pedido para Proveedor A" }).value).toContain("• Agua: 8 botella");
   await user.click(screen.getByRole("button", { name: "Copiar pedido" }));
-  expect(await navigator.clipboard.readText()).toContain("Hola Proveedor A");
+  expect(await navigator.clipboard.readText()).toBe("• Agua: 8 botella");
   await user.click(screen.getByRole("button", { name: "Volver a revisar" }));
   expect(screen.getByRole("button", { name: "Confirmar y generar pedidos" })).toBeDisabled();
 });
@@ -37,4 +37,9 @@ it("excludes missing counts and zero shortages and requires choosing an ambiguou
   expect(message).toContain("Agua: 8 botella");
   expect(message).not.toContain("Sin contar");
   expect(message).not.toContain("Completo");
+});
+
+it("links missing suppliers to a focused provider queue before generating any orders", () => {
+  render(<OrderReport products={[product({ id: "onion", name: "Cebolla picada", suppliers: [] })]} label="Alimentos" date="2026-10-13" />);
+  expect(screen.getByRole("link", { name: "¿Quién lo trae? · Completar proveedores" })).toHaveAttribute("href", "/data-fill?products=onion");
 });
