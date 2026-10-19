@@ -43,3 +43,34 @@ it("links missing suppliers to a focused provider queue before generating any or
   render(<OrderReport products={[product({ id: "onion", name: "Cebolla picada", suppliers: [] })]} label="Alimentos" date="2026-10-13" />);
   expect(screen.getByRole("link", { name: "¿Quién lo trae? · Completar proveedores" })).toHaveAttribute("href", "/data-fill?products=onion");
 });
+
+it("separates internal production from purchases and copies only its resolved quantities", async () => {
+  const user = userEvent.setup();
+  const production = [{ id: "3e9af935-c777-4357-bf41-fa24a9c3949a", name: "Don juan" }];
+  render(<OrderReport products={[
+    product(),
+    product({ id: "gnocchi", name: "Ñoquis", suppliers: production }),
+    product({ id: "pending", name: "Sin objetivo", suppliers: production, comparison: { stock: "2", target: null, shortage: null, issues: ["missing-target"] } }),
+    product({ id: "full", name: "Suficiente", suppliers: production, comparison: { stock: "10", target: "10", shortage: "0", issues: [] } }),
+  ]} label="Alimentos" date="2026-10-19" />);
+  expect(screen.queryByText("Don juan")).not.toBeInTheDocument();
+  expect(screen.getByText(/1 proveedores · 1 productos para producción interna/)).toBeInTheDocument();
+  await user.click(screen.getByRole("checkbox"));
+  await user.click(screen.getByRole("button", { name: "Confirmar y generar pedidos" }));
+  expect(screen.getAllByRole("button", { name: "Copiar pedido" })).toHaveLength(1);
+  expect(screen.getByRole("region", { name: "Producción interna" })).toBeInTheDocument();
+  expect(screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Lista de producción" }).value).toBe("Producción interna\n• Ñoquis: 8 botella");
+  await user.click(screen.getByRole("button", { name: "Copiar producción" }));
+  expect(await navigator.clipboard.readText()).toBe("Producción interna\n• Ñoquis: 8 botella");
+  expect(screen.getByText("Lista de producción copiada.")).toBeInTheDocument();
+  expect(screen.getByText(/Fuera de estos pedidos: Sin objetivo/)).toBeInTheDocument();
+});
+
+it("generates an internal production list even when there are no external purchases", async () => {
+  const user = userEvent.setup();
+  render(<OrderReport products={[product({ suppliers: [{ id: "3e9af935-c777-4357-bf41-fa24a9c3949a", name: "Don juan" }] })]} label="Alimentos" date="2026-10-19" />);
+  await user.click(screen.getByRole("checkbox"));
+  await user.click(screen.getByRole("button", { name: "Confirmar y generar pedidos" }));
+  expect(screen.getByRole("button", { name: "Copiar producción" })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Copiar pedido" })).not.toBeInTheDocument();
+});
