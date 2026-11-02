@@ -28,7 +28,7 @@ export function buttonClassName({
   className?: string;
 } = {}): string {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+    "app-press inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
     variantClasses[variant],
     sizeClasses[size],
     className
@@ -38,6 +38,7 @@ export function buttonClassName({
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  busy?: boolean;
 }
 
 export function Button({
@@ -45,6 +46,9 @@ export function Button({
   size = "default",
   type = "button",
   variant = "primary",
+  busy = false,
+  disabled,
+  children,
   ...props
 }: ButtonProps): ReactElement {
   return (
@@ -52,6 +56,11 @@ export function Button({
       className={buttonClassName({ variant, size, className })}
       type={type}
       {...props}
-    />
+      disabled={disabled === true || busy}
+      aria-busy={busy || undefined}
+    >
+      {busy && <span className="app-spinner" aria-hidden="true" />}
+      {children}
+    </button>
   );
 }

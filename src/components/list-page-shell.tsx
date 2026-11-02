@@ -1,8 +1,8 @@
 import { ChevronRightIcon, PlusIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 
 import { buttonClassName } from "@/components/ui/button";
+import { NavigationLink as Link } from "@/components/ui/navigation-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";

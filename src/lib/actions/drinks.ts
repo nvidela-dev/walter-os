@@ -2,17 +2,26 @@
 
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, isNull,sql } from "drizzle-orm";
+import { and, eq, isNull,sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { drinkItems, drinkObservations, products, units } from "@/db/schema";
+import { drinkItems, products, units } from "@/db/schema";
 import { actionError, actionOk, type ActionResult, unknownActionError } from "@/lib/action-result";
 import { requireAccess } from "@/lib/auth/access";
-import { drinkActiveSchema, drinkCountsSchema, drinkItemSchema, drinkTargetSchema } from "@/lib/validators/drinks";
+import { drinkActiveSchema, drinkItemSchema, drinkTargetSchema } from "@/lib/validators/drinks";
 
 export async function createDrinkItem(input: unknown): Promise<ActionResult> {
   await requireAccess("main");
+  return createDrink(input, true);
+}
+
+export async function addDrinkItem(input: unknown): Promise<ActionResult> {
+  await requireAccess("drinks");
+  return createDrink(input, false);
+}
+
+async function createDrink(input: unknown, allowUpdate: boolean): Promise<ActionResult> {
   try {
     const data = drinkItemSchema.parse(input);
     const [unit] = await db.select().from(units).where(eq(units.id, data.unitId));
@@ -23,13 +32,19 @@ export async function createDrinkItem(input: unknown): Promise<ActionResult> {
     const existing = matches[0];
     if (existing !== undefined && existing.unitId !== unit.id) return actionError("Ese producto ya existe con otra unidad. Usá su unidad actual.");
     const productId = existing?.id ?? randomUUID();
-    const placement = db.insert(drinkItems).values({ productId, location: data.location, category: data.category, countUnit: data.countUnit })
-      .onConflictDoUpdate({ target: [drinkItems.productId, drinkItems.location], set: { active: true, category: data.category, countUnit: data.countUnit } });
+    const insert = db.insert(drinkItems).values({ productId, location: data.location, category: data.category, countUnit: data.countUnit });
+    // The staff add path never restores, recategorizes, or changes an existing drink.
+    const placement = allowUpdate
+      ? insert.onConflictDoUpdate({ target: [drinkItems.productId, drinkItems.location], set: { active: true, category: data.category, countUnit: data.countUnit } }).returning({ id: drinkItems.id })
+      : insert.onConflictDoNothing().returning({ id: drinkItems.id });
     if (existing === undefined) await db.batch([
       db.insert(products).values({ id: productId, name: data.name, unitId: unit.id, unit: unit.code }),
       placement,
     ]);
-    else await placement;
+    else {
+      const added = await placement;
+      if (added.length === 0) return actionError("Esta bebida ya está registrada en esa ubicación. Si está oculta, pedile a Admin que la restaure.");
+    }
     revalidatePath("/drinks", "layout");
     revalidatePath("/data-fill");
     return actionOk(undefined);
@@ -62,23 +77,7 @@ export async function setDrinkActive(input: unknown): Promise<ActionResult> {
   } catch (error) { return unknownActionError(error); }
 }
 
-export async function saveDrinkCounts(input: unknown): Promise<ActionResult> {
-  const userId = await requireAccess("drinks");
-  try {
-    const data = drinkCountsSchema.parse(input);
-    const rows = await db.select({ id: drinkItems.id, location: drinkItems.location, name: products.name, unit: sql<string>`coalesce(${drinkItems.countUnit}, ${products.unit})` })
-      .from(drinkItems).innerJoin(products, and(eq(products.id, drinkItems.productId), isNull(products.deletedAt)))
-      .where(and(eq(drinkItems.active, true), inArray(drinkItems.id, data.map((row) => row.itemId))));
-    if (rows.length !== data.length) return actionError("Hay bebidas que ya no están disponibles. Volvé a cargar la lista.");
-    if (data.some((count) => rows.find((row) => row.id === count.itemId)?.unit !== count.unit)) {
-      return actionError("La unidad de una bebida cambió. Volvé a cargar la lista antes de contar.");
-    }
-    await db.insert(drinkObservations).values(data.map((count) => {
-      const item = rows.find((row) => row.id === count.itemId);
-      if (item === undefined) throw new Error("Missing drink item");
-      return { itemId: item.id, name: item.name, location: item.location, unit: item.unit, quantity: count.quantity, recordedBy: userId };
-    }));
-    revalidatePath("/drinks", "layout");
-    return actionOk(undefined);
-  } catch (error) { return unknownActionError(error); }
+export async function saveDrinkCounts(_input: unknown, _category?: string): Promise<ActionResult> {
+  await requireAccess("drinks");
+  return actionError("Abrí un documento de inventario y elegí Editar para guardar los conteos.");
 }

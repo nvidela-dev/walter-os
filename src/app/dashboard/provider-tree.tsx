@@ -1230,8 +1230,8 @@ export function ProviderTree({
       >
         <div className="flex items-center gap-2">
           <Link
-            href="/"
-            aria-label="back"
+            href="/dashboard"
+            aria-label="Volver al menú privado"
             className="flex h-11 w-11 items-center justify-center rounded hover:bg-[#e2e8f0]"
             style={{ color: c.grey }}
           >

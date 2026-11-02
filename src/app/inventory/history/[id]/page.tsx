@@ -1,8 +1,12 @@
+import { createHash } from "node:crypto";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 
+import { DeleteInventory } from "@/components/delete-inventory";
 import { t } from "@/i18n";
+import { getCurrentGroup } from "@/lib/auth/access";
 import { runChange, runDate } from "@/lib/inventory/run-display";
 import { getInventoryRun, type RunEntry } from "@/lib/queries/inventory-runs";
 
@@ -25,6 +29,7 @@ export default async function InventoryHistoryDetail({ params }: { params: Promi
     <Link href="/inventory/history" className="text-sm underline">{t.inventory.historyBack}</Link>
     <h1 className="app-title">{runDate(run.day)}</h1>
     <p className="text-sm text-muted">{t.inventory.runDetailHint}</p>
+    {await getCurrentGroup() === "admin" && <DeleteInventory kind="food" id={String(run.id)} token={createHash("md5").update([...run.entries].sort((a,b) => a.observationId-b.observationId).map(entry => entry.observationId).join(",")).digest("hex")} label={`inventario de la semana del ${run.day}`} />}
     {run.initial && <p className="text-sm text-muted">{t.inventory.initialRun}</p>}
     {run.entries.length === 0 && <p>{t.inventory.emptyRun}</p>}
     {[...groups.entries()].map(([fridgeId, entries]) => {

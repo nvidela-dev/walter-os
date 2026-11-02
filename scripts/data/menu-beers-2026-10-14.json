@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Corona 710 ml",
+    "existingId": "eab2d7b3-6337-4449-8b04-d34cb8f2bf5c",
+    "countUnit": "botella"
+  },
+  {
+    "name": "Corona 335 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Patagonia 730 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Budweiser 330 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Heineken 330 ml",
+    "existingId": "6c08be99-4ab5-42b8-91b1-ae193986615e",
+    "countUnit": "botella"
+  },
+  {
+    "name": "Heineken 710 ml",
+    "existingId": "c8981feb-910c-4d07-bfe3-2879268e0176",
+    "countUnit": "botella"
+  },
+  {
+    "name": "Miller 330 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Miller 710 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Amstel 710 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Stella Artois 330 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Stella Artois Noire 500 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Patricia Dunkel 500 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Patricia Gluten Free 330 ml",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Franziskaner",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Schöfferhofer Pomelo",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Clausthaler Lemon",
+    "existingId": "a4859ed1-36ec-4062-a187-74cc4cdc27e2",
+    "countUnit": "botella"
+  },
+  {
+    "name": "Corona 330 ml · sin alcohol",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Stella Artois 330 ml · sin alcohol",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Heineken 330 ml · sin alcohol",
+    "existingId": null,
+    "countUnit": "botella"
+  },
+  {
+    "name": "Faxe 500 ml · sin alcohol",
+    "existingId": "7d6ba73d-a49d-4b71-b777-1464c7b88492",
+    "countUnit": null
+  }
+]

@@ -52,11 +52,11 @@ export function InventoryList({ groups }: { groups: { id: string; number: number
             {row.runInitial === false && row.current !== null && <p className="text-sm text-muted">{runChange(row.difference)}</p>}
             <p className="whitespace-pre-wrap text-sm text-muted">Nota: {row.note ?? "—"}</p>
             {row.current !== null && <p className="text-sm text-muted">{inventoryDate(row.current.recordedAt)}</p>}
-            {removing === key && <div className="mt-2 space-y-2"><p className="text-sm">¿Quitar {row.name} de esta heladera? Su historial se conserva.</p><div className="flex gap-2"><Button disabled={isSubmitting} onClick={() => { void remove(fridge.id, row.id); }}>Confirmar quitar</Button><Button variant="secondary" disabled={isSubmitting} onClick={() => { setRemoving(null); }}>Cancelar</Button></div></div>}
+            {removing === key && <div className="mt-2 space-y-2"><p className="text-sm">¿Quitar {row.name} de esta heladera? Su historial se conserva.</p><div className="flex gap-2"><Button busy={isSubmitting} onClick={() => { void remove(fridge.id, row.id); }}>Confirmar quitar</Button><Button variant="secondary" busy={isSubmitting} onClick={() => { setRemoving(null); }}>Cancelar</Button></div></div>}
             {editing === key && <form className="mt-2 flex flex-wrap gap-2" onSubmit={(event) => { event.preventDefault(); void save(fridge.id, row.id); }}>
               <label className="w-full text-sm">Cantidad ({row.unit})<Input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={quantity} disabled={isSubmitting} onChange={(event) => { setQuantity(event.target.value); }} /></label>
               <label className="w-full text-sm">Nota<textarea className="mt-1 w-full rounded-xl border p-3" rows={2} maxLength={1000} value={note} disabled={isSubmitting} onChange={(event) => { setNote(event.target.value); }} /></label>
-              <Button type="submit" disabled={isSubmitting}>Guardar</Button><Button variant="secondary" disabled={isSubmitting} onClick={() => { setEditing(null); }}>Cancelar</Button>
+              <Button type="submit" busy={isSubmitting}>Guardar</Button><Button variant="secondary" busy={isSubmitting} onClick={() => { setEditing(null); }}>Cancelar</Button>
             </form>}
           </li>;
         })}

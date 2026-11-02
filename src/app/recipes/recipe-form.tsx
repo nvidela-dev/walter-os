@@ -48,7 +48,7 @@ export function RecipeForm({ recipe }: { recipe?: RecipeView }): ReactElement {
           placeholder={t.recipes.fields.instructionsPlaceholder}
         />
       </FormField>
-      <Button type="submit" disabled={isSubmitting} className="w-full py-4 text-base">
+      <Button type="submit" busy={isSubmitting} className="w-full py-4 text-base">
         {isSubmitting ? t.common.loading : isEditing ? t.common.save : t.recipes.addCta}
       </Button>
     </form>

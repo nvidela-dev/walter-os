@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { t } from "@/i18n";
 import { getCurrentGroup } from "@/lib/auth/access";
 
+import { InventoryNavigation } from "./inventory-navigation";
+
 export const metadata: Metadata = {
   title: t.inventory.title,
   applicationName: t.inventory.title,
@@ -23,6 +25,7 @@ export default async function InventoryLayout({ children }: { children: ReactNod
       backHref={group === "admin" ? "/" : undefined} backLabel={t.access.mainApp}
       actions={<><Link href="/inventory/new" aria-label={t.inventory.newInventory} className={buttonClassName({ variant: "secondary", size: "compact" })}>{t.inventory.newInventoryShort}</Link><UserButton /></>}
     />
+    <InventoryNavigation />
     {children}
     <p className="mt-8 text-center text-xs text-muted">{t.inventory.online}</p>
   </div>;

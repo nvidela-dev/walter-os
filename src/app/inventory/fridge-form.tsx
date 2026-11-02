@@ -30,7 +30,7 @@ export function FridgeForm(): ReactElement {
         <FormMessage message={error} />
         <label className="block">{t.inventory.number}<Input name="number" type="number" inputMode="numeric" min="1" step="1" required /></label>
         <label className="block">{t.inventory.name}<Input name="name" maxLength={200} /></label>
-        <div className="flex gap-2"><Button type="submit" disabled={isSubmitting}>{t.inventory.createFridge}</Button><Button variant="secondary" disabled={isSubmitting} onClick={() => { dialog.current?.close(); }}>{t.common.cancel}</Button></div>
+        <div className="flex gap-2"><Button type="submit" busy={isSubmitting}>{t.inventory.createFridge}</Button><Button variant="secondary" busy={isSubmitting} onClick={() => { dialog.current?.close(); }}>{t.common.cancel}</Button></div>
       </form>
     </dialog>
   </>;

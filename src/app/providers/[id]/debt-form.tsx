@@ -50,7 +50,7 @@ export function DebtForm({
         </FormField>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          busy={isSubmitting}
           className="px-6 py-3 text-sm"
         >
           {isSubmitting ? t.common.loading : saved ? t.common.saved : t.common.save}

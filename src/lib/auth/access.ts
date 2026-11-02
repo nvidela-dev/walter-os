@@ -53,3 +53,8 @@ export async function requireAccess(area: AccessArea): Promise<string> {
   }
   return userId;
 }
+
+export async function getCurrentActorName(): Promise<string> {
+  const user = await currentUser();
+  return user?.fullName ?? user?.username ?? user?.primaryEmailAddress?.emailAddress ?? "Usuario";
+}

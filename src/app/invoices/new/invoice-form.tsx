@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { type ReactElement, useState } from "react";
 
 import type { InvoiceFormProvider } from "@/lib/types/invoices";
 import type { UnitOption } from "@/lib/types/providers";
@@ -9,7 +9,9 @@ import { AddProductModal } from "./_components/add-product-modal";
 import { EditProductModal } from "./_components/edit-product-modal";
 import { InvoiceDetailsSection } from "./_components/invoice-details-section";
 import { InvoiceLinesEditor } from "./_components/invoice-lines-editor";
+import { InvoicePhoto } from "./_components/invoice-photo";
 import { InvoiceSummary } from "./_components/invoice-summary";
+import { PhotoReview } from "./_components/photo-review";
 import { ServiceAmountSection } from "./_components/service-amount-section";
 import { useInvoiceForm } from "./_hooks/use-invoice-form";
 
@@ -21,6 +23,7 @@ export function InvoiceForm({
   units: UnitOption[];
 }): ReactElement {
   const form = useInvoiceForm(providers);
+  const [scanning, setScanning] = useState(false);
   const editingLineIdx = form.editingLineIdx;
   const creatingLineIdx = form.creatingLineIdx;
   const editingLine =
@@ -31,42 +34,48 @@ export function InvoiceForm({
 
   return (
     <form onSubmit={form.handleSubmit} className="space-y-4">
-      <InvoiceDetailsSection
-        changeProvider={form.changeProvider}
-        changeType={form.changeType}
-        date={form.date}
-        notes={form.notes}
-        number={form.number}
-        providerId={form.providerId}
-        setDate={form.setDate}
-        setNotes={form.setNotes}
-        setNumber={form.setNumber}
-        type={form.type}
-        visibleProviders={form.visibleProviders}
-      />
-
-      {form.type === "servicio" && (
-        <ServiceAmountSection
-          amount={form.amount}
-          disabled={!form.provider}
-          setAmount={form.setAmount}
+      <InvoicePhoto onExtracted={form.loadPhoto} disabled={form.isPending} onBusy={setScanning} />
+      <fieldset disabled={scanning || form.isPending} className="space-y-4">
+        <InvoiceDetailsSection
+          changeProvider={form.changeProvider}
+          changeType={form.changeType}
+          date={form.date}
+          notes={form.notes}
+          number={form.number}
+          providerId={form.providerId}
+          setDate={form.setDate}
+          setNotes={form.setNotes}
+          setNumber={form.setNumber}
+          type={form.type}
+          visibleProviders={form.visibleProviders}
         />
-      )}
 
-      {form.type === "producto" && (
-        <InvoiceLinesEditor
-          addLine={form.addLine}
-          lines={form.lines}
-          products={form.products}
-          providerSelected={!!form.provider}
-          removeLine={form.removeLine}
-          selectProduct={form.selectProduct}
-          setEditingLineIdx={form.setEditingLineIdx}
-          updateLine={form.updateLine}
-        />
-      )}
+        {form.type === "servicio" && (
+          <ServiceAmountSection
+            amount={form.amount}
+            disabled={!form.provider}
+            setAmount={form.setAmount}
+          />
+        )}
 
-      <InvoiceSummary error={form.error} isPending={form.isPending} total={form.total} />
+        {form.type === "producto" && (
+          <InvoiceLinesEditor
+            addLine={form.addLine}
+            lines={form.lines}
+            products={form.products}
+            providerSelected={!!form.provider}
+            removeLine={form.removeLine}
+            selectProduct={form.selectProduct}
+            setEditingLineIdx={form.setEditingLineIdx}
+            updateLine={form.updateLine}
+          />
+        )}
+
+        {form.photo !== null && <PhotoReview form={form} photo={form.photo} />}
+
+        <InvoiceSummary error={form.error} isPending={form.isPending} total={form.total} />
+
+      </fieldset>
 
       {editingLineIdx !== null && form.provider && editingLine && editingProduct && (
         <EditProductModal

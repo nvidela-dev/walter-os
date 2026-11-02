@@ -22,7 +22,7 @@ export function InvoiceSummary({
 
       <FormMessage message={error} className="mb-3" />
 
-      <Button type="submit" disabled={isPending} className="w-full py-4 text-base">
+      <Button type="submit" busy={isPending} className="w-full py-4 text-base">
         {isPending ? t.common.saving : t.invoices.create}
       </Button>
     </section>

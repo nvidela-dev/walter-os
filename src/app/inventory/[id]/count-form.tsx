@@ -49,7 +49,7 @@ export function CountForm({ fridgeId, rows }: { fridgeId: string; rows: Inventor
     <div className="sticky bottom-0 space-y-2 rounded-2xl bg-cream p-3 shadow-lg">
       <FormMessage message={error} />
       {saved && <p role="status" className="text-center text-sm">{t.inventory.saved}</p>}
-      <Button type="submit" disabled={isSubmitting} className="w-full">{isSubmitting ? t.inventory.saving : t.inventory.save}</Button>
+      <Button type="submit" busy={isSubmitting} className="w-full">{isSubmitting ? t.inventory.saving : t.inventory.save}</Button>
     </div>
   </form>;
 }

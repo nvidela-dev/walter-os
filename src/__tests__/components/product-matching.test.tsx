@@ -17,6 +17,7 @@ it("confirms and rejects a reviewed match", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Confirmar Kasler" }));
   await waitFor(() => { expect(reviewProductMatch).toHaveBeenCalledWith({ inventoryId: "i", catalogueId: "c", status: "accepted" }); });
   expect(await screen.findByText("confirmado")).toBeInTheDocument();
+  await waitFor(() => { expect(screen.getByRole("button", { name: "Descartar Kasler" })).toBeEnabled(); });
   fireEvent.click(screen.getByRole("button", { name: "Descartar Kasler" }));
   await waitFor(() => { expect(reviewProductMatch).toHaveBeenLastCalledWith({ inventoryId: "i", catalogueId: "c", status: "rejected" }); });
   fireEvent.click(screen.getByRole("button", { name: "catálogo completo" }));

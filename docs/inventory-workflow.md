@@ -199,3 +199,11 @@ and the wizard result. It identifies when the latest inventory is from an older
 week. No completion approval, package conversions, purchase-order history, or
 external supplier messaging has been added. Local tests and document references
 do not establish current production contents or signed-in production behavior.
+
+## Drinks documents (2026-10-15)
+
+Drinks now use one saved document per category and actual date, opening read-only.
+See [Drinks inventory documents](drink-documents.md) for ownership, editing,
+actor/time-only logs, legacy conversion, and supplier views. This supersedes the
+previous weekly append-only drinks count workflow; kitchen weekly inventory
+continues unchanged.

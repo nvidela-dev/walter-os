@@ -42,4 +42,5 @@ export * from "./allowed-emails";
 export * from "./drinks";
 export * from "./inventory";
 export * from "./inventory-targets";
+export * from "./invoice-scan-usage";
 export * from "./product-matches";

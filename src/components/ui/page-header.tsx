@@ -1,7 +1,7 @@
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import type { ReactElement, ReactNode } from "react";
 
+import { NavigationLink as Link } from "@/components/ui/navigation-link";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 

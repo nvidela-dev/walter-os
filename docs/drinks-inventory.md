@@ -2,7 +2,7 @@
 
 Admin abre «Bebidas» desde Inicio. En «Bebidas y objetivos» agrega una bebida, su unidad y la ubicación donde se cuenta (por ejemplo, heladera del bar o depósito). Si el producto ya existe con la misma unidad, se reutiliza. Un mismo producto puede estar en varias ubicaciones, con un conteo y objetivo independientes en cada una.
 
-La moza abre directamente el inventario de bebidas al iniciar sesión. Puede ingresar conteos, corregirlos y consultar las semanas anteriores. No puede administrar bebidas, objetivos, usuarios, proveedores ni el inventario de cocina. Admin asigna el rol «Moza · Solo inventario de bebidas» en Accesos usando el correo de inicio de sesión. No se asignan cuentas automáticamente.
+La moza abre directamente el inventario de bebidas al iniciar sesión. Puede ingresar conteos, corregirlos, consultar las semanas anteriores y agregar bebidas desde «Agregar bebida». Ese acceso agrega productos o ubicaciones sin modificar bebidas existentes, restaurar ocultas ni cambiar objetivos. No puede administrar objetivos, usuarios, proveedores ni el inventario de cocina. Admin asigna el rol «Moza · Solo inventario de bebidas» en Accesos usando el correo de inicio de sesión. No se asignan cuentas automáticamente.
 
 El inventario de bebidas usa una semana de martes a lunes en America/Montevideo. Vacío significa sin revisar; cero significa que se revisó y no queda nada. Cada guardado conserva una observación con su autor. La pantalla y el historial muestran la última corrección de cada semana; las observaciones anteriores no se pueden borrar ni modificar.
 

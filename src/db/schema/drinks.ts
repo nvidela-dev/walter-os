@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, check, date, index, numeric, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, date, index, integer, jsonb, numeric, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 import { products } from "./products";
 
@@ -40,3 +40,22 @@ export const drinkObservations = pgTable("observaciones_bebidas", {
   check("bebidas_semana_tuesday", sql`extract(dow FROM ${table.week}) = 2`),
   index("bebidas_latest_idx").on(table.week, table.itemId, table.recordedAt.desc(), table.id.desc()),
 ]);
+
+export interface DrinkDocumentItem { itemId: string; name: string; location: string; unit: string; quantity: string | null }
+export const drinkDocuments = pgTable("documentos_bebidas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  date: date("fecha").notNull(),
+  category: text("categoria").notNull(),
+  items: jsonb("items").$type<DrinkDocumentItem[]>().notNull().default([]),
+  revision: integer("revision").notNull().default(0),
+  createdBy: text("creado_por").notNull(),
+  createdAt: timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+}, table => [unique("documentos_bebidas_fecha_categoria").on(table.date,table.category),check("documentos_bebidas_categoria",sql`${table.category} in ('Alcoholes','Cervezas','Refrescos')`),check("documentos_bebidas_revision",sql`${table.revision} >= 0`)]);
+export const drinkEditEvents = pgTable("ediciones_documentos_bebidas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  documentId: uuid("documento_id").notNull().references(()=>drinkDocuments.id,{onDelete:"restrict"}),
+  actor: text("usuario").notNull(),
+  actorName: text("nombre_usuario").notNull(),
+  recordedAt: timestamp("fecha",{withTimezone:true}).notNull().defaultNow(),
+}, table => [index("ediciones_documentos_fecha").on(table.documentId,table.recordedAt.desc())]);

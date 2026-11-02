@@ -14,6 +14,12 @@ export function inventoryBootstrapSql(): string {
   const matchingMigration = readFileSync("drizzle/0021_neat_jasper_sitwell.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const archiveMigration = readFileSync("drizzle/0022_daffy_smiling_tiger.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   const drinkCategoriesMigration = readFileSync("drizzle/0023_drink_categories.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const menuMigration = readFileSync("drizzle/0024_optimal_colleen_wing.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const menuVersionsMigration = readFileSync("drizzle/0025_menu_versions.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const activeMenusMigration = readFileSync("drizzle/0026_active_menus.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const drinkDocumentsMigration = readFileSync("drizzle/0027_drink_documents.sql", "utf8").replaceAll("--> statement-breakpoint", "");
+  const deletionMigration = readFileSync("drizzle/0029_inventory_deletion.sql", "utf8");
+  const scanUsageMigration = readFileSync("drizzle/0028_clammy_tigra.sql", "utf8").replaceAll("--> statement-breakpoint", "");
   return `
 DO $inventory_bootstrap$
 DECLARE
@@ -137,6 +143,79 @@ BEGIN
   PERFORM categoria, unidad_conteo FROM public.inventario_bebidas_productos LIMIT 0;
   IF position('unidad_conteo' in pg_get_functiondef('public.bebidas_snapshot()'::regprocedure)) = 0 THEN
     RAISE EXCEPTION 'Drinks snapshot must use the counting unit';
+  END IF;
+
+  SELECT count(*) INTO existing_count FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='menu'
+      AND column_name IN ('seccion_id','opciones_precio','clave_fuente','fuente','nota_revision','orden');
+  IF existing_count = 0 AND to_regclass('public.menu_secciones') IS NULL THEN
+    ${menuMigration}
+  ELSIF existing_count <> 6 OR to_regclass('public.menu_secciones') IS NULL THEN
+    RAISE EXCEPTION 'Partial menu catalogue schema: refusing automatic repair';
+  END IF;
+  PERFORM id, carta, nombre, orden FROM public.menu_secciones LIMIT 0;
+  PERFORM seccion_id, opciones_precio, clave_fuente, fuente, nota_revision, orden FROM public.menu LIMIT 0;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='menu' AND column_name='precio_venta' AND is_nullable='YES') THEN
+    RAISE EXCEPTION 'Menu catalogue must allow pending prices';
+  END IF;
+
+  IF to_regclass('public.menu_versiones') IS NULL THEN
+    ${menuVersionsMigration}
+  END IF;
+  PERFORM id,carta,estado,version_base_id,revision,contenido,created_at,presentado_at,creado_por,presentado_por FROM public.menu_versiones LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_versiones'::regclass AND tgname='menu_versiones_inmutables' AND tgenabled='O')
+    OR to_regprocedure('public.submit_menu_version(uuid,integer,uuid,text)') IS NULL
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu'::regclass AND tgname='menu_legacy_readonly' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_secciones'::regclass AND tgname='menu_sections_legacy_readonly' AND tgenabled='O') THEN
+    RAISE EXCEPTION 'Menu version immutability or submission function is missing';
+  END IF;
+
+  IF to_regclass('public.menus_activos') IS NULL THEN
+    ${activeMenusMigration}
+  END IF;
+  PERFORM carta,version_id FROM public.menus_activos LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menus_activos'::regclass AND tgname='menus_activos_validar' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.menu_versiones'::regclass AND tgname='menu_versiones_activar' AND tgenabled='O')
+    OR position('menus_activos' in pg_get_functiondef('public.submit_menu_version(uuid,integer,uuid,text)'::regprocedure))=0 THEN
+    RAISE EXCEPTION 'Active menu constraints or submission function are missing';
+  END IF;
+  IF EXISTS(SELECT 1 FROM (SELECT DISTINCT ON(carta) carta,id FROM public.menu_versiones WHERE estado='submitted' ORDER BY carta,presentado_at DESC,id DESC) v
+    LEFT JOIN public.menus_activos a ON a.carta=v.carta WHERE a.version_id IS DISTINCT FROM v.id)
+    OR EXISTS(SELECT 1 FROM public.menus_activos a JOIN public.menu_versiones v ON v.id=a.version_id WHERE v.carta<>a.carta OR v.estado<>'submitted') THEN
+    RAISE EXCEPTION 'Active menu is inconsistent with submitted history';
+  END IF;
+
+  SELECT count(*) INTO existing_count FROM pg_tables WHERE schemaname='public' AND tablename IN ('documentos_bebidas','ediciones_documentos_bebidas');
+  IF existing_count=0 THEN
+    ${drinkDocumentsMigration}
+  ELSIF existing_count<>2 THEN RAISE EXCEPTION 'Partial drinks document schema: refusing automatic repair';
+  END IF;
+  PERFORM id,fecha,categoria,items,revision,creado_por,created_at,updated_at FROM public.documentos_bebidas LIMIT 0;
+  PERFORM id,documento_id,usuario,nombre_usuario,fecha FROM public.ediciones_documentos_bebidas LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.documentos_bebidas'::regclass AND tgname='documentos_bebidas_identidad' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.ediciones_documentos_bebidas'::regclass AND tgname='ediciones_bebidas_inmutables' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.observaciones_bebidas'::regclass AND tgname='bebidas_documentos_solo' AND tgenabled='O')
+    OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.documentos_bebidas'::regclass AND conname='documentos_bebidas_fecha_categoria')
+    OR to_regprocedure('public.save_drink_document(uuid,integer,jsonb,text,text,boolean)') IS NULL
+    OR EXISTS(SELECT 1 FROM public.observaciones_bebidas) THEN
+    RAISE EXCEPTION 'Drinks document guards or save function are missing, or legacy counts remain';
+  END IF;
+
+  IF to_regclass('public.uso_lectura_facturas') IS NULL THEN
+    ${scanUsageMigration}
+  END IF;
+  PERFORM clave,dia,cantidad,ultimo_at FROM public.uso_lectura_facturas LIMIT 0;
+  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.uso_lectura_facturas'::regclass AND contype='p')
+    OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.uso_lectura_facturas'::regclass AND conname='uso_lectura_facturas_cantidad') THEN
+    RAISE EXCEPTION 'Invoice scan usage constraints are missing';
+  END IF;
+
+  IF to_regprocedure('public.delete_drink_document(uuid,integer,text,boolean)') IS NULL
+    AND to_regprocedure('public.delete_inventory_run(bigint,text)') IS NULL THEN
+    ${deletionMigration}
+  ELSIF to_regprocedure('public.delete_drink_document(uuid,integer,text,boolean)') IS NULL
+    OR to_regprocedure('public.delete_inventory_run(bigint,text)') IS NULL THEN
+    RAISE EXCEPTION 'Partial inventory deletion functions';
   END IF;
 
   -- Access is assigned explicitly by an Admin, never by deployment.

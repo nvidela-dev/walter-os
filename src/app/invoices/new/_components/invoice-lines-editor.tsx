@@ -6,6 +6,7 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { t } from "@/i18n";
+import { reviewedTotalMatches } from "@/lib/invoice-photo/review";
 import type { InvoiceFormProduct } from "@/lib/types/invoices";
 
 import { type InvoiceLineDraft,NEW_PRODUCT_VALUE } from "./types";
@@ -50,6 +51,12 @@ export function InvoiceLinesEditor({
 
         return (
           <div key={idx} className="space-y-3 rounded-xl bg-white p-4">
+            {line.source !== undefined && <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+              <p>Foto: {line.source.description ?? "Producto ilegible"}</p>
+              <p>Cantidad: {line.source.quantity ?? "?"} · Unidad: {line.source.unit ?? "?"} · Precio: {line.source.unitPrice ?? "?"} · Importe: {line.source.total ?? "?"}</p>
+              {line.source.total !== null && !reviewedTotalMatches([line], line.source.total) && <p className="font-medium text-red-700">El importe leído no coincide con cantidad × precio. Revisá esta línea.</p>}
+              <p>{product ? "Coincidencia para revisar" : "Elegí el producto del catálogo"}. Verificá que la unidad y el contenido del envase coincidan; no se convierten automáticamente.</p>
+            </div>}
             <div className="flex items-start gap-2">
               <FormField className="flex-1" htmlFor={productId} label={t.invoices.fields.product}>
                 <Select
@@ -109,7 +116,7 @@ export function InvoiceLinesEditor({
                   id={quantityId}
                   type="number"
                   inputMode="decimal"
-                  step="0.01"
+                  step="0.001"
                   min="0"
                   required
                   value={line.quantity}

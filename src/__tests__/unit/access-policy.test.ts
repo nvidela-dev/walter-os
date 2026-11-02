@@ -15,7 +15,7 @@ describe("Admin and Kitchen policy", () => {
     expect(landingPath(null)).toBe("/not-authorized");
   });
   it("routes Kitchen away from all administrative pages, including direct links", () => {
-    for (const path of ["/", "/providers", "/invoices", "/dashboard", "/access", "/inventory-other"]) {
+    for (const path of ["/", "/providers", "/invoices", "/dashboard", "/dashboard/providers", "/access", "/inventory-other"]) {
       expect(routeDecision("kitchen", path, "GET")).toBe("inventory");
       expect(routeDecision("admin", path, "GET")).toBe("allow");
     }
@@ -43,11 +43,11 @@ it("restricts Waitress to drinks counting and history, including route prefix tr
   expect(canAccess("kitchen", "drinks")).toBe(false);
   expect(canAccess("waitress", "inventory")).toBe(false);
   expect(canAccess("waitress", "main")).toBe(false);
-  for (const route of ["/", "/inventory", "/inventory/new", "/providers", "/access", "/drinks-other", "/drinks/manage", "/drinks/manage/new", "/data-fill", "/inventory-plan"]) {
+  for (const route of ["/", "/dashboard", "/dashboard/providers", "/inventory", "/inventory/new", "/providers", "/access", "/drinks-other", "/drinks/manage", "/drinks/manage/new", "/data-fill", "/inventory-plan", "/product-duplicates"]) {
     expect(routeDecision("waitress", route, "GET")).toBe("drinks");
     expect(routeDecision("waitress", route, "POST")).toBe("forbidden");
   }
-  for (const route of ["/drinks", "/drinks/history"]) {
+  for (const route of ["/drinks", "/drinks/history", "/drinks/new"]) {
     expect(routeDecision("waitress", route, "GET")).toBe("allow");
     expect(routeDecision("waitress", route, "POST")).toBe("allow");
     expect(routeDecision("kitchen", route, "GET")).toBe("inventory");
