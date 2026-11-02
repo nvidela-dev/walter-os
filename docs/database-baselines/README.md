@@ -16,4 +16,4 @@ Restore the full archive into an **empty disposable database** with PostgreSQL t
 pg_restore --no-owner --no-acl --dbname=<empty-target-database> database.dump
 ```
 
-To capture another baseline and private snapshot: `npx tsx scripts/snapshot-database.ts`. Set `PG_BIN` to your PostgreSQL tools directory if needed. The script uses a direct connection and stores no credentials in backup metadata. Keep full backups private; they contain business records and access emails.
+To capture another private snapshot: `npx tsx scripts/snapshot-database.ts`. New captures put `database.dump`, `schema.sql`, and the full schema-and-data `restore.sql` together under the Git-ignored `backups/database/<timestamp>/` directory. These are restore baselines for an empty target, not incremental migrations to apply to the current database. Set `PG_BIN` to your PostgreSQL tools directory if needed. The script uses a direct connection and stores no credentials in backup metadata. Keep full backups private; they contain business records and access emails.
